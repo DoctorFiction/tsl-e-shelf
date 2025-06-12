@@ -9,7 +9,7 @@ export default function Header() {
           <Link href="/">Ana Sayfa</Link>
         </li>
         <li>
-          <Link href="/kitaplar">Kitaplar</Link>
+          <Link href="/books">Kitaplar</Link>
         </li>
       </ul>
     </div>
