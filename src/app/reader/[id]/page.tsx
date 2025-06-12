@@ -15,6 +15,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
         </p>
       </div>
 
+      {/* TODO: Try out client side reader */}
       <iframe
         src={htmlUrl}
         className="flex-1 w-full border-0"

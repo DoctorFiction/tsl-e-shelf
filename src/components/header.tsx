@@ -3,6 +3,7 @@ import Link from "next/link";
 export default function Header() {
   return (
     <div className="border-black/10 border-b h-[60px] flex items-center justify-between px-5">
+      {/* TODO: Update logo, add placeholder profile avatar */}
       <div>Logo</div>
       <ul className="flex items-center gap-3">
         <li>
