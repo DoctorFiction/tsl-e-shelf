@@ -66,7 +66,7 @@ export default function ClientReader({
           ) : currentFormat?.startsWith("text/html") && content ? (
             <div dangerouslySetInnerHTML={{ __html: content }} />
           ) : currentFormat?.includes("epub") ? (
-            <p>This format (.epub) is not supported yet in the demo.</p>
+            <p>This format (.epub) is not supported yet in the demo.</p> // TODO epub support
           ) : (
             <p>Format not supported for reading.</p>
           )}
