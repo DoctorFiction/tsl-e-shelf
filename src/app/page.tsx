@@ -1,3 +1,4 @@
+import BookSearchAutocomplete from "@/components/book-search-autocomplete";
 import RecentlyVisitedBooks from "@/components/recently-visited-books";
 
 export default function Home() {
@@ -8,6 +9,10 @@ export default function Home() {
         {/* TODO: Update the home page */}
         This is the root home page... Add recent books, search, etc...
       </p>
+      <div className="max-w-7xl mx-auto mb-10">
+        {/* Book Search Autocomplete Component */}
+        <BookSearchAutocomplete />
+      </div>
       <div className="max-w-7xl mx-auto">
         {/* Recently Visited Books Component */}
         <RecentlyVisitedBooks />

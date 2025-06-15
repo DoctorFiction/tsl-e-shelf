@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ProgressProvider } from "@bprogress/next/pages";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
@@ -28,9 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-200`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-200`}>
         <ProgressBarProdiver>
           <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto bg-white text-sm">
             <Header />
