@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Header() {
+  // TODO add nav progress
   return (
-    <div className="border-black/10 border-b h-[60px] flex items-center justify-between px-5">
-      {/* TODO: Update logo, add placeholder profile avatar */}
+    <div className="border-black/10 border-b  flex items-center justify-between p-4">
       <Link href="/">
         <Image
           src="https://www.atlaskitap.com/bakim/nobelyayin.png"
@@ -21,7 +21,7 @@ export default function Header() {
           <Link href="/books">Kitaplar</Link>
         </li>
         <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-blue-300 rounded-full ">
-          <span>SY</span>
+          <span>HÖ</span>
         </div>
       </ul>
     </div>
