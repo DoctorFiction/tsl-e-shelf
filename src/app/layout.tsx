@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { ProgressProvider } from "@bprogress/next/pages";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import ProgressBarProdiver from "./providers/progress-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-200`}
       >
-        <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto bg-white text-sm">
-          <Header />
-          {children}
-          <Footer />
-        </div>
+        <ProgressBarProdiver>
+          <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto bg-white text-sm">
+            <Header />
+            {children}
+            <Footer />
+          </div>
+        </ProgressBarProdiver>
       </body>
     </html>
   );
