@@ -1,32 +1,27 @@
-// components/EpubReader.tsx
 "use client";
-
-import { useEffect, useRef } from "react";
-import ePub from "epubjs";
+import { useEpubReader } from "@/hooks/use-epub-reader";
 
 interface EpubReaderProps {
   url: string;
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const viewerRef = useRef<HTMLDivElement>(null);
+  const { viewerRef, location, goNext, goPrev } = useEpubReader(url);
 
-  useEffect(() => {
-    if (!viewerRef.current) return;
-
-    const book = ePub(url);
-    const rendition = book.renderTo(viewerRef.current, {
-      width: "100%",
-      height: "100%",
-    });
-
-    rendition.display();
-
-    return () => {
-      rendition?.destroy?.();
-      book?.destroy?.();
-    };
-  }, [url]);
-
-  return <div ref={viewerRef} className="w-full h-screen bg-white" />;
+  return (
+    <div>
+      <div className="flex gap-4 p-2 justify-center bg-gray-100">
+        <button onClick={goPrev} className="px-4 py-2 bg-blue-500  rounded">
+          ◀ Prev
+        </button>
+        <button onClick={goNext} className="px-4 py-2 bg-blue-500  rounded">
+          Next ▶
+        </button>
+      </div>
+      <div className="p-2 text-center text-sm text-gray-500">
+        Current location: {location}
+      </div>
+      <div ref={viewerRef} className="w-full h-screen bg-white" />
+    </div>
+  );
 }
