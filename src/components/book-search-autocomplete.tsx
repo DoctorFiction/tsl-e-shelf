@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { getBooks } from "@/lib/books";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface IBook {
   id: number | string;
@@ -18,14 +18,6 @@ export default function BookSearchAutocomplete() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const router = useRouter();
-
-  function handleSelect(book: IBook) {
-    setShowDropdown(false);
-    setQuery("");
-    if (book.id) router.push(`/reader/${book.id}`);
-  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -86,9 +78,18 @@ export default function BookSearchAutocomplete() {
             <li className="px-4 py-2 text-center text-gray-500">No books found.</li>
           ) : (
             filtered.map((book) => (
-              <li key={book.id} className="px-4 py-2 cursor-pointer hover:bg-blue-100 transition-colors" onClick={() => handleSelect(book)}>
-                <span className="font-medium">{book.title}</span>
-                <span className="text-gray-500 ml-2 text-sm">{book.authors[0]?.name}</span>
+              <li key={book.id} className="px-4 py-2 cursor-pointer hover:bg-blue-100 transition-colors">
+                <Link
+                  href={`/reader/${book.id}`}
+                  onClick={() => {
+                    setShowDropdown(false);
+                    setQuery("");
+                  }}
+                  className="block w-full h-full"
+                >
+                  <span className="font-medium">{book.title}</span>
+                  <span className="text-gray-500 ml-2 text-sm">{book.authors[0]?.name}</span>
+                </Link>
               </li>
             ))
           )}
