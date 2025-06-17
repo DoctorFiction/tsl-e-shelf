@@ -1,9 +1,16 @@
+import EpubReader from "@/components/epub-reader";
+
 type Params = { id: string };
 
 export default async function ReaderPage({ params }: { params: Params }) {
   const res = await fetch(`https://gutendex.com/books/${params.id}`);
   const book = await res.json();
-  const htmlUrl = book.formats["text/html"];
+  // const htmlUrl = book.formats["text/html"];
+  const books: string[] = [
+    "https://react-reader.metabits.no/files/alice.epub",
+    "/books/moby-dick.epub",
+    "/books/pg2701-images-3.epub",
+  ];
 
   return (
     <div className="w-full h-screen flex flex-col">
@@ -13,11 +20,7 @@ export default async function ReaderPage({ params }: { params: Params }) {
           {book.authors.map((a: { name: string }) => a.name).join(", ")}
         </p>
       </div>
-      <iframe
-        src={htmlUrl}
-        className="flex-1 w-full border-0"
-        sandbox="allow-same-origin allow-scripts"
-      />
+      <EpubReader url={books[1]} />
     </div>
   );
 }
