@@ -20,6 +20,7 @@ export function useEpubReader(url: string): UseEpubReaderReturn {
     const rendition = book.renderTo(viewerRef.current, {
       width: "100%",
       height: "100%",
+      allowScriptedContent: true,
     });
 
     renditionRef.current = rendition;

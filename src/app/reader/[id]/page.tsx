@@ -1,7 +1,5 @@
 import EpubReader from "@/components/epub-reader";
 
-type Params = { id: string };
-
 export default async function ReaderPage() {
   const books: string[] = [
     "https://react-reader.metabits.no/files/alice.epub",
@@ -11,7 +9,7 @@ export default async function ReaderPage() {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <EpubReader url={books[1]} />
+      <EpubReader url={books[0]} />
     </div>
   );
 }
