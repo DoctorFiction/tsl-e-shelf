@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 
-interface Highlight {
+type Highlight = {
   cfi: string;
   text: string;
-}
+};
+
+type Bookmark = {
+  cfi: string;
+  label?: string;
+  createdAt: string;
+};
 
 interface IUseEpubReaderReturn {
   location: string | null;
@@ -15,6 +21,9 @@ interface IUseEpubReaderReturn {
   viewerRef: React.RefObject<HTMLDivElement | null>;
   addHighlight: (cfi: string, text: string) => void;
   highlights: Highlight[];
+  bookmarks: Bookmark[];
+  addBookmark: () => void;
+  goToBookmark: (cfi: string) => void;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -23,9 +32,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [location, setLocation] = useState<string | null>(null);
   const [toc, setToc] = useState<NavItem[]>([]);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
+  const BOOKMARK_STORAGE_KEY = `epub-bookmarks-${url}`;
 
   const addHighlight = useCallback(
     (cfi: string, text: string) => {
@@ -52,6 +63,36 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     },
     [STORAGE_KEY_HIGHLIGHTS],
   );
+
+  const addBookmark = useCallback(() => {
+    if (!location) {
+      console.warn(
+        "addBookmark: not a valid location to add a bookmark. location",
+        location,
+      );
+      return;
+    }
+
+    const newBookmark: Bookmark = {
+      cfi: location,
+      createdAt: new Date().toISOString(),
+    };
+
+    setBookmarks((prev) => {
+      const updated = [...prev, newBookmark];
+      localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, [location, BOOKMARK_STORAGE_KEY]);
+
+  const goToBookmark = useCallback((cfi: string) => {
+    if (!cfi) {
+      console.warn("goToBookmark: not a valid CFI to go. CFI", cfi);
+      return;
+    }
+
+    renditionRef.current?.display(cfi);
+  }, []);
 
   useEffect(() => {
     if (!viewerRef.current) return;
@@ -111,11 +152,27 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
     }
 
+    // Load bookmarks from localStorage
+    const savedBookmarks = localStorage.getItem(BOOKMARK_STORAGE_KEY);
+    if (savedBookmarks) {
+      try {
+        setBookmarks(JSON.parse(savedBookmarks));
+      } catch {
+        console.warn("Failed to parse saved bookmarks");
+      }
+    }
+
     return () => {
       rendition.destroy?.();
       book.destroy?.();
     };
-  }, [url, addHighlight, STORAGE_KEY_LOC, STORAGE_KEY_HIGHLIGHTS]);
+  }, [
+    url,
+    addHighlight,
+    STORAGE_KEY_LOC,
+    STORAGE_KEY_HIGHLIGHTS,
+    BOOKMARK_STORAGE_KEY,
+  ]);
 
   const goNext = useCallback(() => {
     renditionRef.current?.next();
@@ -134,7 +191,10 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     location,
     viewerRef,
     highlights,
+    bookmarks,
     addHighlight,
+    addBookmark,
+    goToBookmark,
     goToHref,
     goNext,
     goPrev,
