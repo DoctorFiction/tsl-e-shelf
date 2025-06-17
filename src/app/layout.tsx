@@ -28,10 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-200`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ProgressBarProvider>
-            <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto bg-white text-sm">
+            <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">
               <Header />
               {children}
               <Footer />
