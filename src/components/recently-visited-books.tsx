@@ -18,7 +18,7 @@ export default async function RecentlyVisitedBooks() {
 
   return (
     <div className="mt-8 p-2">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900">En Son Ziyaret Edilen Kitaplar</h2>
+      <Typography variant="h2">En Son Ziyaret Edilen Kitaplar</Typography>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {books.map((book: IBook) => (
           <Card
