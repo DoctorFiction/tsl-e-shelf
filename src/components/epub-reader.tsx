@@ -47,7 +47,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
           <li key={i} onClick={() => goToCfi(result.cfi)}>
             <div className="flex gap-0.5">
               <p>{i + 1} - </p>
-              <p dangerouslySetInnerHTML={{ __html: result.excerpt }} />
+              <p dangerouslySetInnerHTML={{ __html: result.excerpt }} />{" "}
+              {`${result.chapterTitle}`}
             </div>
           </li>
         ))}

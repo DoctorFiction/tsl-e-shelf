@@ -24,6 +24,8 @@ type SearchResult = {
   cfi: string;
   excerpt: string;
   href: string;
+  chapterTitle: string;
+  chapterIndex: number;
 };
 
 interface ExtendedSpine extends Spine {
@@ -144,7 +146,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const spineItems = (spine as ExtendedSpine).spineItems;
       const contextLength = 30;
 
-      const promises = spineItems.map(async (item) => {
+      const promises = spineItems.map(async (item, chapterIndex) => {
         try {
           item.load(book.load.bind(book));
           const doc = item.document;
@@ -159,6 +161,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
           }
 
           const searchQuery = query.toLowerCase();
+
+          const tocItem = book.navigation.toc.find((toc) =>
+            toc.href.includes(item.href),
+          );
+          const chapterTitle = tocItem?.label || "Unknown Chapter";
 
           for (const node of textNodes) {
             const nodeText = node.textContent?.toLowerCase() || "";
@@ -181,6 +188,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
                   cfi,
                   excerpt: `...${excerpt}...`,
                   href: item.href,
+                  chapterTitle,
+                  chapterIndex,
                 });
               } catch (e) {
                 console.warn("Invalid range during node-based search", e);
