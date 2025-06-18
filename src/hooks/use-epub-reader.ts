@@ -35,6 +35,7 @@ interface IUseEpubReaderReturn {
   goNext: () => void;
   goPrev: () => void;
   goToHref: (href: string) => void;
+  goToCfi: (href: string) => void;
   toc: NavItem[];
   viewerRef: React.RefObject<HTMLDivElement | null>;
   addHighlight: (cfi: string, text: string) => void;
@@ -51,6 +52,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
+  const previousSearchHighlights = useRef<string[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [location, setLocation] = useState<string | null>(null);
   const [toc, setToc] = useState<NavItem[]>([]);
@@ -58,6 +60,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCfi, setSelectedCfi] = useState<string | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
@@ -125,89 +128,70 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const book = bookRef.current;
       if (!query || !book || !spine) {
         console.warn(`Invalid searchBook call`);
-        return [];
+        setSearchResults([]);
+        return;
       }
 
-      if (query === "") setSearchResults([]);
+      if (query.trim() === "") {
+        setSearchResults([]);
+        return;
+      }
 
       const results: SearchResult[] = [];
       const spineItems = (spine as ExtendedSpine).spineItems;
-      const contextLength = 30; // chars around match
+      const contextLength = 30;
 
-      const promises = spineItems.map((item) =>
-        (async () => {
-          try {
-            item.load(book.load.bind(book));
-            const doc = item.document;
+      const promises = spineItems.map(async (item) => {
+        try {
+          item.load(book.load.bind(book));
+          const doc = item.document;
+          if (!doc) return;
 
-            if (!doc) return;
+          const textNodes: Node[] = [];
+          const walker = doc.createTreeWalker(doc, NodeFilter.SHOW_TEXT);
 
-            const textNodes: Node[] = [];
-            const walker = doc.createTreeWalker(
-              doc,
-              NodeFilter.SHOW_TEXT,
-              null,
-            );
-
-            let currentNode;
-            while ((currentNode = walker.nextNode())) {
-              textNodes.push(currentNode);
-            }
-
-            const fullText = textNodes
-              .map((n) => n.textContent || "")
-              .join("")
-              .toLowerCase();
-
-            const searchQuery = query.toLowerCase();
-            let pos = fullText.indexOf(searchQuery);
-
-            while (pos !== -1) {
-              let offset = pos;
-              let nodeIndex = 0;
-
-              // Figure out which node the match starts in
-              while (nodeIndex < textNodes.length) {
-                const nodeText = textNodes[nodeIndex].textContent || "";
-                if (offset < nodeText.length) break;
-                offset -= nodeText.length;
-                nodeIndex++;
-              }
-
-              if (nodeIndex < textNodes.length) {
-                const range = doc.createRange();
-                try {
-                  range.setStart(textNodes[nodeIndex], offset);
-                  range.setEnd(
-                    textNodes[nodeIndex],
-                    offset + searchQuery.length,
-                  );
-
-                  const cfi = item.cfiFromRange(range);
-                  const excerpt = fullText.substring(
-                    Math.max(0, pos - contextLength),
-                    pos + searchQuery.length + contextLength,
-                  );
-
-                  results.push({
-                    cfi,
-                    excerpt: `...${excerpt}...`,
-                    href: item.href,
-                  });
-                } catch (e) {
-                  console.warn("Invalid range during search", e);
-                }
-              }
-
-              pos = fullText.indexOf(searchQuery, pos + 1);
-            }
-
-            item.unload?.();
-          } catch (error) {
-            console.error("Error searching spine item:", error);
+          let currentNode: Node | null;
+          while ((currentNode = walker.nextNode())) {
+            textNodes.push(currentNode);
           }
-        })(),
-      );
+
+          const searchQuery = query.toLowerCase();
+
+          for (const node of textNodes) {
+            const nodeText = node.textContent?.toLowerCase() || "";
+            let index = nodeText.indexOf(searchQuery);
+
+            while (index !== -1) {
+              try {
+                const range = doc.createRange();
+                range.setStart(node, index);
+                range.setEnd(node, index + searchQuery.length);
+
+                const cfi = item.cfiFromRange(range);
+                const fullNodeText = node.textContent || "";
+                const excerpt = fullNodeText.substring(
+                  Math.max(0, index - contextLength),
+                  index + searchQuery.length + contextLength,
+                );
+
+                results.push({
+                  cfi,
+                  excerpt: `...${excerpt}...`,
+                  href: item.href,
+                });
+              } catch (e) {
+                console.warn("Invalid range during node-based search", e);
+              }
+
+              index = nodeText.indexOf(searchQuery, index + 1);
+            }
+          }
+
+          item.unload?.();
+        } catch (error) {
+          console.error("Error searching spine item:", error);
+        }
+      });
 
       await Promise.all(promises);
       setSearchResults(results);
@@ -225,6 +209,33 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       searchBook(deferredSearchQuery);
     }
   }, [deferredSearchQuery, searchBook]);
+
+  useEffect(() => {
+    if (!renditionRef.current) return;
+
+    // Clear previous search highlights
+    for (const cfi of previousSearchHighlights.current) {
+      renditionRef.current?.annotations.remove(cfi, "highlight");
+    }
+    previousSearchHighlights.current = [];
+
+    // Add new highlights
+    for (const result of searchResults) {
+      renditionRef.current.annotations.add(
+        "highlight",
+        result.cfi,
+        { text: result.excerpt },
+        undefined,
+        "epub-search-highlight",
+        {
+          fill: "red",
+          fillOpacity: "0.3",
+          mixBlendMode: "multiply",
+        },
+      );
+      previousSearchHighlights.current.push(result.cfi);
+    }
+  }, [searchResults]);
 
   useEffect(() => {
     if (!viewerRef.current) return;
@@ -320,6 +331,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     renditionRef.current?.display(href);
   }, []);
 
+  const goToCfi = useCallback((cfi: string) => {
+    renditionRef.current?.display(cfi);
+    setSelectedCfi(cfi);
+  }, []);
+
   return {
     toc,
     location,
@@ -333,6 +349,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     addBookmark,
     goToBookmark,
     goToHref,
+    goToCfi,
     goNext,
     goPrev,
   };
