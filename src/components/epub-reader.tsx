@@ -11,7 +11,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     location,
     goNext,
     goPrev,
-    goToHref,
+    goToCfi,
     searchQuery,
     setSearchQuery,
     searchResults,
@@ -40,9 +40,15 @@ export default function EpubReader({ url }: EpubReaderProps) {
         />
       </div>
       <ul>
+        {searchResults.length > 0 && (
+          <p className="font-bold">{searchResults.length} results found:</p>
+        )}
         {searchResults.map((result, i) => (
-          <li key={i} onClick={() => goToHref(result.href)}>
-            <p dangerouslySetInnerHTML={{ __html: result.excerpt }} />
+          <li key={i} onClick={() => goToCfi(result.cfi)}>
+            <div className="flex gap-0.5">
+              <p>{i + 1} - </p>
+              <p dangerouslySetInnerHTML={{ __html: result.excerpt }} />
+            </div>
           </li>
         ))}
       </ul>

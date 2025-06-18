@@ -60,7 +60,10 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedCfi, setSelectedCfi] = useState<string | null>(null);
+  const [selectedCfi, setSelectedCfi] = useState<string>("");
+  const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(
+    null,
+  );
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
@@ -199,6 +202,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     [bookRef, spine],
   );
 
+  // SEARCH EFFECT
   useEffect(() => {
     if (deferredSearchQuery.trim().length === 0) {
       setSearchResults([]);
@@ -210,6 +214,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     }
   }, [deferredSearchQuery, searchBook]);
 
+  // HIGHLIGHT SEARCH RESULTS EFFECT
   useEffect(() => {
     if (!renditionRef.current) return;
 
@@ -237,6 +242,31 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     }
   }, [searchResults]);
 
+  // HIGHLIGHT SELECTED SEARCH EFFECT
+  useEffect(() => {
+    if (!selectedCfi || !renditionRef.current) return;
+
+    // Remove the previous highlight
+    if (previousSelectedCfi)
+      renditionRef.current.annotations.remove(previousSelectedCfi, "highlight");
+
+    // Add the new highlight with inline styles
+    renditionRef.current.annotations.add(
+      "highlight",
+      selectedCfi,
+      {}, // data
+      undefined, // cb
+      undefined, // no className
+      {
+        fill: "yellow",
+        fillOpacity: "100",
+        mixBlendMode: "multiply",
+      },
+    );
+    setPreviousSelectedCfi(selectedCfi);
+  }, [previousSelectedCfi, selectedCfi]);
+
+  // MAIN EFFECT
   useEffect(() => {
     if (!viewerRef.current) return;
 
@@ -332,8 +362,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   }, []);
 
   const goToCfi = useCallback((cfi: string) => {
-    renditionRef.current?.display(cfi);
     setSelectedCfi(cfi);
+    renditionRef.current?.display(cfi);
   }, []);
 
   return {
