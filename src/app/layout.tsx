@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { ProgressProvider } from "@bprogress/next/pages";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import ProgressBarProdiver from "./providers/progress-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import ProgressBarProvider from "./providers/progress-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,17 +27,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-zinc-200`}
-      >
-        <ProgressBarProdiver>
-          <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto bg-white text-sm">
-            <Header />
-            {children}
-            <Footer />
-          </div>
-        </ProgressBarProdiver>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ProgressBarProvider>
+            <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">
+              <Header />
+              {children}
+              <Footer />
+            </div>
+          </ProgressBarProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
