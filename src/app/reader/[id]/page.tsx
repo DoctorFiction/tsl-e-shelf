@@ -12,7 +12,7 @@ export default async function ReaderPage() {
 
   return (
     <div className="w-full h-screen flex flex-col">
-      <EpubReader url={books[0]} />
+      <EpubReader url={books[1]} />
     </div>
   );
 }

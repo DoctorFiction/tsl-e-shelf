@@ -12,7 +12,11 @@ import Spine from "epubjs/types/spine";
 type Highlight = {
   cfi: string;
   text: string;
+  color?: string;
+  type?: HighlightType;
 };
+
+type HighlightType = "highlight" | "underline";
 
 type Bookmark = {
   cfi: string;
@@ -37,10 +41,10 @@ interface IUseEpubReaderReturn {
   goNext: () => void;
   goPrev: () => void;
   goToHref: (href: string) => void;
-  goToCfi: (href: string) => void;
+  goToCfi: (cfi: string) => void;
   toc: NavItem[];
   viewerRef: React.RefObject<HTMLDivElement | null>;
-  addHighlight: (cfi: string, text: string) => void;
+  addHighlight: (args: Highlight) => void;
   highlights: Highlight[];
   bookmarks: Bookmark[];
   addBookmark: () => void;
@@ -48,6 +52,8 @@ interface IUseEpubReaderReturn {
   searchResults: SearchResult[];
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  removeHighlight: (cfi: string, type: HighlightType) => void;
+  removeAllHighlights: () => void;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -73,20 +79,31 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const BOOKMARK_STORAGE_KEY = `epub-bookmarks-${url}`;
 
   const addHighlight = useCallback(
-    (cfi: string, text: string) => {
+    ({ cfi, text, color = "yellow", type = "highlight" }: Highlight) => {
+      const className =
+        type === "underline" ? "epub-underline" : "epub-highlight";
+
+      const style =
+        type === "underline"
+          ? {
+              stroke: color,
+              strokeWidth: "1",
+            }
+          : {
+              fill: color,
+              fillOpacity: "0.5",
+              mixBlendMode: "multiply",
+            };
+
       const newHighlight = { cfi, text };
 
       renditionRef.current?.annotations.add(
-        "highlight",
+        type,
         cfi,
         { text },
         undefined,
-        "epub-highlight",
-        {
-          fill: "yellow",
-          fillOpacity: "0.5",
-          mixBlendMode: "multiply",
-        },
+        className,
+        style,
       );
 
       setHighlights((prev) => {
@@ -97,6 +114,24 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     },
     [STORAGE_KEY_HIGHLIGHTS],
   );
+
+  const removeHighlight = (cfi: string, type: HighlightType) => {
+    renditionRef.current?.annotations.remove(type, cfi);
+
+    setHighlights((prev) => {
+      const updated = prev.filter((h) => h.cfi !== cfi);
+      localStorage.setItem(STORAGE_KEY_HIGHLIGHTS, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const removeAllHighlights = () => {
+    highlights.forEach((highlight) =>
+      renditionRef.current?.annotations.remove(highlight.cfi, "highlight"),
+    );
+    localStorage.removeItem(STORAGE_KEY_HIGHLIGHTS);
+    setHighlights([]);
+  };
 
   const addBookmark = useCallback(() => {
     if (!location) {
@@ -306,9 +341,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     });
 
     // Handle new highlights on selection
+    // note: currently highlights whenever a text is selected
+    // highlight text later on via UI highligt picker, using addHighlight function
     rendition.on("selected", (cfiRange: string, contents: Contents) => {
       const selectedText = contents.window.getSelection()?.toString() || "";
-      addHighlight(cfiRange, selectedText);
+      addHighlight({ cfi: cfiRange, text: selectedText });
     });
 
     // Load saved highlights
@@ -316,20 +353,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (saved) {
       try {
         const parsed: Highlight[] = JSON.parse(saved);
-        parsed.forEach(({ cfi, text }) => {
-          rendition.annotations.add(
-            "highlight",
-            cfi,
-            { text },
-            undefined,
-            "epub-highlight",
-            {
-              fill: "yellow",
-              fillOpacity: "0.5",
-              mixBlendMode: "multiply",
-            },
-          );
-        });
+        parsed.forEach(({ cfi, text }) => addHighlight({ cfi, text }));
         setHighlights(parsed);
       } catch (err) {
         console.error("Failed to parse saved highlights", err);
@@ -383,6 +407,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     bookmarks,
     searchResults,
     searchQuery,
+    removeHighlight,
+    removeAllHighlights,
     setSearchQuery,
     addHighlight,
     addBookmark,
