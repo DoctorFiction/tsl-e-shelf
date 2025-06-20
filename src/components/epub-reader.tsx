@@ -48,7 +48,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
             <div className="flex gap-0.5">
               <p>{i + 1} - </p>
               <p dangerouslySetInnerHTML={{ __html: result.excerpt }} />{" "}
-              {`${result.chapterTitle}`}
+              <p className="font-bold">({result.chapterTitle})</p>
             </div>
           </li>
         ))}

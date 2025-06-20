@@ -172,7 +172,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return;
       }
 
-      if (query.trim() === "") {
+      const trimmedQuery = query.trim().toLowerCase();
+      if (!trimmedQuery) {
         setSearchResults([]);
         return;
       }
@@ -181,43 +182,56 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const spineItems = (spine as ExtendedSpine).spineItems;
       const contextLength = 30;
 
+      console.log("toc", book.navigation.toc);
+      console.log("spn", spineItems);
       const promises = spineItems.map(async (item, chapterIndex) => {
         try {
-          item.load(book.load.bind(book));
+          await item.load(book.load.bind(book));
           const doc = item.document;
           if (!doc) return;
 
-          const textNodes: Node[] = [];
           const walker = doc.createTreeWalker(doc, NodeFilter.SHOW_TEXT);
+          const textNodes: Node[] = [];
+          let node: Node | null;
+          while ((node = walker.nextNode())) textNodes.push(node);
 
-          let currentNode: Node | null;
-          while ((currentNode = walker.nextNode())) {
-            textNodes.push(currentNode);
-          }
+          const fullText = textNodes
+            .map((n) => n.textContent || "")
+            .join("")
+            .toLowerCase();
 
-          const searchQuery = query.toLowerCase();
+          let pos = fullText.indexOf(trimmedQuery);
+          while (pos !== -1) {
+            let offset = pos;
+            let nodeIndex = 0;
 
-          const tocItem = book.navigation.toc.find((toc) =>
-            toc.href.includes(item.href),
-          );
-          const chapterTitle = tocItem?.label || "Unknown Chapter";
+            // Find the matching node and offset
+            while (nodeIndex < textNodes.length) {
+              const nodeText = textNodes[nodeIndex].textContent || "";
+              if (offset < nodeText.length) break;
+              offset -= nodeText.length;
+              nodeIndex++;
+            }
 
-          for (const node of textNodes) {
-            const nodeText = node.textContent?.toLowerCase() || "";
-            let index = nodeText.indexOf(searchQuery);
-
-            while (index !== -1) {
+            if (nodeIndex < textNodes.length) {
               try {
                 const range = doc.createRange();
-                range.setStart(node, index);
-                range.setEnd(node, index + searchQuery.length);
+                range.setStart(textNodes[nodeIndex], offset);
+                range.setEnd(
+                  textNodes[nodeIndex],
+                  offset + trimmedQuery.length,
+                );
 
                 const cfi = item.cfiFromRange(range);
-                const fullNodeText = node.textContent || "";
-                const excerpt = fullNodeText.substring(
-                  Math.max(0, index - contextLength),
-                  index + searchQuery.length + contextLength,
+                const excerpt = fullText.substring(
+                  Math.max(0, pos - contextLength),
+                  pos + trimmedQuery.length + contextLength,
                 );
+
+                const tocItem = book.navigation.toc.find((toc) =>
+                  toc.href.includes(item.href),
+                );
+                const chapterTitle = tocItem?.label || "";
 
                 results.push({
                   cfi,
@@ -227,11 +241,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
                   chapterIndex,
                 });
               } catch (e) {
-                console.warn("Invalid range during node-based search", e);
+                console.warn("Invalid range during search", e);
               }
-
-              index = nodeText.indexOf(searchQuery, index + 1);
             }
+
+            pos = fullText.indexOf(trimmedQuery, pos + 1);
           }
 
           item.unload?.();
