@@ -24,6 +24,12 @@ type Bookmark = {
   createdAt: string;
 };
 
+type Note = {
+  cfi: string;
+  text: string;
+  note: string;
+};
+
 type SearchResult = {
   cfi: string;
   excerpt: string;
@@ -54,6 +60,8 @@ interface IUseEpubReaderReturn {
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   removeHighlight: (cfi: string, type: HighlightType) => void;
   removeAllHighlights: () => void;
+  addNote: (note: Note) => void;
+  notes: Note[];
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -65,6 +73,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [location, setLocation] = useState<string | null>(null);
   const [toc, setToc] = useState<NavItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -77,6 +86,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
   const BOOKMARK_STORAGE_KEY = `epub-bookmarks-${url}`;
+  const STORAGE_KEY_NOTES = `epub-notes-${url}`;
 
   const addHighlight = useCallback(
     ({ cfi, text, color = "yellow", type = "highlight" }: Highlight) => {
@@ -162,6 +172,51 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
     renditionRef.current?.display(cfi);
   }, []);
+
+  const goNext = useCallback(() => {
+    renditionRef.current?.next();
+  }, []);
+
+  const goPrev = useCallback(() => {
+    renditionRef.current?.prev();
+  }, []);
+
+  const goToHref = useCallback((href: string) => {
+    renditionRef.current?.display(href);
+  }, []);
+
+  const goToCfi = useCallback((cfi: string) => {
+    setSelectedCfi(cfi);
+    renditionRef.current?.display(cfi);
+  }, []);
+
+  const addNote = useCallback(
+    ({ cfi, text, note }: Note) => {
+      const newNote: Note = { cfi, text, note };
+
+      // visually annotate
+      renditionRef.current?.annotations.add(
+        "highlight",
+        cfi,
+        { text },
+        undefined,
+        "epub-note",
+        {
+          fill: "lightblue",
+          fillOpacity: "0.4",
+          mixBlendMode: "multiply",
+        },
+      );
+
+      // update state + localStorage
+      setNotes((prev) => {
+        const updated = [...prev, newNote];
+        localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(updated));
+        return updated;
+      });
+    },
+    [STORAGE_KEY_NOTES],
+  );
 
   const searchBook = useCallback(
     async (query: string) => {
@@ -358,13 +413,19 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     rendition.on("selected", (cfiRange: string, contents: Contents) => {
       const selectedText = contents.window.getSelection()?.toString() || "";
       addHighlight({ cfi: cfiRange, text: selectedText });
+
+      // FOR TESTING NOTES
+      // const userNote = prompt("Add a note for:\n" + selectedText);
+      // if (userNote) {
+      //   addNote({ cfi: cfiRange, text: selectedText, note: userNote });
+      // }
     });
 
     // Load saved highlights
-    const saved = localStorage.getItem(STORAGE_KEY_HIGHLIGHTS);
-    if (saved) {
+    const savedHighlights = localStorage.getItem(STORAGE_KEY_HIGHLIGHTS);
+    if (savedHighlights) {
       try {
-        const parsed: Highlight[] = JSON.parse(saved);
+        const parsed: Highlight[] = JSON.parse(savedHighlights);
         parsed.forEach(({ cfi, text }) => addHighlight({ cfi, text }));
         setHighlights(parsed);
       } catch (err) {
@@ -382,6 +443,27 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
     }
 
+    // Load saved notes
+    const savedNotes = localStorage.getItem(STORAGE_KEY_NOTES);
+    if (savedNotes) {
+      const parsed = JSON.parse(savedNotes) as Note[];
+      parsed.forEach((note) => {
+        rendition.annotations.add(
+          "highlight",
+          note.cfi,
+          { text: note.text },
+          undefined,
+          "epub-note",
+          {
+            fill: "lightblue",
+            fillOpacity: "0.4",
+            mixBlendMode: "multiply",
+          },
+        );
+      });
+      setNotes(parsed);
+    }
+
     return () => {
       rendition.destroy?.();
       book.destroy?.();
@@ -394,23 +476,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     BOOKMARK_STORAGE_KEY,
   ]);
 
-  const goNext = useCallback(() => {
-    renditionRef.current?.next();
-  }, []);
-
-  const goPrev = useCallback(() => {
-    renditionRef.current?.prev();
-  }, []);
-
-  const goToHref = useCallback((href: string) => {
-    renditionRef.current?.display(href);
-  }, []);
-
-  const goToCfi = useCallback((cfi: string) => {
-    setSelectedCfi(cfi);
-    renditionRef.current?.display(cfi);
-  }, []);
-
   return {
     toc,
     location,
@@ -419,6 +484,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     bookmarks,
     searchResults,
     searchQuery,
+    notes,
     removeHighlight,
     removeAllHighlights,
     setSearchQuery,
@@ -429,5 +495,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     goToCfi,
     goNext,
     goPrev,
+    addNote,
   };
 }
