@@ -182,8 +182,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const spineItems = (spine as ExtendedSpine).spineItems;
       const contextLength = 30;
 
-      console.log("toc", book.navigation.toc);
-      console.log("spn", spineItems);
       const promises = spineItems.map(async (item, chapterIndex) => {
         try {
           await item.load(book.load.bind(book));
