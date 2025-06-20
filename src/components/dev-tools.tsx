@@ -86,8 +86,21 @@ export function DevTools() {
   };
 
   const clearAll = () => {
-    Object.values(STORAGE_KEYS).forEach(clearKey);
-    console.log("✅ Cleared all reader-related localStorage for this book.");
+    if (removeAllMode) {
+      Object.entries(localStorage).forEach(([key]) => {
+        const isEpubKey = key.includes("epub");
+        if (isEpubKey) {
+          clearKey(key);
+          console.log(
+            `✅ Cleared all reader-related localStorage for all books.`,
+          );
+        }
+      });
+    } else {
+      Object.values(STORAGE_KEYS).forEach(clearKey);
+
+      console.log("✅ Cleared all reader-related localStorage for this book.");
+    }
   };
 
   if (!mounted) return null;
