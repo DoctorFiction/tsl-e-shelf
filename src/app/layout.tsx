@@ -5,6 +5,7 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import ProgressBarProvider from "./providers/progress-provider";
+import { DevTools } from "@/components/dev-tools";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,12 +29,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           <ProgressBarProvider>
             <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">
               <Header />
               {children}
+              <DevTools />
               <Footer />
             </div>
           </ProgressBarProvider>

@@ -85,8 +85,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
-  const BOOKMARK_STORAGE_KEY = `epub-bookmarks-${url}`;
+  const STORAGE_KEY_BOOKMARK = `epub-bookmarks-${url}`;
   const STORAGE_KEY_NOTES = `epub-notes-${url}`;
+  const STORAGE_KEY_TOC = `epub-toc`;
 
   const addHighlight = useCallback(
     ({ cfi, text, color = "yellow", type = "highlight" }: Highlight) => {
@@ -159,10 +160,10 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
     setBookmarks((prev) => {
       const updated = [...prev, newBookmark];
-      localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEY_BOOKMARK, JSON.stringify(updated));
       return updated;
     });
-  }, [location, BOOKMARK_STORAGE_KEY]);
+  }, [location, STORAGE_KEY_BOOKMARK]);
 
   const goToBookmark = useCallback((cfi: string) => {
     if (!cfi) {
@@ -384,6 +385,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     const book: Book = ePub(url);
     book.ready.then(() => {
       setToc(book.navigation?.toc || []);
+      // for debugger
+      localStorage.setItem(
+        STORAGE_KEY_TOC,
+        JSON.stringify(book.navigation?.toc || []),
+      );
       setSpine(book.spine as ExtendedSpine);
     });
     bookRef.current = book;
@@ -434,7 +440,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     }
 
     // Load bookmarks from localStorage
-    const savedBookmarks = localStorage.getItem(BOOKMARK_STORAGE_KEY);
+    const savedBookmarks = localStorage.getItem(STORAGE_KEY_BOOKMARK);
     if (savedBookmarks) {
       try {
         setBookmarks(JSON.parse(savedBookmarks));
@@ -473,7 +479,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     addHighlight,
     STORAGE_KEY_LOC,
     STORAGE_KEY_HIGHLIGHTS,
-    BOOKMARK_STORAGE_KEY,
+    STORAGE_KEY_BOOKMARK,
+    STORAGE_KEY_NOTES,
+    STORAGE_KEY_TOC,
   ]);
 
   return {
