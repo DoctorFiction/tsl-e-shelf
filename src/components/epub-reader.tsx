@@ -8,7 +8,6 @@ interface EpubReaderProps {
 export default function EpubReader({ url }: EpubReaderProps) {
   const {
     viewerRef,
-    location,
     goNext,
     goPrev,
     goToCfi,
@@ -19,10 +18,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
 
   return (
     <div>
-      <div className="p-2 text-center text-sm text-gray-500">
-        Current location: {location}
-      </div>
-      <div className="flex gap-4 p-2 justify-center bg-gray-100">
+      <div className="flex gap-4 p-2 justify-center bg-gray-100 dark:bg-gray-800">
         <button onClick={goPrev} className="px-4 py-2 bg-blue-500  rounded">
           ◀ Prev
         </button>
@@ -53,7 +49,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
           </li>
         ))}
       </ul>
-      <div ref={viewerRef} className="w-full h-screen bg-white" />
+      <div ref={viewerRef} className="w-full h-screen" />
     </div>
   );
 }

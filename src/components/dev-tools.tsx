@@ -14,18 +14,14 @@ import { Switch } from "./ui/switch";
 
 export function DevTools() {
   const pathname = usePathname();
-  const [mounted, setMounted] = useState(false);
-  const [removeAllMode, setRemoveAllMode] = useState(false);
-  const [logAllMode, setLogAllMode] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Read the book ID from the path
   const bookId = pathname?.split("/").pop() || "";
 
-  // epub-location-/books/pg50290-images-3.epub
+  const STORAGE_DEVTOOL_LOG_ALL = "devtool-log-all";
+  const STORAGE_DEVTOOL_DELETE_ALL = "devtool-delete-log";
+  const STORAGE_DEVTOOL_AUTO_RELOAD = "devtool-auto-reload";
+
   const STORAGE_PREFIX = `epub`;
   const STORAGE_BOOK = `/books/${bookId}`;
   const STORAGE_KEYS = {
@@ -36,6 +32,31 @@ export function DevTools() {
     bookmarks: `${STORAGE_PREFIX}-bookmarks-${STORAGE_BOOK}`,
     notes: `${STORAGE_PREFIX}-notes-${STORAGE_BOOK}`,
   };
+
+  const [mounted, setMounted] = useState(false);
+  const [removeAllMode, setRemoveAllMode] = useState(false);
+  const [logAllMode, setLogAllMode] = useState(false);
+  const [autoReload, setAutoReload] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const localSettings = {
+      removeAll:
+        localStorage.getItem(STORAGE_DEVTOOL_DELETE_ALL) === "true"
+          ? true
+          : false,
+      logAll:
+        localStorage.getItem(STORAGE_DEVTOOL_LOG_ALL) === "true" ? true : false,
+      autoReload:
+        localStorage.getItem(STORAGE_DEVTOOL_AUTO_RELOAD) === "true "
+          ? true
+          : false,
+    };
+    setRemoveAllMode(localSettings.removeAll);
+    setLogAllMode(localSettings.logAll);
+    setAutoReload(localSettings.autoReload);
+  }, []);
 
   // Try to get epub state from localStorage
   const getParsed = (key: string) => {
@@ -65,6 +86,26 @@ export function DevTools() {
       clearKey(key);
       console.log(`${type} cleared`);
     }
+    if (autoReload) reload();
+  };
+
+  const clearAll = () => {
+    if (removeAllMode) {
+      Object.entries(localStorage).forEach(([key]) => {
+        const isEpubKey = key.includes("epub");
+        if (isEpubKey) {
+          clearKey(key);
+          console.log(
+            `✅ Cleared all reader-related localStorage for all books.`,
+          );
+        }
+      });
+    } else {
+      Object.values(STORAGE_KEYS).forEach(clearKey);
+
+      console.log("✅ Cleared all reader-related localStorage for this book.");
+    }
+    if (autoReload) reload();
   };
 
   const logEntry = (key: string, type: string = "") => {
@@ -85,22 +126,8 @@ export function DevTools() {
     }
   };
 
-  const clearAll = () => {
-    if (removeAllMode) {
-      Object.entries(localStorage).forEach(([key]) => {
-        const isEpubKey = key.includes("epub");
-        if (isEpubKey) {
-          clearKey(key);
-          console.log(
-            `✅ Cleared all reader-related localStorage for all books.`,
-          );
-        }
-      });
-    } else {
-      Object.values(STORAGE_KEYS).forEach(clearKey);
-
-      console.log("✅ Cleared all reader-related localStorage for this book.");
-    }
+  const reload = () => {
+    window.location.reload();
   };
 
   if (!mounted) return null;
@@ -124,7 +151,16 @@ export function DevTools() {
             <div className="flex gap-2">
               <p className="text-sm font-medium">📄 Logs</p>
               <p className="text-sm font-normal">This</p>
-              <Switch checked={logAllMode} onCheckedChange={setLogAllMode} />
+              <Switch
+                checked={logAllMode}
+                onCheckedChange={() => {
+                  setLogAllMode(!logAllMode);
+                  localStorage.setItem(
+                    STORAGE_DEVTOOL_LOG_ALL,
+                    logAllMode ? "false" : "true",
+                  );
+                }}
+              />
               <p className="text-sm font-normal">All</p>
             </div>
 
@@ -229,7 +265,13 @@ export function DevTools() {
               <p className="text-sm font-normal">This</p>
               <Switch
                 checked={removeAllMode}
-                onCheckedChange={setRemoveAllMode}
+                onCheckedChange={() => {
+                  setRemoveAllMode(!removeAllMode);
+                  localStorage.setItem(
+                    STORAGE_DEVTOOL_DELETE_ALL,
+                    removeAllMode ? "false" : "true",
+                  );
+                }}
               />
               <p className="text-sm font-normal">All</p>
             </div>
@@ -273,12 +315,20 @@ export function DevTools() {
 
           <div className="space-y-2">
             <p className="text-sm font-medium">⚙️ Actions</p>
-            <Button
-              className="w-full"
-              onClick={() => {
-                window.location.reload();
-              }}
-            >
+            <div className="flex gap-2">
+              <Switch
+                checked={autoReload}
+                onCheckedChange={() => {
+                  setAutoReload(!autoReload);
+                  localStorage.setItem(
+                    STORAGE_DEVTOOL_AUTO_RELOAD,
+                    autoReload ? "false" : "true",
+                  );
+                }}
+              />
+              <p className="text-sm font-normal">Reload after action</p>
+            </div>
+            <Button className="w-full" onClick={reload}>
               Reload Reader
             </Button>
           </div>

@@ -8,6 +8,7 @@ import {
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
+import { useTheme } from "next-themes";
 
 type Highlight = {
   cfi: string;
@@ -82,6 +83,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     null,
   );
   const deferredSearchQuery = useDeferredValue(searchQuery);
+
+  const { theme } = useTheme();
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -402,6 +405,45 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
     renditionRef.current = rendition;
 
+    // SETUP THE THEME
+    const isDark = theme === "dark";
+    rendition.themes.register("custom-theme", {
+      body: {
+        background: isDark ? "#0f0f0f" : "#ffffff",
+        color: isDark ? "#ffffff" : "#000000",
+
+        // Font stack (Tailwind's default sans-serif stack)
+        "font-family":
+          "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif",
+
+        // Text sizing
+        "font-size": "1.125rem", // ~18px, Tailwind's `text-lg`
+        "line-height": "1.75", // Tailwind's `leading-relaxed`
+        "letter-spacing": "0.01em", // Tailwind's tracking-tight
+
+        // Paragraph spacing
+        margin: "0",
+        padding: "1.25rem", // space around the content, Tailwind's `p-5`
+        "word-break": "break-word",
+        "overflow-wrap": "break-word",
+        "max-width": "65ch", // readable text line length
+        "margin-left": "auto",
+        "margin-right": "auto",
+      },
+
+      p: {
+        "margin-bottom": "1rem", // spacing between paragraphs
+      },
+    });
+    // APPLY ONCE RIGHT AWAY
+    rendition.themes.select("custom-theme");
+
+    // REAPPLY WHEN A NEW CHAPTER IS DISPLAYED TO AVOID FLASHING
+    // flashing was solved by removing bg from EpubReader viewerRef - but keeping it here just in case if needed in the future
+    // rendition.on("rendered", () => {
+    //   rendition.themes.select("custom-theme");
+    // });
+
     // Load last location
     const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
     rendition.display(savedLocation || undefined);
@@ -477,6 +519,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   }, [
     url,
     addHighlight,
+    theme,
     STORAGE_KEY_LOC,
     STORAGE_KEY_HIGHLIGHTS,
     STORAGE_KEY_BOOKMARK,
