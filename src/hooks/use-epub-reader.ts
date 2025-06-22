@@ -91,7 +91,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const isDark = theme === "dark";
 
   const [prefs] = useAtom(readerPreferencesAtom);
-  console.log("prefs", prefs);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -392,8 +391,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   useEffect(() => {
     if (!viewerRef.current) return;
 
-    const themeObject = getReaderTheme(isDark, prefs);
-
     const book: Book = ePub(url);
     book.ready.then(() => {
       setToc(book.navigation?.toc || []);
@@ -412,6 +409,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       allowScriptedContent: true,
     });
 
+    const themeObject = getReaderTheme(isDark, prefs);
     rendition.hooks.content.register(() => {
       if (rendition?.themes) {
         rendition.themes.register("custom-theme", themeObject);
