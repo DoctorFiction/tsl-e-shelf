@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search } from "lucide-react";
 
 interface EpubReaderProps {
@@ -15,6 +15,16 @@ export default function EpubReader({ url }: EpubReaderProps) {
   const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults } = useEpubReader(url);
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "ArrowLeft") goPrev();
+      else if (e.key === "ArrowRight") goNext();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [goPrev, goNext]);
 
   const handleClose = () => {
     setSearchOpen(false);
