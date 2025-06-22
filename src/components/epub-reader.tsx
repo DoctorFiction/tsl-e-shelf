@@ -40,7 +40,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <CardContent>
         <div className="flex p-2 items-center bg-gray-100 dark:bg-gray-800 relative justify-center">
           <div className="absolute left-4 flex gap-2">
-            {/* Highlights Button */}
             <Button className="ml-2" onClick={() => setHighlightsOpen(true)} aria-label="Show highlights" type="button">
               <Highlighter className="w-4 h-4 mr-1" />
             </Button>
@@ -49,7 +48,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
             <Button onClick={goPrev}>◀ Prev</Button>
             <Button onClick={goNext}>Next ▶</Button>
           </div>
-
           <div className="absolute right-4">
             <Button
               className="ml-2"
