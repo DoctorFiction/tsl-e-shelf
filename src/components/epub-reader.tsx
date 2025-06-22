@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef } from "react";
+import { Search } from "lucide-react";
 
 interface EpubReaderProps {
   url: string;
@@ -40,7 +41,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
               aria-label="Search in book"
               type="button"
             >
-              Search
+              <Search className="w-4 h-4 mr-1" />
             </Button>
           </div>
           {searchOpen && (
