@@ -14,9 +14,9 @@ interface EpubReaderProps {
 export default function EpubReader({ url }: EpubReaderProps) {
   const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark } = useEpubReader(url);
 
-  const [highlightsOpen, setHighlightsOpen] = useState(false); // highlight modal state
+  const [highlightsOpen, setHighlightsOpen] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [showBookmarks, setShowBookmarks] = useState(false); // state to toggle between highlights and bookmarks
 
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,11 +76,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
             <Button
               className="ml-2"
               onClick={() => {
-                // add bookmark for current page
-                if (typeof window !== "undefined") {
-                  // useEpubReader'dan gelen addBookmark fonksiyonu mevcut sayfaya bookmark ekler
-                  addBookmark();
-                }
+                addBookmark();
               }}
               aria-label="Add bookmark"
               type="button"
