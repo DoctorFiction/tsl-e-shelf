@@ -1,6 +1,6 @@
 import { atomWithStorage } from "jotai/utils";
 
-export interface IReaderPreferences {
+export interface IReaderPreference {
   title: string;
   config: IReaderPreferenceConfig;
 }
@@ -13,18 +13,39 @@ export interface IReaderPreferenceConfig {
   textAlign?: string;
 }
 
-const defaultPreferences: IReaderPreferences = {
+const DEFAULT_CONFIG_VALUES = {
+  fontSize: 17,
+  lineHeight: 1.4,
+};
+
+const original: IReaderPreference = {
   title: "Original",
   config: {
-    fontSize: 17,
+    fontSize: DEFAULT_CONFIG_VALUES.fontSize,
     fontFamily: "Georgia, 'Times New Roman', serif",
-    lineHeight: 1.6,
+    lineHeight: DEFAULT_CONFIG_VALUES.lineHeight,
     theme: "light",
     textAlign: "justify",
   },
 };
 
-export const readerPreferencesAtom = atomWithStorage<IReaderPreferences>(
+const quiet: IReaderPreference = {
+  title: "Quiet",
+  config: {
+    fontSize: DEFAULT_CONFIG_VALUES.fontSize,
+    fontFamily: "Publico",
+    lineHeight: DEFAULT_CONFIG_VALUES.lineHeight,
+    theme: "light",
+    textAlign: "justify",
+  },
+};
+
+export const defaultPreferences: IReaderPreference[] = [original, quiet];
+
+const defaultPreferenceConfig: IReaderPreferenceConfig =
+  defaultPreferences[0].config;
+
+export const readerPreferencesAtom = atomWithStorage<IReaderPreferenceConfig>(
   "reader-prefs",
-  defaultPreferences,
+  defaultPreferenceConfig,
 );
