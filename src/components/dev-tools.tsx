@@ -6,7 +6,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-// import { useEpubReader } from "@/hooks/use-epub-reader"; // adjust if needed
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BugPlay } from "lucide-react";
@@ -49,7 +48,7 @@ export function DevTools() {
       logAll:
         localStorage.getItem(STORAGE_DEVTOOL_LOG_ALL) === "true" ? true : false,
       autoReload:
-        localStorage.getItem(STORAGE_DEVTOOL_AUTO_RELOAD) === "true "
+        localStorage.getItem(STORAGE_DEVTOOL_AUTO_RELOAD) === "true"
           ? true
           : false,
     };

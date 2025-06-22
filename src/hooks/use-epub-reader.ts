@@ -9,7 +9,9 @@ import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
 import { useTheme } from "next-themes";
-import { getReaderTheme } from "@/lib/getReaderTheme";
+import { getReaderTheme } from "@/lib/get-reader-theme";
+import { useAtom } from "jotai";
+import { readerPreferencesAtom } from "@/atoms/reader-preferences";
 
 type Highlight = {
   cfi: string;
@@ -87,6 +89,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const [prefs] = useAtom(readerPreferencesAtom);
+  console.log("prefs", prefs);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -387,7 +392,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   useEffect(() => {
     if (!viewerRef.current) return;
 
-    const themeObject = getReaderTheme(isDark);
+    const themeObject = getReaderTheme(isDark, prefs);
 
     const book: Book = ePub(url);
     book.ready.then(() => {
@@ -506,6 +511,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     STORAGE_KEY_BOOKMARK,
     STORAGE_KEY_NOTES,
     STORAGE_KEY_TOC,
+    isDark,
+    prefs,
   ]);
 
   return {

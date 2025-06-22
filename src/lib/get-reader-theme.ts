@@ -1,10 +1,15 @@
-export const getReaderTheme = (isDark: boolean) => ({
+import { IReaderPreferences } from "@/atoms/reader-preferences";
+
+export const getReaderTheme = (
+  isDark: boolean,
+  preferences: IReaderPreferences,
+) => ({
   body: {
     background: isDark ? "#0f0f0f" : "#ffffff",
     color: isDark ? "#f1f1f1" : "#1c1c1e",
-    "font-family": "Georgia, 'Times New Roman', serif",
-    "line-height": "1.6",
-    "font-size": "1.1rem",
+    "font-family": preferences.fontFamily,
+    "line-height": preferences.lineHeight,
+    "font-size": `${preferences.fontSize}px`,
     padding: "1.5rem 1rem",
   },
 
