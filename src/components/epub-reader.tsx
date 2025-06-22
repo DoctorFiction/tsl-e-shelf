@@ -14,7 +14,7 @@ interface EpubReaderProps {
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark } = useEpubReader(url);
+  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark, location } = useEpubReader(url);
 
   // Popover ile state yönetimi sadeleşiyor
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -28,6 +28,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goPrev, goNext]);
+
+  const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
 
   return (
     <Card className="mt-2">
@@ -188,16 +190,29 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button
-              className="ml-2"
-              onClick={() => {
-                addBookmark();
-              }}
-              aria-label="Add bookmark"
-              type="button"
-            >
-              <Bookmark className="w-4 h-4" />
-            </Button>
+            {isBookmarked ? (
+              <Button
+                className="ml-2"
+                onClick={() => {
+                  if (location) removeBookmark(location);
+                }}
+                aria-label="Remove bookmark"
+                type="button"
+              >
+                <Bookmark fill="red" className="w-4 h-4 text-red-500" />
+              </Button>
+            ) : (
+              <Button
+                className="ml-2"
+                onClick={() => {
+                  addBookmark();
+                }}
+                aria-label="Add bookmark"
+                type="button"
+              >
+                <Bookmark className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </div>
         <div ref={viewerRef} className="w-full h-screen" />
