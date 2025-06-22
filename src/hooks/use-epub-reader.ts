@@ -9,6 +9,7 @@ import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
 import { useTheme } from "next-themes";
+import { getReaderTheme } from "@/lib/getReaderTheme";
 
 type Highlight = {
   cfi: string;
@@ -85,6 +86,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -385,6 +387,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   useEffect(() => {
     if (!viewerRef.current) return;
 
+    const themeObject = getReaderTheme(isDark);
+
     const book: Book = ePub(url);
     book.ready.then(() => {
       setToc(book.navigation?.toc || []);
@@ -403,40 +407,17 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       allowScriptedContent: true,
     });
 
-    renditionRef.current = rendition;
-
-    // SETUP THE THEME
-    const isDark = theme === "dark";
-    rendition.themes.register("custom-theme", {
-      body: {
-        background: isDark ? "#0f0f0f" : "#ffffff",
-        color: isDark ? "#ffffff" : "#000000",
-
-        // Font stack (Tailwind's default sans-serif stack)
-        "font-family":
-          "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif",
-
-        // Text sizing
-        "font-size": "1.125rem", // ~18px, Tailwind's `text-lg`
-        "line-height": "1.75", // Tailwind's `leading-relaxed`
-        "letter-spacing": "0.01em", // Tailwind's tracking-tight
-
-        // Paragraph spacing
-        margin: "0",
-        padding: "1.25rem", // space around the content, Tailwind's `p-5`
-        "word-break": "break-word",
-        "overflow-wrap": "break-word",
-        "max-width": "65ch", // readable text line length
-        "margin-left": "auto",
-        "margin-right": "auto",
-      },
-
-      p: {
-        "margin-bottom": "1rem", // spacing between paragraphs
-      },
+    rendition.hooks.content.register(() => {
+      if (rendition?.themes) {
+        rendition.themes.register("custom-theme", themeObject);
+        rendition.themes.default({ override: true });
+        rendition.themes.select("custom-theme");
+      } else {
+        console.warn("Rendition themes not initialized");
+      }
     });
-    // APPLY ONCE RIGHT AWAY
-    rendition.themes.select("custom-theme");
+
+    renditionRef.current = rendition;
 
     // REAPPLY WHEN A NEW CHAPTER IS DISPLAYED TO AVOID FLASHING
     // flashing was solved by removing bg from EpubReader viewerRef - but keeping it here just in case if needed in the future
