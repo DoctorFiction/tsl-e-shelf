@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
-import { menuItems } from "./menu-config";
+import { menuItems } from "../lib/menu-config";
 
 export function Menu() {
   const pathname = usePathname();
