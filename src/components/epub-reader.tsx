@@ -5,18 +5,25 @@ import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef, useEffect } from "react";
-import { Search, Highlighter, Trash2 } from "lucide-react";
+import { Search, Highlighter, Trash2, Bookmark, BookMarked } from "lucide-react";
 
 interface EpubReaderProps {
   url: string;
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight } = useEpubReader(url);
-  console.log("🚀 ~ EpubReader ~ highlights:", highlights);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark } = useEpubReader(url);
+
   const [highlightsOpen, setHighlightsOpen] = useState(false); // highlight modal state
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [showBookmarks, setShowBookmarks] = useState(false); // state to toggle between highlights and bookmarks
+
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClose = () => {
+    setSearchOpen(false);
+    // setSearchQuery(""); // Artık arama kutusu kapanınca arama ifadesi silinmeyecek
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,11 +35,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goPrev, goNext]);
 
-  const handleClose = () => {
-    setSearchOpen(false);
-    // setSearchQuery(""); // Artık arama kutusu kapanınca arama ifadesi silinmeyecek
-  };
-
   const handleHighlightsClose = () => setHighlightsOpen(false);
 
   return (
@@ -41,14 +43,25 @@ export default function EpubReader({ url }: EpubReaderProps) {
         <div className="flex p-2 items-center bg-gray-100 dark:bg-gray-800 relative justify-center">
           <div className="absolute left-4 flex gap-2">
             <Button className="ml-2" onClick={() => setHighlightsOpen((v) => !v)} aria-label="Show highlights" type="button">
-              <Highlighter className="w-4 h-4 mr-1" />
+              <Highlighter className="w-4 h-4" />
+            </Button>
+            <Button
+              className="ml-2"
+              onClick={() => {
+                setShowBookmarks((v) => !v);
+                setHighlightsOpen(false);
+              }}
+              aria-label="Show bookmarks"
+              type="button"
+            >
+              <BookMarked className="w-4 h-4" />
             </Button>
           </div>
           <div className="flex gap-4 mx-auto">
             <Button onClick={goPrev}>◀ Prev</Button>
             <Button onClick={goNext}>Next ▶</Button>
           </div>
-          <div className="absolute right-4">
+          <div className="absolute right-4 flex gap-2">
             <Button
               className="ml-2"
               onClick={() => {
@@ -58,9 +71,24 @@ export default function EpubReader({ url }: EpubReaderProps) {
               aria-label="Search in book"
               type="button"
             >
-              <Search className="w-4 h-4 mr-1" />
+              <Search className="w-4 h-4" />
+            </Button>
+            <Button
+              className="ml-2"
+              onClick={() => {
+                // add bookmark for current page
+                if (typeof window !== "undefined") {
+                  // useEpubReader'dan gelen addBookmark fonksiyonu mevcut sayfaya bookmark ekler
+                  addBookmark();
+                }
+              }}
+              aria-label="Add bookmark"
+              type="button"
+            >
+              <Bookmark className="w-4 h-4" />
             </Button>
           </div>
+
           {/* Search Modal */}
           {searchOpen && (
             <div className="absolute top-12 right-0 z-20 w-80 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-4 border border-gray-200 dark:border-gray-700">
@@ -119,34 +147,112 @@ export default function EpubReader({ url }: EpubReaderProps) {
           {highlightsOpen && (
             <div className="absolute top-12 left-0 z-20 w-96 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-2">
-                <Typography variant="body1" className="font-bold">
-                  Highlights
-                </Typography>
+                <div className="flex items-center gap-2">
+                  <Typography variant="body1" className="font-bold">
+                    Highlights
+                  </Typography>
+                  <Button size="icon" variant="ghost" aria-label="Show bookmarks" onClick={() => setShowBookmarks((v) => !v)}>
+                    <Bookmark className="w-5 h-5 text-primary" />
+                  </Button>
+                </div>
                 <button onClick={handleHighlightsClose} className="ml-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" aria-label="Close highlights">
                   ✕
                 </button>
               </div>
+              {showBookmarks ? (
+                <ul className="max-h-64 overflow-y-auto">
+                  {bookmarks && bookmarks.length > 0 ? (
+                    bookmarks.map((bm, i) => (
+                      <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
+                        <div
+                          className="flex-1"
+                          onClick={() => {
+                            goToCfi(bm.cfi);
+                            handleHighlightsClose();
+                          }}
+                        >
+                          <Typography variant="body2" className="line-clamp-2">
+                            {bm.cfi}
+                          </Typography>
+                        </div>
+                      </Card>
+                    ))
+                  ) : (
+                    <Typography variant="body2" className="text-gray-400">
+                      No bookmarks found.
+                    </Typography>
+                  )}
+                </ul>
+              ) : (
+                <ul className="max-h-64 overflow-y-auto">
+                  {highlights && highlights.length > 0 ? (
+                    highlights.map((hl, i) => (
+                      <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
+                        <div
+                          className="flex-1"
+                          onClick={() => {
+                            goToCfi(hl.cfi);
+                            handleHighlightsClose();
+                          }}
+                        >
+                          <Typography variant="body2" className="line-clamp-2">
+                            {hl.text}
+                          </Typography>
+                        </div>
+                        <button
+                          className="text-gray-400 hover:text-red-500 transition ml-2"
+                          aria-label="Delete highlight"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeHighlight?.(hl.cfi, "highlight");
+                          }}
+                          type="button"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </Card>
+                    ))
+                  ) : (
+                    <Typography variant="body2" className="text-gray-400">
+                      No highlights found.
+                    </Typography>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
+          {/* Bookmarks Modal */}
+          {showBookmarks && (
+            <div className="absolute top-12 left-0 z-20 w-96 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <Typography variant="body1" className="font-bold">
+                  Bookmarks
+                </Typography>
+                <button onClick={() => setShowBookmarks(false)} className="ml-1 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" aria-label="Close bookmarks">
+                  ✕
+                </button>
+              </div>
               <ul className="max-h-64 overflow-y-auto">
-                {highlights && highlights.length > 0 ? (
-                  highlights.map((hl, i) => (
+                {bookmarks && bookmarks.length > 0 ? (
+                  bookmarks.map((bm, i) => (
                     <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
                       <div
                         className="flex-1"
                         onClick={() => {
-                          goToCfi(hl.cfi);
-                          handleHighlightsClose();
+                          goToCfi(bm.cfi);
+                          setShowBookmarks(false);
                         }}
                       >
                         <Typography variant="body2" className="line-clamp-2">
-                          {hl.text}
+                          {bm.cfi}
                         </Typography>
                       </div>
                       <button
                         className="text-gray-400 hover:text-red-500 transition ml-2"
-                        aria-label="Delete highlight"
+                        aria-label="Delete bookmark"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeHighlight?.(hl.cfi, "highlight");
+                          removeBookmark?.(bm.cfi);
                         }}
                         type="button"
                       >
@@ -156,7 +262,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
                   ))
                 ) : (
                   <Typography variant="body2" className="text-gray-400">
-                    No highlights found.
+                    No bookmarks found.
                   </Typography>
                 )}
               </ul>
