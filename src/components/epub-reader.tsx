@@ -40,7 +40,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <CardContent>
         <div className="flex p-2 items-center bg-gray-100 dark:bg-gray-800 relative justify-center">
           <div className="absolute left-4 flex gap-2">
-            <Button className="ml-2" onClick={() => setHighlightsOpen(true)} aria-label="Show highlights" type="button">
+            <Button className="ml-2" onClick={() => setHighlightsOpen((v) => !v)} aria-label="Show highlights" type="button">
               <Highlighter className="w-4 h-4 mr-1" />
             </Button>
           </div>
@@ -146,7 +146,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
                         aria-label="Delete highlight"
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeHighlight?.(hl.cfi, hl.type ?? "highlight");
+                          removeHighlight?.(hl.cfi, "highlight");
                         }}
                         type="button"
                       >
