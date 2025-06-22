@@ -1,6 +1,11 @@
 import { atomWithStorage } from "jotai/utils";
 
 export interface IReaderPreferences {
+  title: string;
+  config: IReaderPreferenceConfig;
+}
+
+export interface IReaderPreferenceConfig {
   fontSize: number; // px
   fontFamily: string;
   lineHeight: number;
@@ -9,11 +14,14 @@ export interface IReaderPreferences {
 }
 
 const defaultPreferences: IReaderPreferences = {
-  fontSize: 17,
-  fontFamily: "Georgia, 'Times New Roman', serif",
-  lineHeight: 1.6,
-  theme: "light",
-  textAlign: "justify",
+  title: "Original",
+  config: {
+    fontSize: 17,
+    fontFamily: "Georgia, 'Times New Roman', serif",
+    lineHeight: 1.6,
+    theme: "light",
+    textAlign: "justify",
+  },
 };
 
 export const readerPreferencesAtom = atomWithStorage<IReaderPreferences>(
