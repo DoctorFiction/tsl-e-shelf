@@ -12,52 +12,102 @@ export interface IReaderPreferenceConfig {
   fontSize: number; // px
   fontFamily: string;
   lineHeight: number;
-  theme: "light" | "dark";
+  theme: "light" | "dark" | "auto";
   textAlign?: string;
+  backgroundColor: { light: string; dark: string };
+  textColor: { light: string; dark: string };
 }
 
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
   Original: {
     fontSize: 17,
     fontFamily: "Georgia, 'Times New Roman', serif",
-    lineHeight: 1.4,
-    theme: "light",
+    lineHeight: 1.2,
+    theme: "auto",
     textAlign: "justify",
+    backgroundColor: {
+      light: "#ffffff",
+      dark: "#000000",
+    },
+    textColor: {
+      light: "#000000",
+      dark: "#ffffff",
+    },
   },
   Quiet: {
     fontSize: 17,
     fontFamily: "Publico",
     lineHeight: 1.4,
-    theme: "light",
+    theme: "auto",
     textAlign: "justify",
+    backgroundColor: {
+      light: "#414144",
+      dark: "#000000",
+    },
+    textColor: {
+      light: "#A5A5Ad",
+      dark: "#828288",
+    },
   },
   Paper: {
     fontSize: 17,
     fontFamily: "Palatino Linotype, Book Antiqua, Palatino, serif",
-    lineHeight: 1.4,
-    theme: "light",
+    lineHeight: 1.55,
+    theme: "auto",
     textAlign: "justify",
+    backgroundColor: {
+      light: "#EBEAEA",
+      dark: "#1A1A1C",
+    },
+    textColor: {
+      light: "#1D1A1A",
+      dark: "#F0F0EE",
+    },
   },
   Bold: {
     fontSize: 17,
     fontFamily: "Arial Black, Gadget, sans-serif",
-    lineHeight: 1.4,
-    theme: "dark",
+    lineHeight: 1.5,
+    theme: "auto",
     textAlign: "left",
+    backgroundColor: {
+      light: "#FFFFFF",
+      dark: "#000000",
+    },
+    textColor: {
+      light: "#1A1A1C",
+      dark: "#EDECf0",
+    },
   },
   Calm: {
     fontSize: 17,
-    fontFamily: "Helvetica Neue, sans-serif",
-    lineHeight: 1.6,
-    theme: "light",
+    fontFamily: "'Helvetica Neue', sans-serif",
+    lineHeight: 1.55,
+    theme: "auto",
     textAlign: "justify",
+    backgroundColor: {
+      light: "#EEDEC3",
+      dark: "#433E36",
+    },
+    textColor: {
+      light: "#342C24",
+      dark: "#F7E9D7",
+    },
   },
   Focus: {
     fontSize: 17,
-    fontFamily: "Courier New, Courier, monospace",
+    fontFamily: "Proxima Nova, sans-serif",
     lineHeight: 1.4,
-    theme: "dark",
+    theme: "auto",
     textAlign: "left",
+    backgroundColor: {
+      light: "#FFFCF3",
+      dark: "#17160F",
+    },
+    textColor: {
+      light: "#141303",
+      dark: "#FFF8E9",
+    },
   },
 };
 

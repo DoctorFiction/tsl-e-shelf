@@ -48,7 +48,6 @@ export function FontSizeToggler({
 
   return (
     <div className="flex flex-col gap-1">
-      {/* Toggle Buttons */}
       <div className="flex w-full items-center border rounded-md overflow-hidden">
         <ToggleGroup type="single" className="flex w-full">
           <ToggleGroupItem
@@ -69,8 +68,7 @@ export function FontSizeToggler({
         </ToggleGroup>
       </div>
 
-      {/* Indicator Row (animated) */}
-      <div className="h-4 mt-1">
+      <div className="h-3 mt-1">
         <div
           className={`flex items-center justify-center gap-1 transition-all duration-300 ease-in-out transform ${
             touched
@@ -81,10 +79,10 @@ export function FontSizeToggler({
           {Array.from({ length: INDICATOR_COUNT }).map((_, idx) => (
             <div
               key={idx}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-2 h-2 rounded-xs transition-colors ${
                 idx <= getActiveIndex() ? "bg-foreground" : "bg-muted"
               }`}
-            />
+            ></div>
           ))}
         </div>
       </div>
