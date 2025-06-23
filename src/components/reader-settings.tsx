@@ -8,11 +8,22 @@ import { useAtom } from "jotai";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { CaseSensitive } from "lucide-react";
+import { FontSizeToggler } from "./font-size-toggler";
+import { useCallback } from "react";
 
 export const ReaderSettings = () => {
   const [currentPref, setCurrentPref] = useAtom(readerPreferencesAtom);
-  console.log(currentPref);
   const defPrefs = defaultPreferences;
+
+  const handleFontSizeChange = useCallback(
+    (val: number) => {
+      setCurrentPref((prev) => ({
+        ...prev,
+        fontSize: val,
+      }));
+    },
+    [setCurrentPref],
+  );
 
   return (
     <div className="fixed bottom-18 right-4 z-50">
@@ -26,7 +37,9 @@ export const ReaderSettings = () => {
         <PopoverContent>
           <div className="flex flex-col gap-2">
             <div className="grid grid-cols-12 gap-2 h-full">
-              <div className="col-span-8">FONT SIZE</div>
+              <div className="col-span-8">
+                <FontSizeToggler onChange={handleFontSizeChange} />
+              </div>
               <div className="col-span-4">MODE</div>
             </div>
             <div className="grid grid-cols-2 gap-1 border-r-amber-400">
