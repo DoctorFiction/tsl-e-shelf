@@ -1,13 +1,13 @@
-// components/FontSizeToggler.tsx
 "use client";
 
+import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { readerPreferencesAtom } from "@/atoms/reader-preferences";
 
 const FONT_SIZE_MIN = 12;
-const FONT_SIZE_MAX = 36;
+const FONT_SIZE_MAX = 38;
 const FONT_SIZE_STEP = 2;
-
 const INDICATOR_COUNT = (FONT_SIZE_MAX - FONT_SIZE_MIN) / FONT_SIZE_STEP + 1;
 
 export function FontSizeToggler({
@@ -15,13 +15,23 @@ export function FontSizeToggler({
 }: {
   onChange?: (value: number) => void;
 }) {
-  const [fontSize, setFontSize] = useState(20);
+  const [readerPrefs, setReaderPrefs] = useAtom(readerPreferencesAtom);
+  const [fontSize, setFontSize] = useState(readerPrefs.fontSize ?? 20);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
+    setFontSize(readerPrefs.fontSize ?? 20);
+  }, [readerPrefs.fontSize]);
+
+  useEffect(() => {
     if (!touched) return;
+
     onChange?.(fontSize);
-  }, [fontSize, touched, onChange]);
+    setReaderPrefs((prev) => ({
+      ...prev,
+      fontSize,
+    }));
+  }, [fontSize, touched, onChange, setReaderPrefs]);
 
   const increase = () => {
     setTouched(true);
@@ -37,7 +47,8 @@ export function FontSizeToggler({
     Math.floor((fontSize - FONT_SIZE_MIN) / FONT_SIZE_STEP);
 
   return (
-    <div>
+    <div className="flex flex-col gap-1">
+      {/* Toggle Buttons */}
       <div className="flex w-full items-center border rounded-md overflow-hidden">
         <ToggleGroup type="single" className="flex w-full">
           <ToggleGroupItem
@@ -45,7 +56,7 @@ export function FontSizeToggler({
             className="flex-1 rounded-none"
             onClick={decrease}
           >
-            A−
+            <span className="text-sm font-serif">A</span>
           </ToggleGroupItem>
           <div className="w-px bg-border h-6" />
           <ToggleGroupItem
@@ -53,13 +64,20 @@ export function FontSizeToggler({
             className="flex-1 rounded-none"
             onClick={increase}
           >
-            A+
+            <span className="text-xl font-serif">A</span>
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
 
-      {touched && (
-        <div className="flex items-center justify-center gap-1 mt-1">
+      {/* Indicator Row (animated) */}
+      <div className="h-4 mt-1">
+        <div
+          className={`flex items-center justify-center gap-1 transition-all duration-300 ease-in-out transform ${
+            touched
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
           {Array.from({ length: INDICATOR_COUNT }).map((_, idx) => (
             <div
               key={idx}
@@ -69,7 +87,7 @@ export function FontSizeToggler({
             />
           ))}
         </div>
-      )}
+      </div>
     </div>
   );
 }

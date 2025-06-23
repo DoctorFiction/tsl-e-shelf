@@ -1,8 +1,10 @@
 "use client";
 
 import {
-  defaultPreferences,
+  readerThemeNameAtom,
   readerPreferencesAtom,
+  THEME_PRESETS,
+  IReaderPreferenceConfig,
 } from "@/atoms/reader-preferences";
 import { useAtom } from "jotai";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -11,20 +13,30 @@ import { CaseSensitive } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
 import { useCallback } from "react";
 import { ModeToggle } from "./mode-toggle";
+import clsx from "clsx";
 
 export const ReaderSettings = () => {
-  const [currentPref, setCurrentPref] = useAtom(readerPreferencesAtom);
-  const defPrefs = defaultPreferences;
+  const [themeName, setThemeName] = useAtom(readerThemeNameAtom);
+  const [, setReaderPrefs] = useAtom(readerPreferencesAtom);
 
   const handleFontSizeChange = useCallback(
     (val: number) => {
-      setCurrentPref((prev) => ({
+      setReaderPrefs((prev) => ({
         ...prev,
         fontSize: val,
       }));
     },
-    [setCurrentPref],
+    [setReaderPrefs],
   );
+
+  const handleThemeSelect = (newThemeName: keyof typeof THEME_PRESETS) => {
+    const newTheme: IReaderPreferenceConfig = THEME_PRESETS[newThemeName];
+    setThemeName(newThemeName);
+    setReaderPrefs((prev) => ({
+      ...newTheme,
+      fontSize: prev.fontSize, // preserve user's current font size
+    }));
+  };
 
   return (
     <div className="fixed bottom-18 right-4 z-50">
@@ -35,9 +47,10 @@ export const ReaderSettings = () => {
             Theme Settings
           </Button>
         </PopoverTrigger>
-        <PopoverContent>
-          <div className="flex flex-col gap-2">
-            <div className="grid grid-cols-12 gap-2 h-full">
+        <PopoverContent className="w-[300px]">
+          <div className="flex flex-col ">
+            {/* Font Size & Mode */}
+            <div className="grid grid-cols-12 gap-2 items-start">
               <div className="col-span-8">
                 <FontSizeToggler onChange={handleFontSizeChange} />
               </div>
@@ -45,57 +58,37 @@ export const ReaderSettings = () => {
                 <ModeToggle />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-1 border-r-amber-400">
-              {defPrefs.map((pref) => (
+
+            {/* Theme Presets */}
+            <div className="grid grid-cols-3 gap-2">
+              {Object.entries(THEME_PRESETS).map(([name, config]) => (
                 <div
-                  key={pref.title}
-                  className="text-center border-2 border-solid rounded-md cursor-pointer"
-                  onClick={() => setCurrentPref(pref.config)}
+                  key={name}
+                  className={clsx(
+                    "text-center border-2 rounded-md cursor-pointer p-1",
+                    themeName === name
+                      ? "border-primary"
+                      : "border-transparent hover:border-muted",
+                  )}
+                  onClick={() =>
+                    handleThemeSelect(name as keyof typeof THEME_PRESETS)
+                  }
                 >
-                  <p>{pref.title}</p>
-                  <p style={{ fontFamily: pref.config.fontFamily }}>Aa</p>
+                  <p className="text-sm">{name}</p>
+                  <p
+                    className="text-lg"
+                    style={{ fontFamily: config.fontFamily }}
+                  >
+                    Aa
+                  </p>
                 </div>
               ))}
             </div>
-            <div className="text-center">
-              <p>Customize</p>
+
+            <div className="text-center text-muted-foreground text-sm">
+              Customize (coming soon)
             </div>
           </div>
-          {/* THIS WILL MOVE TO CUSTOMIZE PREFERENCE LATER */}
-          {/* <div className="flex flex-col gap-1"> */}
-          {/*   <label className="block"> */}
-          {/*     Font Size:{" "} */}
-          {/*     <input */}
-          {/*       type="number" */}
-          {/*       value={currentPref.fontSize} */}
-          {/*       onChange={(e) => */}
-          {/*         setCurrentPref({ */}
-          {/*           ...currentPref, */}
-          {/*           fontSize: parseInt(e.target.value), */}
-          {/*         }) */}
-          {/*       } */}
-          {/*     /> */}
-          {/*   </label> */}
-          {/**/}
-          {/*   <label className="block"> */}
-          {/*     Font Family:{" "} */}
-          {/*     <select */}
-          {/*       value={currentPref.fontFamily} */}
-          {/*       onChange={(e) => */}
-          {/*         setCurrentPref({ */}
-          {/*           ...currentPref, */}
-          {/*           fontFamily: e.target.value, */}
-          {/*         }) */}
-          {/*       } */}
-          {/*     > */}
-          {/*       <option value="Georgia, 'Times New Roman', serif"> */}
-          {/*         Georgia */}
-          {/*       </option> */}
-          {/*       <option value="'Helvetica Neue', sans-serif">Helvetica</option> */}
-          {/*       <option value="'Courier New', monospace">Courier</option> */}
-          {/*     </select> */}
-          {/*   </label> */}
-          {/* </div> */}
         </PopoverContent>
       </Popover>
     </div>
