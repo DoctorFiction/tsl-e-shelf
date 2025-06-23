@@ -37,7 +37,7 @@ export function FontSizeToggler({
     Math.floor((fontSize - FONT_SIZE_MIN) / FONT_SIZE_STEP);
 
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex w-full items-center border rounded-md overflow-hidden">
         <ToggleGroup type="single" className="flex w-full">
           <ToggleGroupItem

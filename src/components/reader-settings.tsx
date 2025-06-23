@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { CaseSensitive } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
 import { useCallback } from "react";
+import { ModeToggle } from "./mode-toggle";
 
 export const ReaderSettings = () => {
   const [currentPref, setCurrentPref] = useAtom(readerPreferencesAtom);
@@ -40,9 +41,11 @@ export const ReaderSettings = () => {
               <div className="col-span-8">
                 <FontSizeToggler onChange={handleFontSizeChange} />
               </div>
-              <div className="col-span-4">MODE</div>
+              <div className="col-span-4">
+                <ModeToggle />
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-1 border-r-amber-400">
+            <div className="grid grid-cols-3 gap-1 border-r-amber-400">
               {defPrefs.map((pref) => (
                 <div
                   key={pref.title}
