@@ -9,20 +9,12 @@ import {
 import { useAtom } from "jotai";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import { CaseSensitive, Cog, Type } from "lucide-react";
+import { CaseSensitive, Cog } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
 import { useCallback, useState } from "react";
 import clsx from "clsx";
 import { useTheme } from "next-themes";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+import { ReaderSettingsCustomization } from "./reader-settings-customization";
 
 export const ReaderSettings = () => {
   const [showPreferences, setShowPreferences] = useState(false);
@@ -135,32 +127,7 @@ export const ReaderSettings = () => {
                 <Cog />
                 More customizations
               </Button>
-
-              <div
-                className={`
-    mt-1 flex flex-col items-center justify-center gap-1 overflow-hidden
-    transition-all duration-300 ease-in-out
-    ${showPreferences ? "opacity-100 max-h-20" : "opacity-0 max-h-0"}
-  `}
-                aria-hidden={!showPreferences}
-              >
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <Type />
-                    <SelectValue placeholder="Select font" />
-                  </SelectTrigger>
-                  <SelectContent className="w-full">
-                    <SelectGroup>
-                      <SelectLabel>Fonts</SelectLabel>
-                      <SelectItem value="apple">Apple</SelectItem>
-                      <SelectItem value="banana">Banana</SelectItem>
-                      <SelectItem value="blueberry">Blueberry</SelectItem>
-                      <SelectItem value="grapes">Grapes</SelectItem>
-                      <SelectItem value="pineapple">Pineapple</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
+              <ReaderSettingsCustomization show={showPreferences} />
             </div>
           </div>
         </PopoverContent>

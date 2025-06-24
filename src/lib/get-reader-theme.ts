@@ -1,8 +1,11 @@
-import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
+import {
+  IReaderOverrides,
+  IReaderPreferenceConfig,
+} from "@/atoms/reader-preferences";
 
 export const getReaderTheme = (
   isDark: boolean, // no longer needed since we use theme config
-  preferences: IReaderPreferenceConfig,
+  preferences: IReaderPreferenceConfig & IReaderOverrides,
 ) => {
   const {
     backgroundColor,
@@ -11,6 +14,11 @@ export const getReaderTheme = (
     fontFamily,
     fontSize,
     lineHeight,
+    isBold,
+    characterSpacing,
+    wordSpacing,
+    margin,
+    columns,
   } = preferences;
 
   return {
@@ -22,7 +30,12 @@ export const getReaderTheme = (
       "line-height": lineHeight,
       "text-align": textAlign ?? "left",
       padding: "1.5rem 1rem",
-      transition: "transition: 0.2s;",
+      fontWeight: isBold ? "bold" : "normal",
+      letterSpacing: characterSpacing ? `${characterSpacing}px` : undefined,
+      wordSpacing: wordSpacing ? `${wordSpacing}px` : undefined,
+      columnCount: columns ?? 1,
+      columnGap: columns ? "2rem" : undefined,
+      margin: margin ? `${margin}px` : undefined,
     },
 
     // Headings

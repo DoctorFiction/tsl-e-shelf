@@ -18,6 +18,18 @@ export interface IReaderPreferenceConfig {
   textColor: { light: string; dark: string };
 }
 
+export interface IReaderOverrides {
+  fontSize?: number;
+  fontFamily?: string;
+  lineHeight?: number;
+  isBold?: boolean;
+  characterSpacing?: number;
+  wordSpacing?: number;
+  margin?: number;
+  columns?: number;
+  textAlign?: string;
+}
+
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
   Original: {
     fontSize: 17,
@@ -121,4 +133,9 @@ export const readerThemeNameAtom = atomWithStorage<ReaderThemeName>(
 export const readerPreferencesAtom = atomWithStorage<IReaderPreferenceConfig>(
   "reader-preferences",
   THEME_PRESETS[defaultThemeName],
+);
+
+export const readerOverridesAtom = atomWithStorage<IReaderOverrides>(
+  "reader-overrides",
+  {},
 );
