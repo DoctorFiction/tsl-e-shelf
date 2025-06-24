@@ -26,16 +26,22 @@ export const getReaderTheme = (
       background: isDark ? backgroundColor.dark : backgroundColor.light,
       color: isDark ? textColor?.dark : textColor.light,
       "font-family": fontFamily,
-      "font-size": `${fontSize}px`,
-      "line-height": lineHeight,
+      "font-size": `${Number(fontSize) || 16}px`, // Ensure number conversion
+      "line-height": Number(lineHeight) || 1.5, // Ensure number conversion
       "text-align": textAlign ?? "left",
-      padding: "1.5rem 1rem",
+      // padding: "1.5rem 1rem",
       fontWeight: isBold ? "bold" : "normal",
-      letterSpacing: characterSpacing ? `${characterSpacing}px` : undefined,
-      wordSpacing: wordSpacing ? `${wordSpacing}px` : undefined,
-      columnCount: columns ?? 1,
-      columnGap: columns ? "2rem" : undefined,
-      margin: margin ? `${margin}px` : undefined,
+      "letter-spacing": characterSpacing
+        ? `${Number(characterSpacing)}px`
+        : undefined,
+      "word-spacing": wordSpacing ? `${Number(wordSpacing)}px` : undefined,
+      columnCount: columns
+        ? typeof columns === "string"
+          ? parseInt(columns)
+          : Number(columns)
+        : 1,
+      columnGap: columns && Number(columns) > 1 ? "2rem" : undefined,
+      padding: margin ? `${Number(margin)}px` : undefined,
     },
 
     // Headings

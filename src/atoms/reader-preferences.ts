@@ -26,7 +26,7 @@ export interface IReaderOverrides {
   characterSpacing?: number;
   wordSpacing?: number;
   margin?: number;
-  columns?: number;
+  columns?: string; // Change this from number to string
   textAlign?: string;
 }
 

@@ -14,7 +14,7 @@ import { FontSizeToggler } from "./font-size-toggler";
 import { useCallback, useState } from "react";
 import clsx from "clsx";
 import { useTheme } from "next-themes";
-import { ReaderSettingsCustomization } from "./reader-settings-customization";
+import { ReaderSettingsCustom } from "./reader-settings-custom";
 
 export const ReaderSettings = () => {
   const [showPreferences, setShowPreferences] = useState(false);
@@ -127,7 +127,7 @@ export const ReaderSettings = () => {
                 <Cog />
                 More customizations
               </Button>
-              <ReaderSettingsCustomization show={showPreferences} />
+              <ReaderSettingsCustom show={showPreferences} />
             </div>
           </div>
         </PopoverContent>
