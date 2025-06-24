@@ -123,6 +123,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
   },
 };
 
+const defaultOverrides: IReaderOverrides = {
+  characterSpacing: 1,
+  wordSpacing: 1,
+  isBold: false,
+};
+
 export const defaultThemeName: ReaderThemeName = "Original";
 
 export const readerThemeNameAtom = atomWithStorage<ReaderThemeName>(
@@ -137,5 +143,5 @@ export const readerPreferencesAtom = atomWithStorage<IReaderPreferenceConfig>(
 
 export const readerOverridesAtom = atomWithStorage<IReaderOverrides>(
   "reader-overrides",
-  {},
+  defaultOverrides,
 );

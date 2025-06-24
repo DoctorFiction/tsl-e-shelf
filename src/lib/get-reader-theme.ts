@@ -20,6 +20,7 @@ export const getReaderTheme = (
     margin,
     columns,
   } = preferences;
+  console.log("prefs", preferences);
 
   return {
     body: {
@@ -29,7 +30,7 @@ export const getReaderTheme = (
       "font-size": `${Number(fontSize) || 16}px`, // Ensure number conversion
       "line-height": Number(lineHeight) || 1.5, // Ensure number conversion
       "text-align": textAlign ?? "left",
-      // padding: "1.5rem 1rem",
+      padding: "1.5rem 1rem",
       fontWeight: isBold ? "bold" : "normal",
       "letter-spacing": characterSpacing
         ? `${Number(characterSpacing)}px`
@@ -41,7 +42,7 @@ export const getReaderTheme = (
           : Number(columns)
         : 1,
       columnGap: columns && Number(columns) > 1 ? "2rem" : undefined,
-      padding: margin ? `${Number(margin)}px` : undefined,
+      margin: margin ? `${margin}px` : undefined,
     },
 
     // Headings

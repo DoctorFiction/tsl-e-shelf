@@ -217,7 +217,7 @@ export const ReaderSettingsCustom = ({ show }: MoreReaderSettingsProps) => {
         <ReaderStyleSlider
           label="Line Spacing"
           field="lineHeight"
-          min={1.25}
+          min={1}
           max={2.5}
           step={0.05}
           formatValue={(val) => val.toFixed(2)}
