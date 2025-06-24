@@ -9,13 +9,23 @@ import {
 import { useAtom } from "jotai";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import { CaseSensitive } from "lucide-react";
+import { CaseSensitive, Cog, Type } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import clsx from "clsx";
 import { useTheme } from "next-themes";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 export const ReaderSettings = () => {
+  const [showPreferences, setShowPreferences] = useState(false);
   const [themeName, setThemeName] = useAtom(readerThemeNameAtom);
   const [, setReaderPrefs] = useAtom(readerPreferencesAtom);
   const { theme } = useTheme();
@@ -56,7 +66,7 @@ export const ReaderSettings = () => {
               <FontSizeToggler onChange={handleFontSizeChange} />
             </div>
 
-            <div className="h-px bg-muted" />
+            <div className="h-px bg-muted mb-4" />
 
             {/* Theme Picker */}
             <div className="space-y-2">
@@ -114,8 +124,43 @@ export const ReaderSettings = () => {
               </div>
             </div>
 
-            <div className="text-center text-muted-foreground text-xs pt-2 italic">
-              More customizations coming soon
+            <div className="h-px bg-muted my-4" />
+
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="outline"
+                className="gap-1"
+                onClick={() => setShowPreferences(!showPreferences)}
+              >
+                <Cog />
+                More customizations
+              </Button>
+
+              <div
+                className={`
+    mt-1 flex flex-col items-center justify-center gap-1 overflow-hidden
+    transition-all duration-300 ease-in-out
+    ${showPreferences ? "opacity-100 max-h-20" : "opacity-0 max-h-0"}
+  `}
+                aria-hidden={!showPreferences}
+              >
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <Type />
+                    <SelectValue placeholder="Select font" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full">
+                    <SelectGroup>
+                      <SelectLabel>Fonts</SelectLabel>
+                      <SelectItem value="apple">Apple</SelectItem>
+                      <SelectItem value="banana">Banana</SelectItem>
+                      <SelectItem value="blueberry">Blueberry</SelectItem>
+                      <SelectItem value="grapes">Grapes</SelectItem>
+                      <SelectItem value="pineapple">Pineapple</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </PopoverContent>
