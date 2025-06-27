@@ -437,8 +437,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       allowScriptedContent: true,
     });
 
-    console.log("prefs", prefs);
-    console.log("overrides", overrides);
     const themeObject = getReaderTheme(isDark, { ...prefs, ...overrides });
     rendition.hooks.content.register(() => {
       if (rendition?.themes) {

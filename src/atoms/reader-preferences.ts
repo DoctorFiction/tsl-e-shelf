@@ -124,6 +124,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
 };
 
 const defaultOverrides: IReaderOverrides = {
+  lineHeight: 1.25,
   characterSpacing: 1,
   wordSpacing: 1,
   isBold: false,

@@ -20,7 +20,6 @@ export const getReaderTheme = (
     margin,
     columns,
   } = preferences;
-  console.log("prefs", preferences);
 
   return {
     body: {
@@ -31,7 +30,7 @@ export const getReaderTheme = (
       "line-height": Number(lineHeight) || 1.5, // Ensure number conversion
       "text-align": textAlign ?? "left",
       padding: "1.5rem 1rem",
-      fontWeight: isBold ? "bold" : "normal",
+      "font-weight": isBold ? "bold" : "normal",
       "letter-spacing": characterSpacing
         ? `${Number(characterSpacing)}px`
         : undefined,
