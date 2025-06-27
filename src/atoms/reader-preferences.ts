@@ -128,6 +128,8 @@ const defaultOverrides: IReaderOverrides = {
   characterSpacing: 1,
   wordSpacing: 1,
   isBold: false,
+  columns: "2",
+  textAlign: "justify",
 };
 
 export const defaultThemeName: ReaderThemeName = "Original";

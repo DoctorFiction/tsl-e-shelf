@@ -34,6 +34,7 @@ interface ReaderStyleSliderProps {
   min: number;
   max: number;
   step?: number;
+  delay?: number;
   formatValue?: (val: number) => string;
 }
 
@@ -61,6 +62,7 @@ export const ReaderStyleSlider = ({
   min,
   max,
   step = 1,
+  delay = 52,
   formatValue,
 }: ReaderStyleSliderProps) => {
   const [overrides, setOverrides] = useAtom(readerOverridesAtom);
@@ -68,7 +70,7 @@ export const ReaderStyleSlider = ({
 
   // UI WILL BE CHANGED OPTIMIC
   const [tempValue, setTempValue] = useState<number>(currentValue);
-  const debouncedValue = useDebounce(tempValue, 52);
+  const debouncedValue = useDebounce(tempValue, delay);
 
   useEffect(() => {
     if (debouncedValue !== currentValue) {
@@ -245,8 +247,9 @@ export const ReaderSettingsCustom = ({ show }: MoreReaderSettingsProps) => {
           label="Margin"
           field="margin"
           min={0}
-          max={5}
-          step={0.1}
+          max={250}
+          step={1}
+          delay={250}
           formatValue={(val) => `${val.toFixed(1)}px`}
         />
 
