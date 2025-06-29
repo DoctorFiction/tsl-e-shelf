@@ -35,6 +35,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -228,6 +229,9 @@ export const ReaderSettingsCustom = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
+  const [open, setOpen] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+
   const [prefs] = useAtom(readerPreferencesAtom);
   const [overrides, setOverrides] = useAtom(readerOverridesAtom);
   const [pendingOverrides, setPendingOverrides] = useAtom(
@@ -236,14 +240,19 @@ export const ReaderSettingsCustom = () => {
 
   const handleSave = () => {
     setOverrides(pendingOverrides);
-    setDialogOpen(false);
+    setOpen(false);
+  };
+
+  const handleCancel = () => {
+    setPendingOverrides(overrides);
+    setOpen(false);
   };
 
   const handleReset = () => {
     setPendingOverrides(defaultOverrides);
     setOverrides(defaultOverrides);
     setResetDialogOpen(false);
-    setDialogOpen(false);
+    setOpen(false);
   };
 
   useEffect(() => {
@@ -268,11 +277,14 @@ export const ReaderSettingsCustom = () => {
     [prefs, pendingOverrides, isDark],
   );
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const isCustomized = useMemo(() => {
+    return Object.entries(defaultOverrides).some(([key, val]) => {
+      return overrides[key as keyof typeof overrides] !== val;
+    });
+  }, [overrides]);
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-1">
           <Cog />
@@ -302,7 +314,10 @@ export const ReaderSettingsCustom = () => {
             the poor little thing sat down and cried.”
           </p>
         </div>
-        <div className="flex flex-col gap-4">
+        <div
+          key={JSON.stringify(pendingOverrides)}
+          className="flex flex-col gap-4"
+        >
           <ReaderStyleSelect
             label="Font Family"
             field="fontFamily"
@@ -370,26 +385,43 @@ export const ReaderSettingsCustom = () => {
             description="Make text bold for better readability"
           />
         </div>
-        <div className="flex justify-end gap-2 pt-4">
-          <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="secondary">Reset</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  Are you sure you want to reset all styles?
-                </AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>
-                  Yes, Reset
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-          <Button onClick={handleSave}>Save</Button>
+        <div className="flex justify-between items-center pt-4">
+          {/* Reset Button on the left if customized */}
+          {isCustomized ? (
+            <AlertDialog
+              open={resetDialogOpen}
+              onOpenChange={setResetDialogOpen}
+            >
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Reset</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset customizations?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove all your custom styles and revert to the
+                    theme defaults.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleReset}>
+                    Yes, Reset
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <div /> // empty placeholder to keep spacing
+          )}
+
+          {/* Cancel + Save Buttons */}
+          <div className="flex gap-2">
+            <Button variant="ghost" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave}>Save</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
