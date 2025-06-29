@@ -389,14 +389,15 @@ export const ReaderSettingsCustom = () => {
             formatValue={(val) => `${val.toFixed(1)}px`}
           />
 
-          <ReaderStyleSlider
-            label="Margin"
-            field="margin"
-            min={0}
-            max={250}
-            step={1}
-            formatValue={(val) => `${val.toFixed(1)}px`}
-          />
+          {/* TODO: ADD BACK WHEN MARGIN BUG IS SOLVED */}
+          {/* <ReaderStyleSlider */}
+          {/*   label="Margin" */}
+          {/*   field="margin" */}
+          {/*   min={0} */}
+          {/*   max={250} */}
+          {/*   step={1} */}
+          {/*   formatValue={(val) => `${val.toFixed(1)}px`} */}
+          {/* /> */}
 
           <ReaderStyleSelect
             label="Columns"
