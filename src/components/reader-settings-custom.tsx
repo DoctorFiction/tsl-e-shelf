@@ -15,6 +15,7 @@ import { useAtom } from "jotai";
 import { Slider } from "@/components/ui/slider";
 import {
   defaultOverrides,
+  IReaderOverrides,
   pendingReaderOverridesAtom,
   readerOverridesAtom,
   readerPreferencesAtom,
@@ -296,10 +297,15 @@ export const ReaderSettingsCustom = () => {
   }, [overrides]);
 
   const hasChanges = useMemo(() => {
-    return Object.entries(defaultOverrides).some(([key, val]) => {
-      return pendingOverrides[key as keyof typeof pendingOverrides] !== val;
+    const mergedCurrent: IReaderOverrides = {
+      ...prefs,
+      ...overrides,
+    };
+
+    return Object.entries(pendingOverrides).some(([key, val]) => {
+      return mergedCurrent[key as keyof IReaderOverrides] !== val;
     });
-  }, [pendingOverrides]);
+  }, [pendingOverrides, prefs, overrides]);
 
   return (
     <Dialog
