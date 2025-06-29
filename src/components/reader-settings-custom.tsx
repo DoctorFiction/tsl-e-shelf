@@ -256,8 +256,19 @@ export const ReaderSettingsCustom = () => {
   };
 
   useEffect(() => {
-    setPendingOverrides(overrides);
-  }, [overrides, setPendingOverrides]);
+    // Use overrides if customized, otherwise fall back to current theme prefs
+    const initial = {
+      fontFamily: prefs.fontFamily,
+      fontSize: prefs.fontSize,
+      lineHeight: prefs.lineHeight,
+      textAlign: prefs.textAlign,
+    };
+
+    setPendingOverrides((prev) => ({
+      ...initial,
+      ...prev, // preserve any open changes
+    }));
+  }, [overrides, prefs, setPendingOverrides, open]);
 
   const previewStyle = useMemo<CSSProperties>(() => {
     return {

@@ -24,10 +24,7 @@ export const ReaderSettings = () => {
   const handleThemeSelect = (newThemeName: keyof typeof THEME_PRESETS) => {
     const newTheme: IReaderPreferenceConfig = THEME_PRESETS[newThemeName];
     setThemeName(newThemeName);
-    setReaderPrefs((prev) => ({
-      ...newTheme,
-      fontSize: prev.fontSize,
-    }));
+    setReaderPrefs(newTheme);
   };
 
   return (

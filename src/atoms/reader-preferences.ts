@@ -125,17 +125,16 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
   },
 };
 
+export const defaultThemeName: ReaderThemeName = "Original";
+
 export const defaultOverrides: IReaderOverrides = {
-  fontFamily: THEME_PRESETS.Original.fontFamily,
-  lineHeight: THEME_PRESETS.Original.lineHeight,
+  fontSize: 17,
   characterSpacing: 1,
   wordSpacing: "1",
   isBold: false,
   columnCount: 2,
   textAlign: "justify",
 };
-
-export const defaultThemeName: ReaderThemeName = "Original";
 
 export const readerThemeNameAtom = atomWithStorage<ReaderThemeName>(
   "reader-theme-name",
