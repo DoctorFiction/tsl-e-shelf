@@ -10,6 +10,6 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: "Kitaplar",
-    href: "/books",
+    href: "/books/local",
   },
 ];
