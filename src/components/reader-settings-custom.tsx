@@ -10,7 +10,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Cog, Type } from "lucide-react";
+import { Asterisk, Cog, Type } from "lucide-react";
 import { useAtom } from "jotai";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -298,14 +298,17 @@ export const ReaderSettingsCustom = () => {
       }}
     >
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="gap-1"
-          onClick={() => setOpen(true)}
-        >
-          <Cog />
-          More customizations
-        </Button>
+        <div className="flex flex-row gap-1 items-center">
+          <Button
+            variant="outline"
+            className="gap-1 grow"
+            onClick={() => setOpen(true)}
+          >
+            <Cog />
+            More customizations
+          </Button>
+          {isCustomized ? <Asterisk className="flex-none" /> : ""}
+        </div>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
