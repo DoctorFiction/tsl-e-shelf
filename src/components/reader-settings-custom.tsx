@@ -336,18 +336,17 @@ export const ReaderSettingsCustom = () => {
             </div>
           </DialogTitle>
         </DialogHeader>
-        <div
-          style={previewStyle}
-          className="relative rounded-md p-4 border bg-background h-40 overflow-hidden"
-        >
-          <p className="text-sm leading-relaxed">
-            “After a while, finding that nothing more happened, she decided on
-            going into the garden at once; but, alas for poor Alice! when she
-            got to the door, she found she had forgotten the little golden key
-            [...]” &nbsp; “It was too slippery; and when she had tired herself
-            out with trying, the poor little thing sat down and cried.” &nbsp;
-            “But it was no use. She soon found she was not the right size and
-            had no more magic mushrooms to help her.”
+        <div className="relative rounded-md p-4 border bg-background h-40 overflow-hidden">
+          <p style={previewStyle} className="text-sm leading-relaxed">
+            Alice was beginning to get very tired of sitting by her sister on
+            the bank, and of having nothing to do: once or twice she had peeped
+            into the book her sister was reading, but it had no pictures or
+            conversations in it, “and what is the use of a book,” thought Alice
+            “without pictures or conversations?” So she was considering in her
+            own mind (as well as she could, for the hot day made her feel very
+            sleepy and stupid), whether the pleasure of making a daisy-chain
+            would be worth the trouble of getting up and picking the daisies,
+            when suddenly a White Rabbit with pink eyes ran close by her.
           </p>
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
         </div>
