@@ -11,7 +11,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { CaseSensitive } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
-import { useCallback } from "react";
 import clsx from "clsx";
 import { useTheme } from "next-themes";
 import { ReaderSettingsCustom } from "./reader-settings-custom";
@@ -21,16 +20,6 @@ export const ReaderSettings = () => {
   const [, setReaderPrefs] = useAtom(readerPreferencesAtom);
   const { theme } = useTheme();
   const isDark = theme === "dark";
-
-  const handleFontSizeChange = useCallback(
-    (val: number) => {
-      setReaderPrefs((prev) => ({
-        ...prev,
-        fontSize: val,
-      }));
-    },
-    [setReaderPrefs],
-  );
 
   const handleThemeSelect = (newThemeName: keyof typeof THEME_PRESETS) => {
     const newTheme: IReaderPreferenceConfig = THEME_PRESETS[newThemeName];
@@ -54,7 +43,7 @@ export const ReaderSettings = () => {
           <div className="flex flex-col gap-1">
             {/* Font Size + Mode */}
             <div className="flex-1">
-              <FontSizeToggler onChange={handleFontSizeChange} />
+              <FontSizeToggler />
             </div>
 
             <div className="h-px bg-muted mb-4" />
