@@ -283,10 +283,26 @@ export const ReaderSettingsCustom = () => {
     });
   }, [overrides]);
 
+  const hasChanges = useMemo(() => {
+    return Object.entries(defaultOverrides).some(([key, val]) => {
+      return pendingOverrides[key as keyof typeof pendingOverrides] !== val;
+    });
+  }, [pendingOverrides]);
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleCancel();
+        setOpen(isOpen);
+      }}
+    >
       <DialogTrigger asChild>
-        <Button variant="outline" className="gap-1">
+        <Button
+          variant="outline"
+          className="gap-1"
+          onClick={() => setOpen(true)}
+        >
           <Cog />
           More customizations
         </Button>
@@ -387,40 +403,37 @@ export const ReaderSettingsCustom = () => {
         </div>
         <div className="flex justify-between items-center pt-4">
           {/* Reset Button on the left if customized */}
-          {isCustomized ? (
-            <AlertDialog
-              open={resetDialogOpen}
-              onOpenChange={setResetDialogOpen}
-            >
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Reset</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Reset customizations?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will remove all your custom styles and revert to the
-                    theme defaults.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleReset}>
-                    Yes, Reset
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            <div /> // empty placeholder to keep spacing
-          )}
+          <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={!isCustomized}>
+                Reset
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Reset customizations?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will remove all your custom styles and revert to the
+                  theme defaults.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReset}>
+                  Yes, Reset
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Cancel + Save Buttons */}
           <div className="flex gap-2">
             <Button variant="ghost" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave} disabled={!hasChanges}>
+              Save
+            </Button>
           </div>
         </div>
       </DialogContent>
