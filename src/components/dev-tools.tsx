@@ -92,7 +92,8 @@ export function DevTools() {
     if (removeAllMode) {
       Object.entries(localStorage).forEach(([key]) => {
         const isEpubKey = key.includes("epub");
-        if (isEpubKey) {
+        const isReaderKey = key.includes("reader");
+        if (isEpubKey || isReaderKey) {
           clearKey(key);
           console.log(
             `✅ Cleared all reader-related localStorage for all books.`,

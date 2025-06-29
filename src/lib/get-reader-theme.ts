@@ -1,8 +1,11 @@
-import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
+import {
+  IReaderOverrides,
+  IReaderPreferenceConfig,
+} from "@/atoms/reader-preferences";
 
 export const getReaderTheme = (
   isDark: boolean, // no longer needed since we use theme config
-  preferences: IReaderPreferenceConfig,
+  preferences: IReaderPreferenceConfig & IReaderOverrides,
 ) => {
   const {
     backgroundColor,
@@ -11,6 +14,11 @@ export const getReaderTheme = (
     fontFamily,
     fontSize,
     lineHeight,
+    isBold,
+    characterSpacing,
+    wordSpacing,
+    margin,
+    columnCount,
   } = preferences;
 
   return {
@@ -18,11 +26,24 @@ export const getReaderTheme = (
       background: isDark ? backgroundColor.dark : backgroundColor.light,
       color: isDark ? textColor?.dark : textColor.light,
       "font-family": fontFamily,
-      "font-size": `${fontSize}px`,
-      "line-height": lineHeight,
+      "font-size": `${Number(fontSize) || 16}px`, // Ensure number conversion
+      "line-height": Number(lineHeight) || 1.5, // Ensure number conversion
       "text-align": textAlign ?? "left",
-      padding: "1.5rem 1rem",
-      transition: "transition: 0.2s;",
+      // padding: "1.5rem 1rem",
+      "padding-left": `${margin}px !important`,
+      "padding-right": `${margin}px !important`,
+      "font-weight": isBold ? "bold" : "normal",
+      "letter-spacing": characterSpacing
+        ? `${Number(characterSpacing)}px`
+        : undefined,
+      "word-spacing": wordSpacing ? `${Number(wordSpacing)}px` : undefined,
+      "column-count": columnCount
+        ? typeof columnCount === "string"
+          ? parseInt(columnCount)
+          : Number(columnCount)
+        : 1,
+      "column-gap": columnCount && Number(columnCount) > 1 ? "2rem" : undefined,
+      margin: margin ? `${margin}px` : undefined,
     },
 
     // Headings
