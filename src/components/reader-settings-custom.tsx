@@ -20,7 +20,6 @@ import {
   readerPreferencesAtom,
 } from "@/atoms/reader-preferences";
 import { useState, useEffect, CSSProperties, useMemo } from "react";
-import useDebounce from "@/hooks/use-debounce";
 import {
   Dialog,
   DialogContent,
@@ -59,7 +58,6 @@ interface ReaderStyleSliderProps {
   min: number;
   max: number;
   step?: number;
-  delay?: number;
   formatValue?: (val: number) => string;
 }
 
@@ -77,38 +75,34 @@ interface ReaderStyleSwitchProps {
   description?: string;
 }
 
-export const ReaderStyleSlider = ({
+const ReaderStyleSlider = ({
   label,
   field,
   min,
   max,
   step = 1,
-  delay = 52,
   formatValue,
 }: ReaderStyleSliderProps) => {
   const [pendingOverrides, setPendingOverrides] = useAtom(
     pendingReaderOverridesAtom,
   );
-  const currentValue = Number(pendingOverrides[field]) || min;
+  const atomValue = Number(pendingOverrides[field]) || min;
+  const [tempValue, setTempValue] = useState<number>(atomValue);
 
-  const [tempValue, setTempValue] = useState<number>(currentValue);
-  const debouncedValue = useDebounce(tempValue, delay);
-
+  // Sync local state when atom changes externally (e.g., cancel/reset)
   useEffect(() => {
-    if (debouncedValue !== currentValue) {
-      setPendingOverrides((prev) => ({
-        ...prev,
-        [field]: debouncedValue,
-      }));
-    }
-  }, [debouncedValue, field, setPendingOverrides, currentValue]);
+    setTempValue(atomValue);
+  }, [atomValue]);
 
-  useEffect(() => {
-    setTempValue(Number(currentValue));
-  }, [currentValue]);
+  const handleValueChange = (value: number[]) => {
+    setTempValue(value[0]);
+  };
 
-  const handleChange = (newVal: number[]) => {
-    setTempValue(newVal[0]);
+  const handleValueCommit = (value: number[]) => {
+    setPendingOverrides((prev) => ({
+      ...prev,
+      [field]: value[0],
+    }));
   };
 
   return (
@@ -122,7 +116,8 @@ export const ReaderStyleSlider = ({
         max={max}
         step={step}
         value={[tempValue]}
-        onValueChange={handleChange}
+        onValueChange={handleValueChange}
+        onValueCommit={handleValueCommit}
       />
     </div>
   );
@@ -138,7 +133,7 @@ export const ReaderStyleSelect = ({
   const [pendingOverrides, setPendingOverrides] = useAtom(
     pendingReaderOverridesAtom,
   );
-  const currentValue = pendingOverrides[field] as string;
+  const currentValue = pendingOverrides[field]?.toString() as string;
 
   const handleValueChange = (value: string) => {
     setPendingOverrides((prev) => ({
@@ -205,11 +200,16 @@ export const ReaderStyleSwitch = ({
 export const ReaderSettingsCustom = () => {
   const fontOptions = [
     { value: "system", label: "System Default" },
-    { value: "serif", label: "Serif" },
-    { value: "sans-serif", label: "Sans Serif" },
+    { value: "Georgia, 'Times New Roman', serif", label: "Georgia" },
+    { value: "Publico", label: "Publico" },
+    {
+      value: "Palatino Linotype, Book Antiqua, Palatino, serif",
+      label: "Palatino",
+    },
+    { value: "Arial Black, Gadget, sans-serif", label: "Arial Black" },
+    { value: "'Helvetica Neue', sans-serif", label: "Helvetica Neue" },
+    { value: "Proxima Nova, sans-serif", label: "Proxima Nova" },
     { value: "monospace", label: "Monospace" },
-    { value: "georgia", label: "Georgia" },
-    { value: "times", label: "Times New Roman" },
   ];
 
   const columnOptions = [
@@ -259,23 +259,24 @@ export const ReaderSettingsCustom = () => {
     setPendingOverrides(overrides);
   }, [overrides, setPendingOverrides]);
 
-  const previewStyle = useMemo<CSSProperties>(
-    () => ({
+  const previewStyle = useMemo<CSSProperties>(() => {
+    return {
       backgroundColor: isDark
         ? prefs.backgroundColor.dark
         : prefs.backgroundColor.light,
       color: isDark ? prefs.textColor.dark : prefs.textColor.light,
-      fontSize: prefs.fontSize,
-      fontFamily: prefs.fontFamily,
-      lineHeight: prefs.lineHeight,
-      columnCount: pendingOverrides.columnCount,
-      wordSpacing: pendingOverrides.wordSpacing,
+      fontSize: pendingOverrides.fontSize,
+      fontFamily: pendingOverrides.fontFamily,
+      lineHeight: pendingOverrides.lineHeight,
+      fontWeight: pendingOverrides.isBold ? "bold" : "normal",
+      letterSpacing: `${pendingOverrides.characterSpacing}px`,
+      wordSpacing: `${pendingOverrides.wordSpacing}px`,
       textAlign: pendingOverrides.textAlign,
+      columnCount: Number(pendingOverrides.columnCount) || 1,
       paddingLeft: `${pendingOverrides.margin}px`,
       paddingRight: `${pendingOverrides.margin}px`,
-    }),
-    [prefs, pendingOverrides, isDark],
-  );
+    };
+  }, [pendingOverrides, prefs.backgroundColor, prefs.textColor, isDark]);
 
   const isCustomized = useMemo(() => {
     return Object.entries(defaultOverrides).some(([key, val]) => {
@@ -320,18 +321,18 @@ export const ReaderSettingsCustom = () => {
         </DialogHeader>
         <div
           style={previewStyle}
-          className="rounded-md p-3 border bg-background"
+          className="relative rounded-md p-4 border bg-background h-40 overflow-hidden"
         >
-          <p>
+          <p className="text-sm leading-relaxed">
             “After a while, finding that nothing more happened, she decided on
             going into the garden at once; but, alas for poor Alice! when she
-            got to the door, she found she had forgotten the little golden key,
-            and when she went back to the table for it, she found she could not
-            possibly reach it: she could see it quite plainly through the glass,
-            and she tried her best to climb up one of the legs of the table, but
-            it was too slippery; and when she had tired herself out with trying,
-            the poor little thing sat down and cried.”
+            got to the door, she found she had forgotten the little golden key
+            [...]” &nbsp; “It was too slippery; and when she had tired herself
+            out with trying, the poor little thing sat down and cried.” &nbsp;
+            “But it was no use. She soon found she was not the right size and
+            had no more magic mushrooms to help her.”
           </p>
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
         </div>
         <div
           key={JSON.stringify(pendingOverrides)}
@@ -378,7 +379,6 @@ export const ReaderSettingsCustom = () => {
             min={0}
             max={250}
             step={1}
-            delay={250}
             formatValue={(val) => `${val.toFixed(1)}px`}
           />
 
