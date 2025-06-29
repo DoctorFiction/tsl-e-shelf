@@ -257,8 +257,7 @@ export const ReaderSettingsCustom = () => {
   };
 
   useEffect(() => {
-    // Use overrides if customized, otherwise fall back to current theme prefs
-    const initial = {
+    const initial: IReaderOverrides = {
       fontFamily: prefs.fontFamily,
       fontSize: prefs.fontSize,
       lineHeight: prefs.lineHeight,
@@ -267,6 +266,7 @@ export const ReaderSettingsCustom = () => {
 
     setPendingOverrides((prev) => ({
       ...initial,
+      ...defaultOverrides,
       ...prev, // preserve any open changes
     }));
   }, [overrides, prefs, setPendingOverrides, open]);
