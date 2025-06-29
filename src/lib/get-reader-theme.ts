@@ -18,9 +18,8 @@ export const getReaderTheme = (
     characterSpacing,
     wordSpacing,
     margin,
-    columns,
+    columnCount,
   } = preferences;
-  console.log("prefs", preferences);
 
   return {
     body: {
@@ -38,12 +37,12 @@ export const getReaderTheme = (
         ? `${Number(characterSpacing)}px`
         : undefined,
       "word-spacing": wordSpacing ? `${Number(wordSpacing)}px` : undefined,
-      "column-count": columns
-        ? typeof columns === "string"
-          ? parseInt(columns)
-          : Number(columns)
+      "column-count": columnCount
+        ? typeof columnCount === "string"
+          ? parseInt(columnCount)
+          : Number(columnCount)
         : 1,
-      "column-gap": columns && Number(columns) > 1 ? "2rem" : undefined,
+      "column-gap": columnCount && Number(columnCount) > 1 ? "2rem" : undefined,
       margin: margin ? `${margin}px` : undefined,
     },
 

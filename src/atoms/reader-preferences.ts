@@ -1,4 +1,6 @@
+import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { CSSProperties } from "react";
 
 export type ReaderThemeName =
   | "Original"
@@ -9,25 +11,25 @@ export type ReaderThemeName =
   | "Focus";
 
 export interface IReaderPreferenceConfig {
-  fontSize: number; // px
-  fontFamily: string;
-  lineHeight: number;
+  fontSize: CSSProperties["fontSize"];
+  fontFamily: CSSProperties["fontFamily"];
+  lineHeight: CSSProperties["lineHeight"];
   theme: "light" | "dark" | "auto";
-  textAlign?: string;
+  textAlign?: CSSProperties["textAlign"];
   backgroundColor: { light: string; dark: string };
   textColor: { light: string; dark: string };
 }
 
 export interface IReaderOverrides {
-  fontSize?: number;
-  fontFamily?: string;
-  lineHeight?: number;
+  fontSize?: CSSProperties["fontSize"];
+  fontFamily?: CSSProperties["fontFamily"];
+  lineHeight?: CSSProperties["lineHeight"];
+  wordSpacing?: CSSProperties["wordSpacing"];
+  margin?: CSSProperties["margin"];
+  columnCount?: CSSProperties["columnCount"];
+  textAlign?: CSSProperties["textAlign"];
   isBold?: boolean;
   characterSpacing?: number;
-  wordSpacing?: number;
-  margin?: number;
-  columns?: string; // Change this from number to string
-  textAlign?: string;
 }
 
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
@@ -123,12 +125,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
   },
 };
 
-const defaultOverrides: IReaderOverrides = {
-  lineHeight: 1.25,
+export const defaultOverrides: IReaderOverrides = {
+  lineHeight: "1.25",
   characterSpacing: 1,
-  wordSpacing: 1,
+  wordSpacing: "1",
   isBold: false,
-  columns: "2",
+  columnCount: 2,
   textAlign: "justify",
 };
 
@@ -148,3 +150,5 @@ export const readerOverridesAtom = atomWithStorage<IReaderOverrides>(
   "reader-overrides",
   defaultOverrides,
 );
+
+export const pendingReaderOverridesAtom = atom<IReaderOverrides>({});

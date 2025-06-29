@@ -11,10 +11,8 @@ import Spine from "epubjs/types/spine";
 import { useTheme } from "next-themes";
 import { getReaderTheme } from "@/lib/get-reader-theme";
 import { useAtom } from "jotai";
-import {
-  readerOverridesAtom,
-  readerPreferencesAtom,
-} from "@/atoms/reader-preferences";
+import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 
 type Highlight = {
   cfi: string;
@@ -95,7 +93,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [prefs] = useAtom(readerPreferencesAtom);
+  const [computedStyles] = useAtom(computedReaderStylesAtom);
   const [overrides] = useAtom(readerOverridesAtom);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
@@ -437,7 +435,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       allowScriptedContent: true,
     });
 
-    const themeObject = getReaderTheme(isDark, { ...prefs, ...overrides });
+    const themeObject = getReaderTheme(isDark, { ...computedStyles });
     rendition.hooks.content.register(() => {
       if (rendition?.themes) {
         rendition.themes.register("custom-theme", themeObject);
@@ -538,8 +536,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     STORAGE_KEY_NOTES,
     STORAGE_KEY_TOC,
     isDark,
-    prefs,
     overrides,
+    computedStyles,
   ]);
 
   return {

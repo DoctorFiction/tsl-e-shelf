@@ -9,15 +9,14 @@ import {
 import { useAtom } from "jotai";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
-import { CaseSensitive, Cog } from "lucide-react";
+import { CaseSensitive } from "lucide-react";
 import { FontSizeToggler } from "./font-size-toggler";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import clsx from "clsx";
 import { useTheme } from "next-themes";
 import { ReaderSettingsCustom } from "./reader-settings-custom";
 
 export const ReaderSettings = () => {
-  const [showPreferences, setShowPreferences] = useState(false);
   const [themeName, setThemeName] = useAtom(readerThemeNameAtom);
   const [, setReaderPrefs] = useAtom(readerPreferencesAtom);
   const { theme } = useTheme();
@@ -115,20 +114,10 @@ export const ReaderSettings = () => {
                 ))}
               </div>
             </div>
-
-            <div className="h-px bg-muted my-4" />
-
-            <div className="flex flex-col gap-1">
-              <Button
-                variant="outline"
-                className="gap-1"
-                onClick={() => setShowPreferences(!showPreferences)}
-              >
-                <Cog />
-                More customizations
-              </Button>
-              <ReaderSettingsCustom show={showPreferences} />
-            </div>
+          </div>
+          <div className="h-px bg-muted my-4" />
+          <div className="flex flex-col gap-1">
+            <ReaderSettingsCustom />
           </div>
         </PopoverContent>
       </Popover>
