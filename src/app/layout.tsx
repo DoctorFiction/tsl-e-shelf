@@ -6,7 +6,6 @@ import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import ProgressBarProvider from "./providers/progress-provider";
 import { DevTools } from "@/components/dev-tools";
-import { ReaderSettings } from "@/components/reader-settings";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +42,6 @@ export default function RootLayout({
             <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">
               <Header />
               {children}
-              <ReaderSettings />
               <DevTools />
               <Footer />
             </div>

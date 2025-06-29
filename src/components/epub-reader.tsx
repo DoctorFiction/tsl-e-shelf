@@ -4,24 +4,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { useRef, useEffect } from "react";
-import { Search, Highlighter, Trash2, Bookmark, BookMarked } from "lucide-react";
+import {
+  Search,
+  Highlighter,
+  Trash2,
+  Bookmark,
+  BookMarked,
+} from "lucide-react";
 import formatRelativeDate from "@/lib/format-relative-date";
+import { ReaderSettings } from "./reader-settings";
 
 interface EpubReaderProps {
   url: string;
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark, location } = useEpubReader(url);
+  const {
+    viewerRef,
+    goNext,
+    goPrev,
+    goToCfi,
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    highlights,
+    removeHighlight,
+    addBookmark,
+    bookmarks,
+    removeBookmark,
+    location,
+  } = useEpubReader(url);
 
   // Popover ile state yönetimi sadeleşiyor
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
       if (e.key === "ArrowLeft") goPrev();
       else if (e.key === "ArrowRight") goNext();
     };
@@ -39,7 +68,11 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Highlights Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Show highlights" type="button">
+                <Button
+                  className="ml-2"
+                  aria-label="Show highlights"
+                  type="button"
+                >
                   <Highlighter className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
@@ -54,7 +87,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 <ul className="max-h-64 overflow-y-auto">
                   {highlights && highlights.length > 0 ? (
                     highlights.map((hl, i) => (
-                      <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
+                      <Card
+                        key={i}
+                        className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group"
+                      >
                         <div
                           className="flex-1"
                           onClick={() => {
@@ -89,7 +125,11 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Bookmarks Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Show bookmarks" type="button">
+                <Button
+                  className="ml-2"
+                  aria-label="Show bookmarks"
+                  type="button"
+                >
                   <BookMarked className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
@@ -102,7 +142,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 <ul className="max-h-64 overflow-y-auto">
                   {bookmarks && bookmarks.length > 0 ? (
                     bookmarks.map((bm, i) => (
-                      <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
+                      <Card
+                        key={i}
+                        className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group"
+                      >
                         <div
                           className="flex-1"
                           onClick={() => {
@@ -112,7 +155,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
                           <Typography variant="body2" className="line-clamp-2">
                             {bm.cfi}
                           </Typography>
-                          <Typography variant="caption" className="text-xs text-gray-500 mt-1">
+                          <Typography
+                            variant="caption"
+                            className="text-xs text-gray-500 mt-1"
+                          >
                             {formatRelativeDate(bm.createdAt)}
                           </Typography>
                         </div>
@@ -146,13 +192,27 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Search Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Search in book" type="button" onClick={() => setTimeout(() => searchInputRef.current?.focus(), 100)}>
+                <Button
+                  className="ml-2"
+                  aria-label="Search in book"
+                  type="button"
+                  onClick={() =>
+                    setTimeout(() => searchInputRef.current?.focus(), 100)
+                  }
+                >
                   <Search className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4" align="end" side="bottom">
                 <div className="flex items-center gap-2 mb-2">
-                  <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search in book..." className="flex-1" />
+                  <Input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search in book..."
+                    className="flex-1"
+                  />
                 </div>
                 <div>
                   {searchQuery && searchResults.length === 0 && (
@@ -180,8 +240,15 @@ export default function EpubReader({ url }: EpubReaderProps) {
                               {result.chapterTitle}
                             </Typography>
                           </div>
-                          <Typography variant="body2" className="text-muted-foreground line-clamp-1">
-                            <span dangerouslySetInnerHTML={{ __html: result.excerpt }} />
+                          <Typography
+                            variant="body2"
+                            className="text-muted-foreground line-clamp-1"
+                          >
+                            <span
+                              dangerouslySetInnerHTML={{
+                                __html: result.excerpt,
+                              }}
+                            />
                           </Typography>
                         </Card>
                       );
@@ -213,6 +280,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 <Bookmark className="w-4 h-4" />
               </Button>
             )}
+            <ReaderSettings />
           </div>
         </div>
         <div ref={viewerRef} className="w-full h-screen" />
