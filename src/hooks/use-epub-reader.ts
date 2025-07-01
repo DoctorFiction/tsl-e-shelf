@@ -115,6 +115,7 @@ interface IUseEpubReaderReturn {
   currentPage: number;
   totalPages: number;
   error: Error | null;
+  isLoading: boolean;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -133,6 +134,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [error, setError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(
     null,
@@ -444,6 +446,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (!viewerRef.current) return;
 
     setError(null); // Clear previous errors
+    setIsLoading(true); // Set loading to true at the start
 
     try {
       const book = ePub(url);
@@ -452,6 +455,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         height: "100%",
         allowScriptedContent: true,
       });
+
+      bookRef.current = book;
+      renditionRef.current = rendition;
 
       book.ready.then(async () => {
         setToc(book.navigation?.toc || []);
@@ -474,11 +480,18 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         if (initialCfi) {
           const initialPage = getPageFromCfi(book, initialCfi) || 1;
           setCurrentPage(initialPage);
+          console.log(
+            "Initial Load: Current Page",
+            initialPage,
+            "Total Pages",
+            book.locations.length(),
+          );
         }
 
         if (savedLocation) {
           setCurrentPage(getPageFromCfi(book, savedLocation) || 1);
         }
+        setIsLoading(false); // Set loading to false when book is ready
       });
 
       bookRef.current = book;
@@ -491,6 +504,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     } catch (err) {
       console.error("Error initializing EPUB reader:", err);
       setError(err as Error);
+      setIsLoading(false); // Set loading to false on error
     }
   }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC]);
 
@@ -631,5 +645,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     currentPage,
     totalPages,
     error,
+    isLoading,
   };
 }
