@@ -123,11 +123,11 @@ export default function EpubReader({ url }: EpubReaderProps) {
                           >
                             {bm.page && (
                               <div className="absolute top-3 right-3">
-                                <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-md font-medium">{bm.page}</span>
+                                <span className=" text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-md font-medium">{bm.page}</span>
                               </div>
                             )}
 
-                            <div className="pr-12 mb-6">
+                            <div className="pr-12 mb-8">
                               <Typography variant="body2" className="line-clamp-3 text-gray-900 dark:text-gray-100 leading-relaxed">
                                 {bm.chapter}
                               </Typography>
@@ -145,7 +145,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
                             aria-label="Delete bookmark"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Remove bookmark CFI:", bm.cfi);
                               removeBookmark?.(bm.cfi);
                             }}
                             type="button"
