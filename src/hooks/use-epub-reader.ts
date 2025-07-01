@@ -110,6 +110,7 @@ interface IUseEpubReaderReturn {
   totalPages: number;
   error: Error | null;
   isLoading: boolean;
+  progress: number;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -129,6 +130,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [totalPages, setTotalPages] = useState<number>(0);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [progress, setProgress] = useState<number>(0);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -543,8 +545,15 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       localStorage.setItem(STORAGE_KEY_LOC, cfi);
       const newPage = getPageFromCfi(bookRef.current!, cfi) || 1;
       if (newPage !== currentPage) {
-        // Only update if page number has changed
         setCurrentPage(newPage);
+      }
+
+      // Calculate progress percentage
+      if (bookRef.current && bookRef.current.locations.length() > 0) {
+        const progressPercentage = Math.round(
+          Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100),
+        );
+        setProgress(progressPercentage);
       }
     };
 
@@ -641,5 +650,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     totalPages,
     error,
     isLoading,
+    progress,
   };
 }
