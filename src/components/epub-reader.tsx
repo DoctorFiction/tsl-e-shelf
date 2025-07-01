@@ -4,19 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useRef, useEffect } from "react";
-import {
-  Search,
-  Highlighter,
-  Trash2,
-  Bookmark,
-  BookMarked,
-} from "lucide-react";
+import { Search, Highlighter, Trash2, Bookmark, BookMarked } from "lucide-react";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { ReaderSettings } from "./reader-settings";
 
@@ -25,32 +15,14 @@ interface EpubReaderProps {
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const {
-    viewerRef,
-    goNext,
-    goPrev,
-    goToCfi,
-    searchQuery,
-    setSearchQuery,
-    searchResults,
-    highlights,
-    removeHighlight,
-    addBookmark,
-    bookmarks,
-    removeBookmark,
-    location,
-  } = useEpubReader(url);
+  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark, location } = useEpubReader(url);
 
   // Popover ile state yönetimi sadeleşiyor
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      )
-        return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowLeft") goPrev();
       else if (e.key === "ArrowRight") goNext();
     };
@@ -68,11 +40,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Highlights Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  className="ml-2"
-                  aria-label="Show highlights"
-                  type="button"
-                >
+                <Button className="ml-2" aria-label="Show highlights" type="button">
                   <Highlighter className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
@@ -87,10 +55,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 <ul className="max-h-64 overflow-y-auto">
                   {highlights && highlights.length > 0 ? (
                     highlights.map((hl, i) => (
-                      <Card
-                        key={i}
-                        className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group"
-                      >
+                      <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
                         <div
                           className="flex-1"
                           onClick={() => {
@@ -125,11 +90,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Bookmarks Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  className="ml-2"
-                  aria-label="Show bookmarks"
-                  type="button"
-                >
+                <Button className="ml-2" aria-label="Show bookmarks" type="button">
                   <BookMarked className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
@@ -141,40 +102,52 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 </div>
                 <ul className="max-h-64 overflow-y-auto">
                   {bookmarks && bookmarks.length > 0 ? (
-                    bookmarks.map((bm, i) => (
-                      <Card
-                        key={i}
-                        className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group"
-                      >
-                        <div
-                          className="flex-1"
-                          onClick={() => {
-                            goToCfi(bm.cfi);
-                          }}
+                    bookmarks.map((bm, i) => {
+                      return (
+                        <Card
+                          key={i}
+                          className="relative px-4 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group overflow-hidden border border-gray-200 dark:border-gray-700 mb-2"
                         >
-                          <Typography variant="body2" className="line-clamp-2">
-                            {bm.cfi}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            className="text-xs text-gray-500 mt-1"
+                          <div
+                            className="w-full"
+                            onClick={() => {
+                              goToCfi(bm.cfi);
+                            }}
                           >
-                            {formatRelativeDate(bm.createdAt)}
-                          </Typography>
-                        </div>
-                        <button
-                          className="text-gray-400 hover:text-red-500 transition ml-2"
-                          aria-label="Delete bookmark"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeBookmark?.(bm.cfi);
-                          }}
-                          type="button"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </Card>
-                    ))
+                            {bm.page && (
+                              <div className="absolute top-3 right-3">
+                                <span className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-1 rounded-md font-medium">{bm.page}</span>
+                              </div>
+                            )}
+
+                            <div className="pr-12 mb-6">
+                              <Typography variant="body2" className="line-clamp-3 text-gray-900 dark:text-gray-100 leading-relaxed">
+                                {bm.chapter}
+                              </Typography>
+                            </div>
+
+                            <div className="absolute bottom-3 left-4">
+                              <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400">
+                                {formatRelativeDate(bm.createdAt)}
+                              </Typography>
+                            </div>
+                          </div>
+
+                          <button
+                            className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
+                            aria-label="Delete bookmark"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log("Remove bookmark CFI:", bm.cfi);
+                              removeBookmark?.(bm.cfi);
+                            }}
+                            type="button"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </Card>
+                      );
+                    })
                   ) : (
                     <Typography variant="body2" className="text-gray-400">
                       No bookmarks found.
@@ -192,27 +165,13 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Search Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  className="ml-2"
-                  aria-label="Search in book"
-                  type="button"
-                  onClick={() =>
-                    setTimeout(() => searchInputRef.current?.focus(), 100)
-                  }
-                >
+                <Button className="ml-2" aria-label="Search in book" type="button" onClick={() => setTimeout(() => searchInputRef.current?.focus(), 100)}>
                   <Search className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4" align="end" side="bottom">
                 <div className="flex items-center gap-2 mb-2">
-                  <Input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search in book..."
-                    className="flex-1"
-                  />
+                  <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search in book..." className="flex-1" />
                 </div>
                 <div>
                   {searchQuery && searchResults.length === 0 && (
@@ -240,10 +199,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
                               {result.chapterTitle}
                             </Typography>
                           </div>
-                          <Typography
-                            variant="body2"
-                            className="text-muted-foreground line-clamp-1"
-                          >
+                          <Typography variant="body2" className="text-muted-foreground line-clamp-1">
                             <span
                               dangerouslySetInnerHTML={{
                                 __html: result.excerpt,
