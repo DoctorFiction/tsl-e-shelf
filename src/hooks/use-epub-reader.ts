@@ -11,9 +11,9 @@ import Spine from "epubjs/types/spine";
 import { useTheme } from "next-themes";
 import { getReaderTheme } from "@/lib/get-reader-theme";
 import { useAtom } from "jotai";
-// import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
+import { readerOverridesAtom } from "@/atoms/reader-preferences";
 
 const defaultConfig = {
   highlight: {
@@ -145,7 +145,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const isDark = theme === "dark";
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
-  // const [overrides] = useAtom(readerOverridesAtom);
+  const [overrides] = useAtom(readerOverridesAtom);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -480,12 +480,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         if (initialCfi) {
           const initialPage = getPageFromCfi(book, initialCfi) || 1;
           setCurrentPage(initialPage);
-          console.log(
-            "Initial Load: Current Page",
-            initialPage,
-            "Total Pages",
-            book.locations.length(),
-          );
         }
 
         if (savedLocation) {
@@ -513,22 +507,27 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     const rendition = renditionRef.current;
     if (!rendition) return;
 
-    const themeObject = getReaderTheme(isDark, { ...computedStyles });
-    rendition.hooks.content.register(() => {
-      if (rendition?.themes) {
-        rendition.themes.register("custom-theme", themeObject);
-        rendition.themes.default({ override: true });
-        rendition.themes.select("custom-theme");
-      } else {
-        console.warn("Rendition themes not initialized");
-      }
+    const themeObject = getReaderTheme(isDark, {
+      ...computedStyles,
+      ...overrides,
     });
 
-    // Re-apply theme when it changes
     if (rendition?.themes) {
+      rendition.themes.register("custom-theme", themeObject);
+      rendition.themes.default({ override: true });
       rendition.themes.select("custom-theme");
+    } else {
+      console.warn("Rendition themes not initialized");
     }
-  }, [isDark, computedStyles, renditionRef]);
+
+    rendition.hooks.content.register(() => {
+      // This hook is for content that is newly rendered or re-rendered
+      // We still want to ensure the theme is applied here for new content
+      if (rendition?.themes) {
+        rendition.themes.select("custom-theme");
+      }
+    });
+  }, [isDark, computedStyles, renditionRef, overrides]);
 
   // Effect for handling location changes
   useEffect(() => {
