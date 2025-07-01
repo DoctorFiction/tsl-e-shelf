@@ -80,6 +80,11 @@ type SearchResult = {
   chapterIndex: number;
 };
 
+type EnhancedNavItem = NavItem & {
+  page?: number;
+  subitems?: EnhancedNavItem[];
+};
+
 interface ExtendedSpine extends Spine {
   spineItems: Section[];
 }
@@ -90,7 +95,7 @@ interface IUseEpubReaderReturn {
   goPrev: () => void;
   goToHref: (href: string) => void;
   goToCfi: (cfi: string) => void;
-  toc: NavItem[];
+  toc: EnhancedNavItem[];
   viewerRef: React.RefObject<HTMLDivElement | null>;
   addHighlight: (args: Highlight) => void;
   highlights: Highlight[];
@@ -120,7 +125,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const previousSearchHighlights = useRef<string[]>([]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [location, setLocation] = useState<string | null>(null);
-  const [toc, setToc] = useState<NavItem[]>([]);
+  const [toc, setToc] = useState<EnhancedNavItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
@@ -312,6 +317,36 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     [STORAGE_KEY_NOTES]
   );
 
+  const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
+    const enhanceItem = async (item: NavItem, index: number): Promise<EnhancedNavItem> => {
+      let page: number | undefined;
+
+      try {
+        if (book.locations?.length() > 0) {
+          page = Math.floor((index / tocItems.length) * book.locations.length()) + 1;
+
+          if (page < 1) page = 1;
+          if (page > book.locations.length()) page = book.locations.length();
+        }
+      } catch (error) {
+        console.warn("Error estimating page for TOC item:", error);
+      }
+
+      const enhancedItem: EnhancedNavItem = {
+        ...item,
+        page,
+      };
+
+      if (item.subitems && item.subitems.length > 0) {
+        enhancedItem.subitems = await Promise.all(item.subitems.map((subitem, subIndex) => enhanceItem(subitem, index + subIndex + 1)));
+      }
+
+      return enhancedItem;
+    };
+
+    return Promise.all(tocItems.map((item, index) => enhanceItem(item, index)));
+  }, []);
+
   const searchBook = useCallback(
     async (query: string) => {
       const book = bookRef.current;
@@ -469,15 +504,22 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       renditionRef.current = rendition;
 
       book.ready.then(async () => {
-        setToc(book.navigation?.toc || []);
-        localStorage.setItem(STORAGE_KEY_TOC, JSON.stringify(book.navigation?.toc || []));
+        const originalToc = book.navigation?.toc || [];
         setSpine(book.spine as ExtendedSpine);
-        await book.locations.generate(5000); // Generate locations for page numbers
+        await book.locations.generate(5000);
 
-        // Set initial current page and total pages after locations are generated
         setTotalPages(book.locations.length());
 
-        // Load last location and display after locations are generated
+        try {
+          const enhancedToc = await enhanceTocWithPages(originalToc, book);
+          setToc(enhancedToc);
+          localStorage.setItem(STORAGE_KEY_TOC, JSON.stringify(enhancedToc));
+        } catch (error) {
+          console.warn("Error enhancing TOC with pages:", error);
+          setToc(originalToc as EnhancedNavItem[]);
+          localStorage.setItem(STORAGE_KEY_TOC, JSON.stringify(originalToc));
+        }
+
         const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
         rendition.display(savedLocation || undefined);
 
@@ -490,7 +532,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         if (savedLocation) {
           setCurrentPage(getPageFromCfi(book, savedLocation) || 1);
         }
-        setIsLoading(false); // Set loading to false when book is ready
+        setIsLoading(false);
       });
 
       bookRef.current = book;
@@ -503,9 +545,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     } catch (err) {
       console.error("Error initializing EPUB reader:", err);
       setError(err as Error);
-      setIsLoading(false); // Set loading to false on error
+      setIsLoading(false);
     }
-  }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC]);
+  }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC, enhanceTocWithPages]);
 
   // Effect for theming
   useEffect(() => {
@@ -550,9 +592,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
       // Calculate progress percentage
       if (bookRef.current && bookRef.current.locations.length() > 0) {
-        const progressPercentage = Math.round(
-          Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100),
-        );
+        const progressPercentage = Math.round(Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100));
         setProgress(progressPercentage);
       }
     };
