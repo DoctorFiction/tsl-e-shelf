@@ -413,27 +413,43 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
 
-  // MAIN EFFECT
+  // Effect for book initialization and cleanup
   useEffect(() => {
     if (!viewerRef.current) return;
 
-    const book: Book = ePub(url);
+    const book = ePub(url);
+    const rendition = book.renderTo(viewerRef.current, {
+      width: "100%",
+      height: "100%",
+      allowScriptedContent: true,
+    });
+
     book.ready.then(() => {
       setToc(book.navigation?.toc || []);
-      // for debugger
       localStorage.setItem(
         STORAGE_KEY_TOC,
         JSON.stringify(book.navigation?.toc || []),
       );
       setSpine(book.spine as ExtendedSpine);
     });
-    bookRef.current = book;
 
-    const rendition = book.renderTo(viewerRef.current, {
-      width: "100%",
-      height: "100%",
-      allowScriptedContent: true,
-    });
+    bookRef.current = book;
+    renditionRef.current = rendition;
+
+    // Load last location
+    const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
+    rendition.display(savedLocation || undefined);
+
+    return () => {
+      book.destroy();
+      rendition.destroy();
+    };
+  }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC]);
+
+  // Effect for theming
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
 
     const themeObject = getReaderTheme(isDark, { ...computedStyles });
     rendition.hooks.content.register(() => {
@@ -446,40 +462,47 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
     });
 
-    renditionRef.current = rendition;
+    // Re-apply theme when it changes
+    if (rendition?.themes) {
+      rendition.themes.select("custom-theme");
+    }
+  }, [isDark, computedStyles, renditionRef]);
 
-    // REAPPLY WHEN A NEW CHAPTER IS DISPLAYED TO AVOID FLASHING
-    // flashing was solved by removing bg from EpubReader viewerRef - but keeping it here just in case if needed in the future
-    // rendition.on("rendered", () => {
-    //   rendition.themes.select("custom-theme");
-    // });
+  // Effect for handling location changes
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
 
-    // Load last location
-    const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
-    rendition.display(savedLocation || undefined);
-
-    // Set location on change
-    rendition.on("relocated", (location: Location) => {
+    const handleRelocated = (location: Location) => {
       const cfi = location.start.cfi;
       setLocation(cfi);
       localStorage.setItem(STORAGE_KEY_LOC, cfi);
-    });
+    };
 
-    // Handle new highlights on selection
-    // note: currently highlights whenever a text is selected
-    // highlight text later on via UI highligt picker, using addHighlight function
-    rendition.on("selected", (cfiRange: string, contents: Contents) => {
+    rendition.on("relocated", handleRelocated);
+    return () => {
+      rendition.off("relocated", handleRelocated);
+    };
+  }, [STORAGE_KEY_LOC]);
+
+  // Effect for handling text selection
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
+
+    const handleSelected = (cfiRange: string, contents: Contents) => {
       const selectedText = contents.window.getSelection()?.toString() || "";
       addHighlight({ cfi: cfiRange, text: selectedText });
+    };
 
-      // FOR TESTING NOTES
-      // const userNote = prompt("Add a note for:\n" + selectedText);
-      // if (userNote) {
-      //   addNote({ cfi: cfiRange, text: selectedText, note: userNote });
-      // }
-    });
+    rendition.on("selected", handleSelected);
+    return () => {
+      rendition.off("selected", handleSelected);
+    };
+  }, [addHighlight]);
 
-    // Load saved highlights
+  // Effect for loading saved highlights
+  useEffect(() => {
     const savedHighlights = localStorage.getItem(STORAGE_KEY_HIGHLIGHTS);
     if (savedHighlights) {
       try {
@@ -490,8 +513,10 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         console.error("Failed to parse saved highlights", err);
       }
     }
+  }, [STORAGE_KEY_HIGHLIGHTS, addHighlight]);
 
-    // Load bookmarks from localStorage
+  // Effect for loading saved bookmarks
+  useEffect(() => {
     const savedBookmarks = localStorage.getItem(STORAGE_KEY_BOOKMARK);
     if (savedBookmarks) {
       try {
@@ -500,8 +525,13 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         console.warn("Failed to parse saved bookmarks");
       }
     }
+  }, [STORAGE_KEY_BOOKMARK]);
 
-    // Load saved notes
+  // Effect for loading saved notes
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
+
     const savedNotes = localStorage.getItem(STORAGE_KEY_NOTES);
     if (savedNotes) {
       const parsed = JSON.parse(savedNotes) as Note[];
@@ -521,24 +551,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       });
       setNotes(parsed);
     }
-
-    return () => {
-      rendition.destroy?.();
-      book.destroy?.();
-    };
-  }, [
-    url,
-    addHighlight,
-    theme,
-    STORAGE_KEY_LOC,
-    STORAGE_KEY_HIGHLIGHTS,
-    STORAGE_KEY_BOOKMARK,
-    STORAGE_KEY_NOTES,
-    STORAGE_KEY_TOC,
-    isDark,
-    overrides,
-    computedStyles,
-  ]);
+  }, [STORAGE_KEY_NOTES]);
 
   return {
     toc,
