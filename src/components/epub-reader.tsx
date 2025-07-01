@@ -5,8 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { useRef, useEffect } from "react";
-import { Search, Highlighter, Trash2, Bookmark, BookMarked, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useRef, useEffect, useState } from "react";
+import { Search, Highlighter, Trash2, Bookmark, BookMarked, ChevronLeft, ChevronRight, Trash } from "lucide-react";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { ReaderSettings } from "./reader-settings";
 
@@ -15,9 +26,27 @@ interface EpubReaderProps {
 }
 
 export default function EpubReader({ url }: EpubReaderProps) {
-  const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark, location } = useEpubReader(url);
+  const {
+    viewerRef,
+    goNext,
+    goPrev,
+    goToCfi,
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    highlights,
+    removeHighlight,
+    removeAllHighlights,
+    addBookmark,
+    bookmarks,
+    removeBookmark,
+    removeAllBookmarks,
+    location,
+  } = useEpubReader(url);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [highlightDeleteDialogOpen, setHighlightDeleteDialogOpen] = useState(false);
+  const [bookmarkDeleteDialogOpen, setBookmarkDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -54,6 +83,33 @@ export default function EpubReader({ url }: EpubReaderProps) {
                       Highlights
                     </Typography>
                   </div>
+                  {highlights && highlights.length > 0 && (
+                    <AlertDialog open={highlightDeleteDialogOpen} onOpenChange={setHighlightDeleteDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Delete all highlights">
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Tüm Highlight&apos;ları Sil</AlertDialogTitle>
+                          <AlertDialogDescription>Bu işlem tüm highlight&apos;ları kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>İptal</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              removeAllHighlights();
+                              setHighlightDeleteDialogOpen(false);
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Evet, Tümünü Sil
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
                 <ul className="max-h-64 overflow-y-auto">
                   {highlights && highlights.length > 0 ? (
@@ -106,6 +162,33 @@ export default function EpubReader({ url }: EpubReaderProps) {
                   <Typography variant="body1" className="font-bold">
                     Bookmarks
                   </Typography>
+                  {bookmarks && bookmarks.length > 0 && (
+                    <AlertDialog open={bookmarkDeleteDialogOpen} onOpenChange={setBookmarkDeleteDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Delete all bookmarks">
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Tüm İşaretleri Sil</AlertDialogTitle>
+                          <AlertDialogDescription>Bu işlem tüm işaretleri kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>İptal</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              removeAllBookmarks();
+                              setBookmarkDeleteDialogOpen(false);
+                            }}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Evet, Tümünü Sil
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
                 <ul className="max-h-64 overflow-y-auto">
                   {bookmarks && bookmarks.length > 0 ? (
