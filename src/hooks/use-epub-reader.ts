@@ -114,6 +114,7 @@ interface IUseEpubReaderReturn {
   notes: Note[];
   currentPage: number;
   totalPages: number;
+  error: Error | null;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -131,6 +132,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
+  const [error, setError] = useState<Error | null>(null);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(
     null,
@@ -441,55 +443,55 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   useEffect(() => {
     if (!viewerRef.current) return;
 
-    const book = ePub(url);
-    const rendition = book.renderTo(viewerRef.current, {
-      width: "100%",
-      height: "100%",
-      allowScriptedContent: true,
-    });
+    setError(null); // Clear previous errors
 
-    bookRef.current = book;
-    renditionRef.current = rendition;
+    try {
+      const book = ePub(url);
+      const rendition = book.renderTo(viewerRef.current, {
+        width: "100%",
+        height: "100%",
+        allowScriptedContent: true,
+      });
 
-    book.ready.then(async () => {
-      setToc(book.navigation?.toc || []);
-      localStorage.setItem(
-        STORAGE_KEY_TOC,
-        JSON.stringify(book.navigation?.toc || []),
-      );
-      setSpine(book.spine as ExtendedSpine);
-      await book.locations.generate(5000); // Generate locations for page numbers
-
-      // Set initial current page and total pages after locations are generated
-      setTotalPages(book.locations.length());
-
-      // Load last location and display after locations are generated
-      const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
-      rendition.display(savedLocation || undefined);
-
-      const initialCfi = savedLocation || book.rendition.currentLocation().cfi;
-      if (initialCfi) {
-        const initialPage = getPageFromCfi(book, initialCfi) || 1;
-        setCurrentPage(initialPage);
-        console.log(
-          "Initial Load: Current Page",
-          initialPage,
-          "Total Pages",
-          book.locations.length(),
+      book.ready.then(async () => {
+        setToc(book.navigation?.toc || []);
+        localStorage.setItem(
+          STORAGE_KEY_TOC,
+          JSON.stringify(book.navigation?.toc || []),
         );
-      }
+        setSpine(book.spine as ExtendedSpine);
+        await book.locations.generate(5000); // Generate locations for page numbers
 
-      if (savedLocation) {
-        setCurrentPage(
-          Number(book.locations.locationFromCfi(savedLocation) || 1),
-        );
-      }
-    });
+        // Set initial current page and total pages after locations are generated
+        setTotalPages(book.locations.length());
 
-    return () => {
-      book.destroy();
-      rendition.destroy();
-    };
+        // Load last location and display after locations are generated
+        const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
+        rendition.display(savedLocation || undefined);
+
+        const initialCfi =
+          savedLocation || book.rendition.currentLocation().cfi;
+        if (initialCfi) {
+          const initialPage = getPageFromCfi(book, initialCfi) || 1;
+          setCurrentPage(initialPage);
+        }
+
+        if (savedLocation) {
+          setCurrentPage(getPageFromCfi(book, savedLocation) || 1);
+        }
+      });
+
+      bookRef.current = book;
+      renditionRef.current = rendition;
+
+      return () => {
+        book.destroy();
+        rendition.destroy();
+      };
+    } catch (err) {
+      console.error("Error initializing EPUB reader:", err);
+      setError(err as Error);
+    }
   }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC]);
 
   // Effect for theming
@@ -527,7 +529,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       if (newPage !== currentPage) {
         // Only update if page number has changed
         setCurrentPage(newPage);
-        console.log("Relocated: Current Page", newPage);
       }
     };
 
@@ -629,5 +630,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     addNote,
     currentPage,
     totalPages,
+    error,
   };
 }
