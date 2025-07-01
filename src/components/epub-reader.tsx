@@ -6,7 +6,7 @@ import { Typography } from "@/components/ui/typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { useRef, useEffect } from "react";
-import { Search, Highlighter, Trash2, Bookmark, BookMarked } from "lucide-react";
+import { Search, Highlighter, Trash2, Bookmark, BookMarked, ChevronLeft, ChevronRight } from "lucide-react";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { ReaderSettings } from "./reader-settings";
 
@@ -17,7 +17,6 @@ interface EpubReaderProps {
 export default function EpubReader({ url }: EpubReaderProps) {
   const { viewerRef, goNext, goPrev, goToCfi, searchQuery, setSearchQuery, searchResults, highlights, removeHighlight, addBookmark, bookmarks, removeBookmark, location } = useEpubReader(url);
 
-  // Popover ile state yönetimi sadeleşiyor
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -40,8 +39,12 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Highlights Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Show highlights" type="button">
-                  <Highlighter className="w-4 h-4" />
+                <Button
+                  className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
+                  aria-label="Show highlights"
+                  type="button"
+                >
+                  <Highlighter className="w-4 h-4 text-yellow-500" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-96 p-4" align="start" side="bottom">
@@ -90,8 +93,12 @@ export default function EpubReader({ url }: EpubReaderProps) {
             {/* Bookmarks Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Show bookmarks" type="button">
-                  <BookMarked className="w-4 h-4" />
+                <Button
+                  className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
+                  aria-label="Show bookmarks"
+                  type="button"
+                >
+                  <BookMarked className="w-4 h-4 text-blue-500" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-96 p-4" align="start" side="bottom">
@@ -158,15 +165,32 @@ export default function EpubReader({ url }: EpubReaderProps) {
             </Popover>
           </div>
           <div className="flex gap-4 mx-auto">
-            <Button onClick={goPrev}>◀ Prev</Button>
-            <Button onClick={goNext}>Next ▶</Button>
+            <Button
+              onClick={goPrev}
+              className="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-75 rounded-lg px-4 py-2 font-medium flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Prev
+            </Button>
+            <Button
+              onClick={goNext}
+              className="bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-75 rounded-lg px-4 py-2 font-medium flex items-center gap-2"
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
           <div className="absolute right-4 flex gap-2">
             {/* Search Popover */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button className="ml-2" aria-label="Search in book" type="button" onClick={() => setTimeout(() => searchInputRef.current?.focus(), 100)}>
-                  <Search className="w-4 h-4" />
+                <Button
+                  className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
+                  aria-label="Search in book"
+                  type="button"
+                  onClick={() => setTimeout(() => searchInputRef.current?.focus(), 50)}
+                >
+                  <Search className="w-4 h-4 text-gray-500" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-4" align="end" side="bottom">
@@ -215,25 +239,25 @@ export default function EpubReader({ url }: EpubReaderProps) {
             </Popover>
             {isBookmarked ? (
               <Button
-                className="ml-2"
+                className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
                 onClick={() => {
                   if (location) removeBookmark(location);
                 }}
                 aria-label="Remove bookmark"
                 type="button"
               >
-                <Bookmark fill="red" className="w-4 h-4 text-red-500" />
+                <Bookmark fill="currentColor" className="w-4 h-4 text-red-500" />
               </Button>
             ) : (
               <Button
-                className="ml-2"
+                className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
                 onClick={() => {
                   addBookmark();
                 }}
                 aria-label="Add bookmark"
                 type="button"
               >
-                <Bookmark className="w-4 h-4" />
+                <Bookmark className="w-4 h-4 text-gray-500" />
               </Button>
             )}
             <ReaderSettings />
@@ -244,5 +268,3 @@ export default function EpubReader({ url }: EpubReaderProps) {
     </Card>
   );
 }
-
-// Add this helper function at the top level of the file (outside the component):
