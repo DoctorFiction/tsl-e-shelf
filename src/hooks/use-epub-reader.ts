@@ -14,10 +14,50 @@ import { useAtom } from "jotai";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 
+const defaultConfig = {
+  highlight: {
+    className: "epub-highlight",
+    style: {
+      fill: "yellow",
+      fillOpacity: "0.5",
+      mixBlendMode: "multiply",
+    },
+  },
+  underline: {
+    className: "epub-underline",
+    style: {
+      stroke: "yellow",
+      strokeWidth: "1",
+    },
+  },
+  note: {
+    className: "epub-note",
+    style: {
+      fill: "lightblue",
+      fillOpacity: "0.4",
+      mixBlendMode: "multiply",
+    },
+  },
+  searchResult: {
+    className: "epub-search-highlight",
+    style: {
+      fill: "red",
+      fillOpacity: "0.3",
+      mixBlendMode: "multiply",
+    },
+  },
+  selectedSearchResult: {
+    style: {
+      fill: "yellow",
+      fillOpacity: "100",
+      mixBlendMode: "multiply",
+    },
+  },
+};
+
 type Highlight = {
   cfi: string;
   text: string;
-  color?: string;
   type?: HighlightType;
 };
 
@@ -94,7 +134,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const isDark = theme === "dark";
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
-  const [overrides] = useAtom(readerOverridesAtom);
+  // const [overrides] = useAtom(readerOverridesAtom);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -103,22 +143,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const STORAGE_KEY_TOC = `epub-toc`;
 
   const addHighlight = useCallback(
-    ({ cfi, text, color = "yellow", type = "highlight" }: Highlight) => {
-      const className =
-        type === "underline" ? "epub-underline" : "epub-highlight";
-
-      const style =
-        type === "underline"
-          ? {
-              stroke: color,
-              strokeWidth: "1",
-            }
-          : {
-              fill: color,
-              fillOpacity: "0.5",
-              mixBlendMode: "multiply",
-            };
-
+    ({ cfi, text, type = "highlight" }: Highlight) => {
+      const config = defaultConfig[type];
       const newHighlight = { cfi, text };
 
       renditionRef.current?.annotations.add(
@@ -126,8 +152,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         cfi,
         { text },
         undefined,
-        className,
-        style,
+        config.className,
+        config.style,
       );
 
       setHighlights((prev) => {
@@ -232,12 +258,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         cfi,
         { text },
         undefined,
-        "epub-note",
-        {
-          fill: "lightblue",
-          fillOpacity: "0.4",
-          mixBlendMode: "multiply",
-        },
+        defaultConfig.note.className,
+        defaultConfig.note.style,
       );
 
       // update state + localStorage
@@ -378,12 +400,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         result.cfi,
         { text: result.excerpt },
         undefined,
-        "epub-search-highlight",
-        {
-          fill: "red",
-          fillOpacity: "0.3",
-          mixBlendMode: "multiply",
-        },
+        defaultConfig.searchResult.className,
+        defaultConfig.searchResult.style,
       );
       previousSearchHighlights.current.push(result.cfi);
     }
@@ -404,11 +422,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       {}, // data
       undefined, // cb
       undefined, // no className
-      {
-        fill: "yellow",
-        fillOpacity: "100",
-        mixBlendMode: "multiply",
-      },
+      defaultConfig.selectedSearchResult.style,
     );
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
