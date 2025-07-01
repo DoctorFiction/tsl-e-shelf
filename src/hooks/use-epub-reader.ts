@@ -11,8 +11,9 @@ import Spine from "epubjs/types/spine";
 import { useTheme } from "next-themes";
 import { getReaderTheme } from "@/lib/get-reader-theme";
 import { useAtom } from "jotai";
-import { readerOverridesAtom } from "@/atoms/reader-preferences";
+// import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
+import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
 
 const defaultConfig = {
   highlight: {
@@ -67,6 +68,8 @@ type Bookmark = {
   cfi: string;
   label?: string;
   createdAt: string;
+  chapter: string | null;
+  page: number | null;
 };
 
 type Note = {
@@ -109,6 +112,8 @@ interface IUseEpubReaderReturn {
   removeAllHighlights: () => void;
   addNote: (note: Note) => void;
   notes: Note[];
+  currentPage: number;
+  totalPages: number;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -124,6 +129,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(
     null,
@@ -183,8 +190,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     setHighlights([]);
   };
 
-  const addBookmark = useCallback(() => {
-    if (!location) {
+  const addBookmark = useCallback(async () => {
+    const book = bookRef.current;
+    if (!location || !book) {
       console.warn(
         "addBookmark: not a valid location to add a bookmark. location",
         location,
@@ -192,9 +200,14 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       return;
     }
 
+    const chapter = await getChapterFromCfi(book, location);
+    const page = getPageFromCfi(book, location);
+
     const newBookmark: Bookmark = {
       cfi: location,
       createdAt: new Date().toISOString(),
+      chapter,
+      page,
     };
 
     setBookmarks((prev) => {
@@ -339,16 +352,13 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
                   pos + trimmedQuery.length + contextLength,
                 );
 
-                const tocItem = book.navigation.toc.find((toc) =>
-                  toc.href.includes(item.href),
-                );
-                const chapterTitle = tocItem?.label || "";
+                const chapterTitle = await getChapterFromCfi(book, cfi);
 
                 results.push({
                   cfi,
                   excerpt: `...${excerpt}...`,
                   href: item.href,
-                  chapterTitle,
+                  chapterTitle: chapterTitle || "",
                   chapterIndex,
                 });
               } catch (e) {
@@ -438,21 +448,43 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       allowScriptedContent: true,
     });
 
-    book.ready.then(() => {
+    bookRef.current = book;
+    renditionRef.current = rendition;
+
+    book.ready.then(async () => {
       setToc(book.navigation?.toc || []);
       localStorage.setItem(
         STORAGE_KEY_TOC,
         JSON.stringify(book.navigation?.toc || []),
       );
       setSpine(book.spine as ExtendedSpine);
+      await book.locations.generate(5000); // Generate locations for page numbers
+
+      // Set initial current page and total pages after locations are generated
+      setTotalPages(book.locations.length());
+
+      // Load last location and display after locations are generated
+      const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
+      rendition.display(savedLocation || undefined);
+
+      const initialCfi = savedLocation || book.rendition.currentLocation().cfi;
+      if (initialCfi) {
+        const initialPage = getPageFromCfi(book, initialCfi) || 1;
+        setCurrentPage(initialPage);
+        console.log(
+          "Initial Load: Current Page",
+          initialPage,
+          "Total Pages",
+          book.locations.length(),
+        );
+      }
+
+      if (savedLocation) {
+        setCurrentPage(
+          Number(book.locations.locationFromCfi(savedLocation) || 1),
+        );
+      }
     });
-
-    bookRef.current = book;
-    renditionRef.current = rendition;
-
-    // Load last location
-    const savedLocation = localStorage.getItem(STORAGE_KEY_LOC);
-    rendition.display(savedLocation || undefined);
 
     return () => {
       book.destroy();
@@ -491,13 +523,19 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const cfi = location.start.cfi;
       setLocation(cfi);
       localStorage.setItem(STORAGE_KEY_LOC, cfi);
+      const newPage = getPageFromCfi(bookRef.current!, cfi) || 1;
+      if (newPage !== currentPage) {
+        // Only update if page number has changed
+        setCurrentPage(newPage);
+        console.log("Relocated: Current Page", newPage);
+      }
     };
 
     rendition.on("relocated", handleRelocated);
     return () => {
       rendition.off("relocated", handleRelocated);
     };
-  }, [STORAGE_KEY_LOC]);
+  }, [STORAGE_KEY_LOC, currentPage]);
 
   // Effect for handling text selection
   useEffect(() => {
@@ -589,5 +627,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     goNext,
     goPrev,
     addNote,
+    currentPage,
+    totalPages,
   };
 }

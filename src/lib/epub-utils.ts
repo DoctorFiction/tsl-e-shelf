@@ -20,9 +20,10 @@ export const getChapterFromCfi = async (
 export const getPageFromCfi = (book: Book, cfi: string): number | null => {
   if (book.locations.length() > 0) {
     const page = book.locations.locationFromCfi(cfi);
-    // locationFromCfi returns the page number, but the type definitions might be incorrect
-    // Casting to unknown and then to number to bypass the type error
-    return page as unknown as number;
+    // locationFromCfi returns a 0-indexed number, but its type definition is 'Location'.
+    // We assert it to number and add 1 to make it 1-indexed for display.
+    return (page as unknown as number) + 1;
   }
   return null;
 };
+
