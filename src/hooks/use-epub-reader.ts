@@ -116,6 +116,8 @@ interface IUseEpubReaderReturn {
   error: Error | null;
   isLoading: boolean;
   progress: number;
+  bookTitle: string | null;
+  bookCover: string | null;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -136,6 +138,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
+  const [bookTitle, setBookTitle] = useState<string | null>(null);
+  const [bookCover, setBookCover] = useState<string | null>(null);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
@@ -165,7 +169,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS]
+    [STORAGE_KEY_HIGHLIGHTS],
   );
 
   const removeHighlight = (cfi: string, type: HighlightType) => {
@@ -273,7 +277,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_BOOKMARK]
+    [STORAGE_KEY_BOOKMARK],
   );
 
   const removeAllBookmarks = useCallback(() => {
@@ -314,7 +318,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
@@ -434,7 +438,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       await Promise.all(promises);
       setSearchResults(results);
     },
-    [bookRef, spine]
+    [bookRef, spine],
   );
 
   // SEARCH EFFECT
@@ -480,7 +484,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       {}, // data
       undefined, // cb
       undefined, // no className
-      defaultConfig.selectedSearchResult.style
+      defaultConfig.selectedSearchResult.style,
     );
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
@@ -504,6 +508,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       renditionRef.current = rendition;
 
       book.ready.then(async () => {
+        const metadata = await book.loaded.metadata;
+        setBookTitle(metadata.title);
+
+        const coverUrl = await book.coverUrl();
+        setBookCover(coverUrl);
         const originalToc = book.navigation?.toc || [];
         setSpine(book.spine as ExtendedSpine);
         await book.locations.generate(5000);
@@ -691,5 +700,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     error,
     isLoading,
     progress,
+    bookTitle,
+    bookCover,
   };
 }
