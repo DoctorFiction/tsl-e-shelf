@@ -73,8 +73,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
 
   return (
-    <Card>
-      <CardContent>
+    <Card className="!py-0">
+      <CardContent className="p-0">
         {isLoading ? (
           <div className="absolute inset-0 z-20 flex flex-col gap-4 items-center justify-center">
             <p className="text-xl">{bookTitle}</p>
