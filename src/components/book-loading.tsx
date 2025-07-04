@@ -5,7 +5,7 @@ interface LoadingSpinnerProps {
   bookCover: string | null;
 }
 
-export function LoadingSpinner({ bookTitle, bookCover }: LoadingSpinnerProps) {
+export function BookLoading({ bookTitle, bookCover }: LoadingSpinnerProps) {
   return (
     <div className="absolute inset-0 z-20 flex flex-col gap-4 items-center justify-center">
       <p className="text-xl">{bookTitle}</p>

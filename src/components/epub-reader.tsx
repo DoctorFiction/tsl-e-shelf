@@ -6,12 +6,12 @@ import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 import { HighlightsListPopover } from "./highlights-list-popover";
+import { BookLoading } from "./book-loading";
 import { NavigationControls } from "./navigation-controls";
 import { ReaderSettings } from "./reader-settings";
 import { SearchPopover } from "./search-popover";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { Progress } from "./ui/progress";
-import { LoadingSpinner } from "./loading-spinner";
 
 interface EpubReaderProps {
   url: string;
@@ -67,7 +67,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     <Card className="!py-0">
       <CardContent className="p-0">
         {isLoading ? (
-          <LoadingSpinner bookTitle={bookTitle} bookCover={bookCover} />
+          <BookLoading bookTitle={bookTitle} bookCover={bookCover} />
         ) : (
           <>
             <div className="flex flex-col p-2 items-center bg-gray-100 dark:bg-gray-800 relative justify-center">
@@ -80,7 +80,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
               </div>
               <div className="absolute right-4 flex gap-2">
                 <SearchPopover searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchResults={searchResults} goToCfi={goToCfi} />
-                {/* TODO: add bookmark component */}
                 <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmark} removeBookmark={removeBookmark} location={location} />
                 <TableOfContentsPopover toc={toc} goToHref={goToHref} />
                 <ReaderSettings />

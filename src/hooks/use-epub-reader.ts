@@ -1,16 +1,14 @@
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
+import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
+import { getReaderTheme } from "@/lib/get-reader-theme";
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
-import { useTheme } from "next-themes";
-import { getReaderTheme } from "@/lib/get-reader-theme";
 import { useAtom } from "jotai";
-import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
-import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
-import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { useTheme } from "next-themes";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 // TODO: fit cover page with no padding
-// TODO: add highlights UI
-// TODO: add notes UI
 
 const defaultConfig = {
   highlight: {
@@ -186,52 +184,55 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     [STORAGE_KEY_HIGHLIGHTS],
   );
 
-  const removeHighlight = (cfi: string, type: HighlightType) => {
-    try {
-      renditionRef.current?.annotations.remove(cfi, type);
+  const removeHighlight = useCallback(
+    (cfi: string, type: HighlightType) => {
+      try {
+        renditionRef.current?.annotations.remove(cfi, type);
 
-      const rendition = renditionRef.current;
-      if (rendition && rendition.getContents) {
-        try {
-          const contents = rendition.getContents();
-          if (contents && typeof contents === "object") {
-            const contentsArray = Array.isArray(contents) ? contents : [contents];
-            contentsArray.forEach((content) => {
-              if (content && content.document) {
-                const highlightElements = content.document.querySelectorAll(`[data-cfi="${cfi}"]`);
-                highlightElements.forEach((el: Element) => el.remove());
+        const rendition = renditionRef.current;
+        if (rendition && rendition.getContents) {
+          try {
+            const contents = rendition.getContents();
+            if (contents && typeof contents === "object") {
+              const contentsArray = Array.isArray(contents) ? contents : [contents];
+              contentsArray.forEach((content) => {
+                if (content && content.document) {
+                  const highlightElements = content.document.querySelectorAll(`[data-cfi="${cfi}"]`);
+                  highlightElements.forEach((el: Element) => el.remove());
 
-                const classElements = content.document.querySelectorAll(".epub-highlight");
-                classElements.forEach((el: Element) => {
-                  if (el.getAttribute("data-cfi") === cfi) {
-                    el.remove();
-                  }
-                });
-              }
-            });
+                  const classElements = content.document.querySelectorAll(".epub-highlight");
+                  classElements.forEach((el: Element) => {
+                    if (el.getAttribute("data-cfi") === cfi) {
+                      el.remove();
+                    }
+                  });
+                }
+              });
+            }
+          } catch (domError) {
+            console.warn("Error removing highlight from DOM:", domError);
           }
-        } catch (domError) {
-          console.warn("Error removing highlight from DOM:", domError);
         }
+      } catch (error) {
+        console.warn("Error removing highlight annotation:", error);
       }
-    } catch (error) {
-      console.warn("Error removing highlight annotation:", error);
-    }
 
-    if (renditionRef.current && location) {
-      requestAnimationFrame(() => {
-        renditionRef.current?.display(location);
+      if (renditionRef.current && location) {
+        requestAnimationFrame(() => {
+          renditionRef.current?.display(location);
+        });
+      }
+
+      setHighlights((prev) => {
+        const updated = prev.filter((h) => h.cfi !== cfi);
+        localStorage.setItem(STORAGE_KEY_HIGHLIGHTS, JSON.stringify(updated));
+        return updated;
       });
-    }
+    },
+    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef],
+  );
 
-    setHighlights((prev) => {
-      const updated = prev.filter((h) => h.cfi !== cfi);
-      localStorage.setItem(STORAGE_KEY_HIGHLIGHTS, JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const removeAllHighlights = () => {
+  const removeAllHighlights = useCallback(() => {
     highlights.forEach((highlight) => {
       try {
         renditionRef.current?.annotations.remove(highlight.cfi, "highlight");
@@ -248,7 +249,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
     localStorage.removeItem(STORAGE_KEY_HIGHLIGHTS);
     setHighlights([]);
-  };
+  }, [STORAGE_KEY_HIGHLIGHTS, highlights, location, renditionRef]);
 
   const addBookmark = useCallback(async () => {
     const book = bookRef.current;
