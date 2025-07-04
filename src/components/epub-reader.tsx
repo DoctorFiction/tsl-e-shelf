@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Typography } from "@/components/ui/typography";
-import { useEpubReader } from "@/hooks/use-epub-reader";
+import { Highlight, useEpubReader } from "@/hooks/use-epub-reader";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { NavItem } from "epubjs";
 import { Bookmark, BookMarked, ChevronLeft, ChevronRight, Highlighter, List, Search, Trash, Trash2 } from "lucide-react";
@@ -23,6 +23,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { ReaderSettings } from "./reader-settings";
 import { Progress } from "./ui/progress";
+import { HighlightOptionsBar } from "./highlight-options-bar";
 
 type EnhancedNavItem = NavItem & {
   page?: number;
@@ -56,6 +57,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
     bookCover,
     bookTitle,
     progress,
+    selection,
+    setSelection,
+    addHighlight,
   } = useEpubReader(url);
 
   // TODO: add book title
@@ -64,6 +68,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [highlightDeleteDialogOpen, setHighlightDeleteDialogOpen] = useState(false);
   const [bookmarkDeleteDialogOpen, setBookmarkDeleteDialogOpen] = useState(false);
+  const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -117,8 +122,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Tüm Highlight&apos;ları Sil</AlertDialogTitle>
-                              <AlertDialogDescription>Bu işlem tüm highlight&apos;ları kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
+                              <AlertDialogTitle>Tüm Highlightları Sil</AlertDialogTitle>
+                              <AlertDialogDescription>Bu işlem tüm highlightları kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>İptal</AlertDialogCancel>
@@ -146,7 +151,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
                                 goToCfi(hl.cfi);
                               }}
                             >
-                              <Typography variant="body2" className="line-clamp-2">
+                              <Typography variant="body2" className={`line-clamp-2 ${hl.type === "underline" ? "underline" : ""}`}>
+                                {hl.type !== "underline" && hl.color && <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: hl.color }} />}
                                 {hl.text}
                               </Typography>
                             </div>
@@ -444,6 +450,14 @@ export default function EpubReader({ url }: EpubReaderProps) {
           </>
         )}
         <div ref={viewerRef} className="w-full h-screen" />
+        <HighlightOptionsBar
+          selection={selection}
+          setSelection={setSelection}
+          addHighlight={addHighlight}
+          clickedHighlight={clickedHighlight}
+          removeHighlight={removeHighlight}
+          setClickedHighlight={setClickedHighlight}
+        />
       </CardContent>
     </Card>
   );

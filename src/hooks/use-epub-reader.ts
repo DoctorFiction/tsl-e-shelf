@@ -53,10 +53,13 @@ const defaultConfig = {
   },
 };
 
-type Highlight = {
+export type Highlight = {
+  id?: string;
   cfi: string;
   text: string;
   type?: HighlightType;
+  color?: string;
+  rect?: DOMRect;
 };
 
 type HighlightType = "highlight" | "underline";
@@ -121,6 +124,8 @@ interface IUseEpubReaderReturn {
   progress: number;
   bookTitle: string | null;
   bookCover: string | null;
+  selection: { cfi: string; text: string; rect: DOMRect } | null;
+  setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -145,6 +150,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [bookCover, setBookCover] = useState<string | null>(null);
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
+  const [selection, setSelection] = useState<{ cfi: string; text: string; rect: DOMRect } | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
@@ -160,9 +166,12 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const STORAGE_KEY_TOC = `epub-toc`;
 
   const addHighlight = useCallback(
-    ({ cfi, text, type = "highlight" }: Highlight) => {
-      const config = defaultConfig[type];
-      const newHighlight = { cfi, text };
+    ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
+      const config = {
+        ...defaultConfig[type],
+        style: { ...defaultConfig[type].style, fill: color, stroke: color },
+      };
+      const newHighlight = { cfi, text, color, type };
 
       renditionRef.current?.annotations.add(type, cfi, { text }, undefined, config.className, config.style);
 
@@ -171,6 +180,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         localStorage.setItem(STORAGE_KEY_HIGHLIGHTS, JSON.stringify(updated));
         return updated;
       });
+
+      setSelection(null);
     },
     [STORAGE_KEY_HIGHLIGHTS],
   );
@@ -622,7 +633,16 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
     const handleSelected = (cfiRange: string, contents: Contents) => {
       const selectedText = contents.window.getSelection()?.toString() || "";
-      addHighlight({ cfi: cfiRange, text: selectedText });
+      const range = contents.window.getSelection()?.getRangeAt(0);
+      if (!range) return;
+
+      const rect = range.getBoundingClientRect();
+
+      if (selectedText) {
+        setSelection({ cfi: cfiRange, text: selectedText, rect });
+      } else {
+        setSelection(null);
+      }
     };
 
     rendition.on("selected", handleSelected);
@@ -637,7 +657,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (savedHighlights) {
       try {
         const parsed: Highlight[] = JSON.parse(savedHighlights);
-        parsed.forEach(({ cfi, text }) => addHighlight({ cfi, text }));
+        parsed.forEach(({ cfi, text, color }) => addHighlight({ cfi, text, color }));
         setHighlights(parsed);
       } catch (err) {
         console.error("Failed to parse saved highlights", err);
@@ -705,5 +725,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     progress,
     bookTitle,
     bookCover,
+    selection,
+    setSelection,
   };
 }
