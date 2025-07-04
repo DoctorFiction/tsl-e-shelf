@@ -331,6 +331,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(updated));
         return updated;
       });
+      setSelection(null);
     },
     [STORAGE_KEY_NOTES],
   );
@@ -686,15 +687,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (savedNotes) {
       const parsed = JSON.parse(savedNotes) as Note[];
       parsed.forEach((note) => {
-        rendition.annotations.add("highlight", note.cfi, { text: note.text }, undefined, "epub-note", {
-          fill: "lightblue",
-          fillOpacity: "0.4",
-          mixBlendMode: "multiply",
-        });
+        rendition.annotations.add("highlight", note.cfi, { text: note.text }, undefined, defaultConfig.note.className, defaultConfig.note.style);
       });
       setNotes(parsed);
     }
-  }, [STORAGE_KEY_NOTES]);
+  }, [STORAGE_KEY_NOTES, renditionRef]);
 
   return {
     toc,

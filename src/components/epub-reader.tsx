@@ -60,6 +60,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     selection,
     setSelection,
     addHighlight,
+    addNote,
   } = useEpubReader(url);
 
   // TODO: add book title
@@ -452,11 +453,12 @@ export default function EpubReader({ url }: EpubReaderProps) {
         <div ref={viewerRef} className="w-full h-screen" />
         <HighlightOptionsBar
           selection={selection}
-          setSelection={setSelection}
           addHighlight={addHighlight}
           clickedHighlight={clickedHighlight}
           removeHighlight={removeHighlight}
           setClickedHighlight={setClickedHighlight}
+          setSelection={setSelection}
+          addNote={addNote}
         />
       </CardContent>
     </Card>
