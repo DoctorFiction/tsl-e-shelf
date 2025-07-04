@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
-import ProgressBarProvider from "./providers/progress-provider";
 import { DevTools } from "@/components/dev-tools";
+import ProgressBarProvider from "../providers/progress-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
