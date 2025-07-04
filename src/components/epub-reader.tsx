@@ -1,5 +1,4 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
 import { Highlight, useEpubReader } from "@/hooks/use-epub-reader";
 import { useEffect, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
@@ -62,15 +61,16 @@ export default function EpubReader({ url }: EpubReaderProps) {
   }, [goPrev, goNext]);
 
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
+  const [controlsVisible, setControlsVisible] = useState(true);
 
   return (
-    <Card className="!py-0">
-      <CardContent className="p-0">
-        {isLoading ? (
-          <BookLoading bookTitle={bookTitle} bookCover={bookCover} />
-        ) : (
-          <>
-            <div className="flex flex-col p-2 items-center bg-gray-100 dark:bg-gray-800 relative justify-center">
+    <div className="w-full h-screen overflow-hidden" onMouseEnter={() => setControlsVisible(true)} onMouseLeave={() => setControlsVisible(false)}>
+      {isLoading ? (
+        <BookLoading bookTitle={bookTitle} bookCover={bookCover} />
+      ) : (
+        <>
+          <div className={`absolute top-0 left-0 right-0 z-10 transition-transform duration-300 ${controlsVisible ? "translate-y-0" : "-translate-y-full"}`}>
+            <div className="flex items-center justify-between px-2 py-1 bg-gray-100 dark:bg-gray-800 relative">
               <div className="absolute left-4 flex gap-2">
                 <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
                 <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
@@ -85,20 +85,20 @@ export default function EpubReader({ url }: EpubReaderProps) {
                 <ReaderSettings />
               </div>
             </div>
-            <Progress value={progress} className="h-1 rounded-none" />
-          </>
-        )}
-        <div ref={viewerRef} className="w-full h-screen" />
-        <HighlightOptionsBar
-          selection={selection}
-          addHighlight={addHighlight}
-          clickedHighlight={clickedHighlight}
-          removeHighlight={removeHighlight}
-          setClickedHighlight={setClickedHighlight}
-          setSelection={setSelection}
-          addNote={addNote}
-        />
-      </CardContent>
-    </Card>
+          </div>
+        </>
+      )}
+      <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
+      <div ref={viewerRef} className="w-full h-screen" />
+      <HighlightOptionsBar
+        selection={selection}
+        addHighlight={addHighlight}
+        clickedHighlight={clickedHighlight}
+        removeHighlight={removeHighlight}
+        setClickedHighlight={setClickedHighlight}
+        setSelection={setSelection}
+        addNote={addNote}
+      />
+    </div>
   );
 }
