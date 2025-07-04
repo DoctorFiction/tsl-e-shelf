@@ -1,33 +1,13 @@
 "use client";
 
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectLabel,
-  SelectItem,
-} from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectLabel, SelectItem } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Asterisk, Cog, Type } from "lucide-react";
 import { useAtom } from "jotai";
 import { Slider } from "@/components/ui/slider";
-import {
-  defaultOverrides,
-  IReaderOverrides,
-  pendingReaderOverridesAtom,
-  readerOverridesAtom,
-  readerPreferencesAtom,
-} from "@/atoms/reader-preferences";
+import { defaultOverrides, IReaderOverrides, pendingReaderOverridesAtom, readerOverridesAtom, readerPreferencesAtom } from "@/atoms/reader-preferences";
 import { useState, useEffect, CSSProperties, useMemo } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import {
@@ -43,12 +23,7 @@ import {
 } from "./ui/alert-dialog";
 
 // List of numeric override keys
-export type SliderField =
-  | "fontSize"
-  | "lineHeight"
-  | "characterSpacing"
-  | "wordSpacing"
-  | "margin";
+export type SliderField = "fontSize" | "lineHeight" | "characterSpacing" | "wordSpacing" | "margin";
 
 export type SelectField = "fontFamily" | "textAlign" | "columnCount";
 export type SwitchField = "isBold";
@@ -76,17 +51,8 @@ interface ReaderStyleSwitchProps {
   description?: string;
 }
 
-const ReaderStyleSlider = ({
-  label,
-  field,
-  min,
-  max,
-  step = 1,
-  formatValue,
-}: ReaderStyleSliderProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(
-    pendingReaderOverridesAtom,
-  );
+const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
+  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const atomValue = Number(pendingOverrides[field]) || min;
   const [tempValue, setTempValue] = useState<number>(atomValue);
 
@@ -112,28 +78,13 @@ const ReaderStyleSlider = ({
         <span>{label}</span>
         <span>{formatValue ? formatValue(tempValue) : tempValue}</span>
       </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[tempValue]}
-        onValueChange={handleValueChange}
-        onValueCommit={handleValueCommit}
-      />
+      <Slider min={min} max={max} step={step} value={[tempValue]} onValueChange={handleValueChange} onValueCommit={handleValueCommit} />
     </div>
   );
 };
 
-export const ReaderStyleSelect = ({
-  label,
-  field,
-  options,
-  placeholder = "Select option",
-  icon,
-}: ReaderStyleSelectProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(
-    pendingReaderOverridesAtom,
-  );
+export const ReaderStyleSelect = ({ label, field, options, placeholder = "Select option", icon }: ReaderStyleSelectProps) => {
+  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const currentValue = pendingOverrides[field]?.toString() as string;
 
   const handleValueChange = (value: string) => {
@@ -166,14 +117,8 @@ export const ReaderStyleSelect = ({
   );
 };
 
-export const ReaderStyleSwitch = ({
-  label,
-  field,
-  description,
-}: ReaderStyleSwitchProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(
-    pendingReaderOverridesAtom,
-  );
+export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwitchProps) => {
+  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const currentValue = (pendingOverrides[field] as boolean) ?? false;
 
   const handleCheckedChange = (checked: boolean) => {
@@ -186,12 +131,8 @@ export const ReaderStyleSwitch = ({
   return (
     <div className="flex items-center justify-between space-x-2">
       <div className="space-y-0.5">
-        <span className="text-sm font-medium text-muted-foreground">
-          {label}
-        </span>
-        {description && (
-          <p className="text-xs text-muted-foreground/70">{description}</p>
-        )}
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        {description && <p className="text-xs text-muted-foreground/70">{description}</p>}
       </div>
       <Switch checked={currentValue} onCheckedChange={handleCheckedChange} />
     </div>
@@ -235,9 +176,7 @@ export const ReaderSettingsCustom = () => {
 
   const [prefs] = useAtom(readerPreferencesAtom);
   const [overrides, setOverrides] = useAtom(readerOverridesAtom);
-  const [pendingOverrides, setPendingOverrides] = useAtom(
-    pendingReaderOverridesAtom,
-  );
+  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
 
   const handleSave = () => {
     setOverrides(pendingOverrides);
@@ -273,9 +212,7 @@ export const ReaderSettingsCustom = () => {
 
   const previewStyle = useMemo<CSSProperties>(() => {
     return {
-      backgroundColor: isDark
-        ? prefs.backgroundColor.dark
-        : prefs.backgroundColor.light,
+      backgroundColor: isDark ? prefs.backgroundColor.dark : prefs.backgroundColor.light,
       color: isDark ? prefs.textColor.dark : prefs.textColor.light,
       fontSize: pendingOverrides.fontSize,
       fontFamily: pendingOverrides.fontFamily,
@@ -317,11 +254,7 @@ export const ReaderSettingsCustom = () => {
     >
       <DialogTrigger asChild>
         <div className="flex flex-row gap-1 items-center">
-          <Button
-            variant="outline"
-            className="gap-1 grow"
-            onClick={() => setOpen(true)}
-          >
+          <Button variant="outline" className="gap-1 grow" onClick={() => setOpen(true)}>
             <Cog />
             More customizations
           </Button>
@@ -338,58 +271,19 @@ export const ReaderSettingsCustom = () => {
         </DialogHeader>
         <div className="relative rounded-md p-4 border bg-background h-40 overflow-hidden">
           <p style={previewStyle} className="text-sm leading-relaxed">
-            Alice was beginning to get very tired of sitting by her sister on
-            the bank, and of having nothing to do: once or twice she had peeped
-            into the book her sister was reading, but it had no pictures or
-            conversations in it, “and what is the use of a book,” thought Alice
-            “without pictures or conversations?” So she was considering in her
-            own mind (as well as she could, for the hot day made her feel very
-            sleepy and stupid), whether the pleasure of making a daisy-chain
-            would be worth the trouble of getting up and picking the daisies,
-            when suddenly a White Rabbit with pink eyes ran close by her.
+            Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no
+            pictures or conversations in it, “and what is the use of a book,” thought Alice “without pictures or conversations?” So she was considering in her own mind (as well as she could, for the
+            hot day made her feel very sleepy and stupid), whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit
+            with pink eyes ran close by her.
           </p>
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
         </div>
-        <div
-          key={JSON.stringify(pendingOverrides)}
-          className="flex flex-col gap-4"
-        >
-          <ReaderStyleSelect
-            label="Font Family"
-            field="fontFamily"
-            options={fontOptions}
-            placeholder="Select font"
-            icon={<Type className="h-4 w-4" />}
-          />
-
-          <ReaderStyleSlider
-            label="Line Spacing"
-            field="lineHeight"
-            min={0.75}
-            max={2.5}
-            step={0.05}
-            formatValue={(val) => val.toFixed(2)}
-          />
-
-          <ReaderStyleSlider
-            label="Character Spacing"
-            field="characterSpacing"
-            min={-3}
-            max={5}
-            step={0.5}
-            formatValue={(val) => `${val.toFixed(1)}px`}
-          />
-
-          <ReaderStyleSlider
-            label="Word Spacing"
-            field="wordSpacing"
-            min={-5}
-            max={10}
-            step={0.5}
-            formatValue={(val) => `${val.toFixed(1)}px`}
-          />
-
-          {/* TODO: ADD BACK WHEN MARGIN BUG IS SOLVED */}
+        <div key={JSON.stringify(pendingOverrides)} className="flex flex-col gap-4">
+          <ReaderStyleSelect label="Font Family" field="fontFamily" options={fontOptions} placeholder="Select font" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSlider label="Line Spacing" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
+          <ReaderStyleSlider label="Character Spacing" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+          <ReaderStyleSlider label="Word Spacing" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+          {/* FIX: ADD BACK WHEN MARGIN BUG IS SOLVED */}
           {/* <ReaderStyleSlider */}
           {/*   label="Margin" */}
           {/*   field="margin" */}
@@ -398,28 +292,9 @@ export const ReaderSettingsCustom = () => {
           {/*   step={1} */}
           {/*   formatValue={(val) => `${val.toFixed(1)}px`} */}
           {/* /> */}
-
-          <ReaderStyleSelect
-            label="Columns"
-            field="columnCount"
-            options={columnOptions}
-            placeholder="Select columns"
-            icon={<Type className="h-4 w-4" />}
-          />
-
-          <ReaderStyleSelect
-            label="Text Alignment"
-            field="textAlign"
-            options={textAlignOptions}
-            placeholder="Select alignment"
-            icon={<Type className="h-4 w-4" />}
-          />
-
-          <ReaderStyleSwitch
-            label="Bold Text"
-            field="isBold"
-            description="Make text bold for better readability"
-          />
+          <ReaderStyleSelect label="Columns" field="columnCount" options={columnOptions} placeholder="Select columns" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSelect label="Text Alignment" field="textAlign" options={textAlignOptions} placeholder="Select alignment" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSwitch label="Bold Text" field="isBold" description="Make text bold for better readability" />
         </div>
         <div className="flex justify-between items-center pt-4">
           {/* Reset Button on the left if customized */}
@@ -432,16 +307,11 @@ export const ReaderSettingsCustom = () => {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Reset customizations?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove all your custom styles and revert to the
-                  theme defaults.
-                </AlertDialogDescription>
+                <AlertDialogDescription>This will remove all your custom styles and revert to the theme defaults.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>
-                  Yes, Reset
-                </AlertDialogAction>
+                <AlertDialogAction onClick={handleReset}>Yes, Reset</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

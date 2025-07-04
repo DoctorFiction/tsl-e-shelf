@@ -58,6 +58,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
     progress,
   } = useEpubReader(url);
 
+  // TODO: add book title
+  // TODO: add book page number
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [highlightDeleteDialogOpen, setHighlightDeleteDialogOpen] = useState(false);
   const [bookmarkDeleteDialogOpen, setBookmarkDeleteDialogOpen] = useState(false);

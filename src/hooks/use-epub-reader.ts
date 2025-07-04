@@ -8,6 +8,9 @@ import { useAtom } from "jotai";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
+// TODO: fit cover page with no padding
+// TODO: add highlights UI
+// TODO: add notes UI
 
 const defaultConfig = {
   highlight: {
