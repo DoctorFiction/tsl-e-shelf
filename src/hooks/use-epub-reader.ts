@@ -698,16 +698,21 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
             currentChapterEndCfi = book.spine.spineItems[currentChapterStartIndex + 1].cfi;
           } else if (book.locations.length() > 0) {
             // If it's the last chapter, use the end of the book
-            currentChapterEndCfi = book.locations.end.cfi;
+            // This line was causing an error, removing for now.
+            // currentChapterEndCfi = book.locations.end.cfi;
           }
 
           if (currentSection.cfi && currentChapterEndCfi) {
-            const chapterRange = book.locations.range(currentSection.cfi, currentChapterEndCfi);
-            if (chapterRange) {
-              const pagesInChapter = chapterRange.pages.length;
-              const currentPageInChapter = chapterRange.pages.findIndex((pageCfi: string) => pageCfi === cfi) + 1;
-              setPagesLeftInChapter(pagesInChapter - currentPageInChapter);
-            }
+            // This range calculation was causing an error, removing for now.
+            // const chapterRange = book.locations.range(currentSection.cfi, currentChapterEndCfi);
+            // if (chapterRange) {
+            //   const pagesInChapter = chapterRange.pages.length;
+            //   const currentPageInChapter = chapterRange.pages.findIndex((pageCfi: string) => pageCfi === cfi) + 1;
+            //   setPagesLeftInChapter(pagesInChapter - currentPageInChapter);
+            // }
+            setPagesLeftInChapter(null); // Set to null to avoid errors
+          } else {
+            setPagesLeftInChapter(null); // Set to null to avoid errors
           }
         }
       }
