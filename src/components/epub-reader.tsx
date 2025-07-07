@@ -41,8 +41,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
     removeNote,
     removeAllNotes,
     editNote,
-    currentPage,
-    totalPages,
     currentSearchResultIndex,
     goToSearchResult,
   } = useEpubReader(url);
