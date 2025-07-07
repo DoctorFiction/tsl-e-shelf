@@ -53,7 +53,7 @@ export function SearchPopover({
               return (
                 <Card
                   key={i}
-                  className="flex flex-col px-4 py-2 gap-0.5 cursor-pointer hover:bg-muted transition"
+                  className="flex flex-col px-4 py-3 cursor-pointer hover:bg-muted transition mb-2"
                   onClick={() => {
                     goToCfi(result.cfi);
                   }}
