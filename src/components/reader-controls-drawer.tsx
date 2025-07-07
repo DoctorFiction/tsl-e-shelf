@@ -122,7 +122,7 @@ export function ReaderControlsDrawer({
   return (
     <div
       ref={barRef}
-      className={`fixed right-0 top-0 h-full bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-md p-4 flex flex-col space-y-4 transition-all duration-300 z-50
+      className={`fixed right-0 top-0 h-full bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-md p-4 mt-1 flex flex-col space-y-4 transition-all duration-300 z-50
         ${isPinned ? "w-64" : "w-20 items-center"}`}
     >
       <Button variant="ghost" className="" onClick={() => setIsPinned(!isPinned)} aria-label={isPinned ? "Unpin drawer" : "Pin drawer"}>
@@ -215,12 +215,20 @@ export function ReaderControlsDrawer({
           Controls
         </Typography>
         <div className="flex flex-row gap-2 items-center">
-          <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
-          {isPinned && <Typography>Highlights</Typography>}
+          <TableOfContentsPopover toc={toc} goToHref={goToHref} />
+          {isPinned && <Typography>Table of Contents</Typography>}
+        </div>
+        <div className="flex flex-row gap-2 items-center">
+          <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
+          {isPinned && <Typography>Bookmark</Typography>}
         </div>
         <div className="flex flex-row gap-2 items-center">
           <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
           {isPinned && <Typography>Bookmarks</Typography>}
+        </div>
+        <div className="flex flex-row gap-2 items-center">
+          <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
+          {isPinned && <Typography>Highlights</Typography>}
         </div>
         <div className="flex flex-row gap-2 items-center">
           <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
@@ -229,14 +237,6 @@ export function ReaderControlsDrawer({
         <div className="flex flex-row gap-2 items-center">
           <SearchPopover searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchResults={searchResults} goToCfi={goToCfi} />
           {isPinned && <Typography>Search</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
-          {isPinned && <Typography>Bookmark</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <TableOfContentsPopover toc={toc} goToHref={goToHref} />
-          {isPinned && <Typography>Table of Contents</Typography>}
         </div>
         <div className="flex flex-row gap-2 items-center">
           <ReaderSettings />

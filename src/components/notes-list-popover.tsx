@@ -51,7 +51,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
           aria-label="Show notes"
           type="button"
         >
-          <FilePenLine className="w-4 h-4 text-blue-500" />
+          <FilePenLine className="w-4 h-4 text-purple-500" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-96 p-4" align="start" side="bottom">
