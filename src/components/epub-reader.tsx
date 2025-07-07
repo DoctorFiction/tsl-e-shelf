@@ -1,16 +1,8 @@
 "use client";
 import { Highlight, useEpubReader } from "@/hooks/use-epub-reader";
 import { useEffect, useState } from "react";
-import { BookmarkButton } from "./bookmark-button";
-import { BookmarksListPopover } from "./bookmarks-list-popover";
-import { HighlightOptionsBar } from "./highlight-options-bar";
-import { HighlightsListPopover } from "./highlights-list-popover";
-import { NotesListPopover } from "./notes-list-popover";
+import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
-import { NavigationControls } from "./navigation-controls";
-import { ReaderSettings } from "./reader-settings";
-import { SearchPopover } from "./search-popover";
-import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { Progress } from "./ui/progress";
 
 interface EpubReaderProps {
@@ -66,37 +58,14 @@ export default function EpubReader({ url }: EpubReaderProps) {
   }, [goPrev, goNext]);
 
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
-  const [controlsVisible, setControlsVisible] = useState(true);
+  const [, setControlsVisible] = useState(true);
 
   return (
     <div className="w-full h-screen overflow-hidden" onMouseEnter={() => setControlsVisible(true)} onMouseLeave={() => setControlsVisible(false)}>
-      {isLoading ? (
-        <BookLoading bookTitle={bookTitle} bookCover={bookCover} />
-      ) : (
-        <>
-          <div className={`absolute top-0 left-0 right-0 z-10 transition-transform duration-300 ${controlsVisible ? "translate-y-0" : "-translate-y-full"}`}>
-            <div className="flex items-center justify-between px-2 py-1 bg-gray-100 dark:bg-gray-800 relative">
-              <div className="absolute left-4 flex gap-2">
-                <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
-                <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
-                <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
-              </div>
-              <div className="flex gap-4 mx-auto">
-                <NavigationControls goPrev={goPrev} goNext={goNext} />
-              </div>
-              <div className="absolute right-4 flex gap-2">
-                <SearchPopover searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchResults={searchResults} goToCfi={goToCfi} />
-                <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmark} removeBookmark={removeBookmark} location={location} />
-                <TableOfContentsPopover toc={toc} goToHref={goToHref} />
-                <ReaderSettings />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
       <div ref={viewerRef} className="w-full h-screen" />
-      <HighlightOptionsBar
+      <ReaderControlsDrawer
         selection={selection}
         addHighlight={addHighlight}
         clickedHighlight={clickedHighlight}
@@ -104,6 +73,24 @@ export default function EpubReader({ url }: EpubReaderProps) {
         setClickedHighlight={setClickedHighlight}
         setSelection={setSelection}
         addNote={addNote}
+        highlights={highlights}
+        bookmarks={bookmarks}
+        notes={notes}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        searchResults={searchResults}
+        goToCfi={goToCfi}
+        removeBookmark={removeBookmark}
+        removeAllBookmarks={removeAllBookmarks}
+        removeNote={removeNote}
+        removeAllNotes={removeAllNotes}
+        editNote={editNote}
+        removeAllHighlights={removeAllHighlights}
+        isBookmarked={isBookmarked}
+        addBookmark={addBookmark}
+        location={location}
+        toc={toc}
+        goToHref={goToHref}
       />
     </div>
   );

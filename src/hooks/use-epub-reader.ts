@@ -78,7 +78,7 @@ export type Note = {
   createdAt: string;
 };
 
-type SearchResult = {
+export type SearchResult = {
   cfi: string;
   excerpt: string;
   href: string;
@@ -86,7 +86,7 @@ type SearchResult = {
   chapterIndex: number;
 };
 
-type EnhancedNavItem = NavItem & {
+export type EnhancedNavItem = NavItem & {
   page?: number;
   subitems?: EnhancedNavItem[];
 };

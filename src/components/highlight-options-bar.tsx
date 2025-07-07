@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Highlight, Note } from "@/hooks/use-epub-reader";
 import { Underline, Trash2, X, NotebookPen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
+import { Highlight, Note } from "@/hooks/use-epub-reader";
+import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 
 const HIGHLIGHT_COLORS = [
   { name: "Yellow", color: "#FFDE63" },
@@ -163,11 +163,7 @@ export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight,
             <DialogTitle>Add Note</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {selection && (
-              <blockquote className="mt-6 border-l-2 pl-6 italic">
-                {selection.text}
-              </blockquote>
-            )}
+            {selection && <blockquote className="mt-6 border-l-2 pl-6 italic">{selection.text}</blockquote>}
             <Label htmlFor="note-content" className="sr-only">
               Note
             </Label>
