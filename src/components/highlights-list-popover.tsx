@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Typography } from "@/components/ui/typography";
 import { Highlight } from "@/hooks/use-epub-reader";
+import formatRelativeDate from "@/lib/format-relative-date";
 import { Highlighter, Trash, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -81,6 +82,9 @@ export function HighlightsListPopover({
                   <Typography variant="body2" className={`line-clamp-2 ${hl.type === "underline" ? "underline" : ""}`}>
                     {hl.type !== "underline" && hl.color && <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: hl.color }} />}
                     {hl.text}
+                  </Typography>
+                  <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formatRelativeDate(hl.createdAt)}
                   </Typography>
                 </div>
                 <button

@@ -58,6 +58,7 @@ export type Highlight = {
   type?: HighlightType;
   color?: string;
   rect?: DOMRect;
+  createdAt: string;
 };
 
 type HighlightType = "highlight" | "underline";
@@ -168,12 +169,12 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const STORAGE_KEY_TOC = `epub-toc`;
 
   const addHighlight = useCallback(
-    ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
+    ({ cfi, text, type = "highlight", color = "yellow" }: Omit<Highlight, "createdAt">) => {
       const config = {
         ...defaultConfig[type],
         style: { ...defaultConfig[type].style, fill: color, stroke: color },
       };
-      const newHighlight = { cfi, text, color, type };
+      const newHighlight: Highlight = { cfi, text, color, type, createdAt: new Date().toISOString() };
 
       renditionRef.current?.annotations.add(type, cfi, { text }, undefined, config.className, config.style);
 
