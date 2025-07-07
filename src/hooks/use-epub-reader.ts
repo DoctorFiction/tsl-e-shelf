@@ -169,7 +169,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const STORAGE_KEY_TOC = `epub-toc`;
 
   const addHighlight = useCallback(
-    ({ cfi, text, type = "highlight", color = "yellow" }: Omit<Highlight, "createdAt">) => {
+    ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
       const config = {
         ...defaultConfig[type],
         style: { ...defaultConfig[type].style, fill: color, stroke: color },
@@ -325,7 +325,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   }, []);
 
   const addNote = useCallback(
-    ({ cfi, text, note }: Omit<Note, 'createdAt'>) => {
+    ({ cfi, text, note }: Note) => {
       const newNote: Note = { cfi, text, note, createdAt: new Date().toISOString() };
 
       // visually annotate
@@ -697,7 +697,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (savedHighlights) {
       try {
         const parsed: Highlight[] = JSON.parse(savedHighlights);
-        parsed.forEach(({ cfi, text, color }) => addHighlight({ cfi, text, color }));
+        parsed.forEach(({ cfi, text, color, createdAt }) => addHighlight({ cfi, text, color, createdAt }));
         setHighlights(parsed);
       } catch (err) {
         console.error("Failed to parse saved highlights", err);

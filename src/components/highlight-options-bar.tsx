@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Highlight } from "@/hooks/use-epub-reader";
+import { Highlight, Note } from "@/hooks/use-epub-reader";
 import { Underline, Trash2, X, NotebookPen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,12 +16,12 @@ const HIGHLIGHT_COLORS = [
 
 interface HighlightOptionsBarProps {
   selection: { cfi: string; text: string; rect: DOMRect } | null;
-  addHighlight: (args: { cfi: string; text: string; type?: "highlight" | "underline"; color?: string }) => void;
+  addHighlight: (args: Highlight) => void;
   clickedHighlight: Highlight | null;
   removeHighlight: (cfi: string, type: "highlight" | "underline") => void;
   setClickedHighlight: React.Dispatch<React.SetStateAction<Highlight | null>>;
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
-  addNote: (args: { cfi: string; text: string; note: string }) => void;
+  addNote: (args: Note) => void;
 }
 
 export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight, removeHighlight, setClickedHighlight, setSelection, addNote }: HighlightOptionsBarProps) {
@@ -51,6 +51,7 @@ export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight,
         cfi: selection.cfi,
         text: selection.text,
         note: noteContent,
+        createdAt: new Date().toISOString(),
       });
       setNoteContent("");
       setIsNoteDialogOpen(false);
@@ -82,6 +83,7 @@ export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight,
                     cfi: selection.cfi,
                     text: selection.text,
                     color: highlight.color,
+                    createdAt: new Date().toISOString(),
                   });
                 }
               }}
@@ -104,6 +106,7 @@ export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight,
                   cfi: selection.cfi,
                   text: selection.text,
                   type: "underline",
+                  createdAt: new Date().toISOString(),
                 });
               }
             }}
