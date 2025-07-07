@@ -45,6 +45,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
     pagesLeftInChapter,
     currentPage,
     totalPages,
+    currentSearchResultIndex,
+    goToSearchResult,
   } = useEpubReader(url);
 
   // TODO: add book title
