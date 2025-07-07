@@ -48,6 +48,8 @@ interface ReaderControlsDrawerProps {
   location: string | null;
   toc: EnhancedNavItem[];
   goToHref: (href: string) => void;
+  currentSearchResultIndex: number;
+  goToSearchResult: (index: number) => void;
 }
 
 export function ReaderControlsDrawer({
@@ -76,6 +78,8 @@ export function ReaderControlsDrawer({
   location,
   toc,
   goToHref,
+  currentSearchResultIndex,
+  goToSearchResult,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -235,7 +239,14 @@ export function ReaderControlsDrawer({
           {isPinned && <Typography>Notes</Typography>}
         </div>
         <div className="flex flex-row gap-2 items-center">
-          <SearchPopover searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchResults={searchResults} goToCfi={goToCfi} />
+          <SearchPopover
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            goToCfi={goToCfi}
+            currentSearchResultIndex={currentSearchResultIndex}
+            goToSearchResult={goToSearchResult}
+          />
           {isPinned && <Typography>Search</Typography>}
         </div>
         <div className="flex flex-row gap-2 items-center">
