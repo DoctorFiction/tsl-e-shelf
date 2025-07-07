@@ -106,6 +106,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
         location={location}
         toc={toc}
         goToHref={goToHref}
+        currentSearchResultIndex={currentSearchResultIndex}
+        goToSearchResult={goToSearchResult}
       />
     </div>
   );
