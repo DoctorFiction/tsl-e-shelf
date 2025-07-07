@@ -111,6 +111,8 @@ interface IUseEpubReaderReturn {
   removeBookmark: (cfiToRemove: string) => void;
   removeAllBookmarks: () => void;
   searchResults: SearchResult[];
+  currentSearchResultIndex: number;
+  goToSearchResult: (index: number) => void;
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   removeHighlight: (cfi: string, type: HighlightType) => void;
@@ -129,6 +131,8 @@ interface IUseEpubReaderReturn {
   bookCover: string | null;
   selection: { cfi: string; text: string; rect: DOMRect } | null;
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
+  currentChapterTitle: string | null;
+  pagesLeftInChapter: number | null;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -143,6 +147,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [notes, setNotes] = useState<Note[]>([]);
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -154,6 +159,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
   const [selection, setSelection] = useState<{ cfi: string; text: string; rect: DOMRect } | null>(null);
+  const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
+  const [pagesLeftInChapter, setPagesLeftInChapter] = useState<number | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
@@ -411,12 +418,14 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       if (!query || !book || !spine) {
         console.warn(`Invalid searchBook call`);
         setSearchResults([]);
+        setCurrentSearchResultIndex(-1);
         return;
       }
 
       const trimmedQuery = query.trim().toLowerCase();
       if (!trimmedQuery) {
         setSearchResults([]);
+        setCurrentSearchResultIndex(-1);
         return;
       }
 
@@ -424,6 +433,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const spineItems = (spine as ExtendedSpine)?.spineItems ?? [];
       if (!Array.isArray(spineItems) || spineItems.length === 0) {
         setSearchResults([]);
+        setCurrentSearchResultIndex(-1);
         return;
       }
       const contextLength = 30;
@@ -491,14 +501,28 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
       await Promise.all(promises);
       setSearchResults(results);
+      setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
     },
     [bookRef, spine],
+  );
+
+  const goToSearchResult = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < searchResults.length) {
+        const result = searchResults[index];
+        renditionRef.current?.display(result.cfi);
+        setSelectedCfi(result.cfi);
+        setCurrentSearchResultIndex(index);
+      }
+    },
+    [searchResults],
   );
 
   // SEARCH EFFECT
   useEffect(() => {
     if (deferredSearchQuery.trim().length === 0) {
       setSearchResults([]);
+      setCurrentSearchResultIndex(-1);
       return;
     }
 
@@ -644,7 +668,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     const rendition = renditionRef.current;
     if (!rendition) return;
 
-    const handleRelocated = (location: Location) => {
+    const handleRelocated = async (location: Location) => {
       const cfi = location.start.cfi;
       setLocation(cfi);
       localStorage.setItem(STORAGE_KEY_LOC, cfi);
@@ -657,6 +681,35 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       if (bookRef.current && bookRef.current.locations.length() > 0) {
         const progressPercentage = Math.round(Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100));
         setProgress(progressPercentage);
+      }
+
+      // Update chapter information
+      const book = bookRef.current;
+      if (book && book.spine && book.locations) {
+        const currentSection = book.spine.get(cfi);
+        if (currentSection) {
+          setCurrentChapterTitle(currentSection.label);
+
+          const currentChapterStartIndex = book.spine.items.findIndex(item => item.cfi === currentSection.cfi);
+          let currentChapterEndCfi = currentSection.cfi;
+
+          // Find the end of the current chapter/section
+          if (currentChapterStartIndex !== -1 && currentChapterStartIndex < book.spine.items.length - 1) {
+            currentChapterEndCfi = book.spine.items[currentChapterStartIndex + 1].cfi;
+          } else if (book.locations.length() > 0) {
+            // If it's the last chapter, use the end of the book
+            currentChapterEndCfi = book.locations.end.cfi;
+          }
+
+          if (currentSection.cfi && currentChapterEndCfi) {
+            const chapterRange = book.locations.range(currentSection.cfi, currentChapterEndCfi);
+            if (chapterRange) {
+              const pagesInChapter = chapterRange.pages.length;
+              const currentPageInChapter = chapterRange.pages.findIndex(pageCfi => pageCfi === cfi) + 1;
+              setPagesLeftInChapter(pagesInChapter - currentPageInChapter);
+            }
+          }
+        }
       }
     };
 
@@ -776,5 +829,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     bookCover,
     selection,
     setSelection,
+    currentChapterTitle,
+    pagesLeftInChapter,
+    currentSearchResultIndex,
+    goToSearchResult,
   };
 }

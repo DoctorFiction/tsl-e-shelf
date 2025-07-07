@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Typography } from "@/components/ui/typography";
-import { Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useRef } from "react";
 
 interface SearchPopoverProps {
@@ -11,6 +11,8 @@ interface SearchPopoverProps {
   setSearchQuery: (query: string) => void;
   searchResults: { cfi: string; excerpt: string; chapterTitle: string }[];
   goToCfi: (cfi: string) => void;
+  currentSearchResultIndex: number;
+  goToSearchResult: (index: number) => void;
 }
 
 export function SearchPopover({
@@ -18,8 +20,21 @@ export function SearchPopover({
   setSearchQuery,
   searchResults,
   goToCfi,
+  currentSearchResultIndex,
+  goToSearchResult,
 }: SearchPopoverProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        goToSearchResult(currentSearchResultIndex - 1);
+      } else {
+        goToSearchResult(currentSearchResultIndex + 1);
+      }
+    }
+  };
 
   return (
     <Popover>
@@ -35,7 +50,7 @@ export function SearchPopover({
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4" align="end" side="bottom">
         <div className="flex items-center gap-2 mb-2">
-          <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search in book..." className="flex-1" />
+          <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder="Search in book..." className="flex-1" />
         </div>
         <div>
           {searchQuery && searchResults.length === 0 && (
@@ -44,9 +59,32 @@ export function SearchPopover({
             </Typography>
           )}
           {searchResults.length > 0 && (
-            <Typography variant="body1" className="font-bold mb-1">
-              {searchResults.length} results found:
-            </Typography>
+            <div className="flex items-center justify-between mb-1">
+              <Typography variant="body1" className="font-bold">
+                {searchResults.length} results found:
+              </Typography>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => goToSearchResult(currentSearchResultIndex - 1)}
+                  disabled={currentSearchResultIndex <= 0}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Typography variant="body2">
+                  {currentSearchResultIndex + 1} / {searchResults.length}
+                </Typography>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => goToSearchResult(currentSearchResultIndex + 1)}
+                  disabled={currentSearchResultIndex >= searchResults.length - 1}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           )}
           <ul className="max-h-48 overflow-y-auto">
             {searchResults.map((result, i) => {

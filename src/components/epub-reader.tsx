@@ -41,6 +41,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
     removeNote,
     removeAllNotes,
     editNote,
+    currentChapterTitle,
+    pagesLeftInChapter,
+    currentPage,
+    totalPages,
   } = useEpubReader(url);
 
   // TODO: add book title
