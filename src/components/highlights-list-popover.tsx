@@ -72,23 +72,27 @@ export function HighlightsListPopover({
         <ul className="max-h-64 overflow-y-auto">
           {highlights && highlights.length > 0 ? (
             highlights.map((hl, i) => (
-              <Card key={i} className="flex flex-row items-center px-4 py-2 gap-2 cursor-pointer hover:bg-muted transition group">
+              <Card key={i} className="relative px-4 py-3 cursor-pointer hover:bg-muted transition group mb-2">
                 <div
-                  className="flex-1"
+                  className="w-full"
                   onClick={() => {
                     goToCfi(hl.cfi);
                   }}
                 >
-                  <Typography variant="body2" className={`line-clamp-2 ${hl.type === "underline" ? "underline" : ""}`}>
-                    {hl.type !== "underline" && hl.color && <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: hl.color }} />}
-                    {hl.text}
-                  </Typography>
-                  <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {formatRelativeDate(hl.createdAt)}
-                  </Typography>
+                  <div className="pr-12 mb-8">
+                    <Typography variant="body2" className={`line-clamp-2 ${hl.type === "underline" ? "underline" : ""}`}>
+                      {hl.type !== "underline" && hl.color && <span className="inline-block w-3 h-3 rounded-full mr-2" style={{ backgroundColor: hl.color }} />}
+                      {hl.text}
+                    </Typography>
+                  </div>
+                  <div className="absolute bottom-3 left-4">
+                    <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400">
+                      {formatRelativeDate(hl.createdAt)}
+                    </Typography>
+                  </div>
                 </div>
                 <button
-                  className="text-gray-400 hover:text-red-500 transition ml-2"
+                  className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
                   aria-label="Delete highlight"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -96,7 +100,7 @@ export function HighlightsListPopover({
                   }}
                   type="button"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </Card>
             ))
