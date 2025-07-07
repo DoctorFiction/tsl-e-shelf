@@ -666,7 +666,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     };
   }, [STORAGE_KEY_LOC, currentPage]);
 
-  // Effect for handling text selection
+  // Effect for handling text selection and clicks within the reader
   useEffect(() => {
     const rendition = renditionRef.current;
     if (!rendition) return;
@@ -685,11 +685,21 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
     };
 
+    const handleClick = () => {
+      // Only clear selection if no text is currently selected
+      if (!window.getSelection()?.toString()) {
+        setSelection(null);
+      }
+    };
+
     rendition.on("selected", handleSelected);
+    rendition.on("click", handleClick);
+
     return () => {
       rendition.off("selected", handleSelected);
+      rendition.off("click", handleClick);
     };
-  }, [addHighlight]);
+  }, []);
 
   // Effect for loading saved highlights
   useEffect(() => {
