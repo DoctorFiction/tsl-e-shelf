@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EpubReaderProps {
   url: string;
@@ -64,7 +65,17 @@ export default function EpubReader({ url }: EpubReaderProps) {
     <div className="w-full h-screen overflow-hidden" onMouseEnter={() => setControlsVisible(true)} onMouseLeave={() => setControlsVisible(false)}>
       {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
-      <div ref={viewerRef} className="w-full h-screen" />
+      <div className="relative w-full h-screen">
+        <div ref={viewerRef} className="w-full h-full" />
+        {/* Previous Page Button */}
+        <div className="absolute left-0 top-0 h-full w-1/5 flex items-center justify-start opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={goPrev}>
+          <ChevronLeft className="w-12 h-12 text-gray-600 dark:text-gray-300" />
+        </div>
+        {/* Next Page Button */}
+        <div className="absolute right-0 top-0 h-full w-1/5 flex items-center justify-end opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={goNext}>
+          <ChevronRight className="w-12 h-12 text-gray-600 dark:text-gray-300" />
+        </div>
+      </div>
       <ReaderControlsDrawer
         selection={selection}
         addHighlight={addHighlight}
