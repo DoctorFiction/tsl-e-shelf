@@ -163,6 +163,11 @@ export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight,
             <DialogTitle>Add Note</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {selection && (
+              <blockquote className="mt-6 border-l-2 pl-6 italic">
+                {selection.text}
+              </blockquote>
+            )}
             <Label htmlFor="note-content" className="sr-only">
               Note
             </Label>
