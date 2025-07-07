@@ -5,6 +5,7 @@ import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 import { HighlightsListPopover } from "./highlights-list-popover";
+import { NotesListPopover } from "./notes-list-popover";
 import { BookLoading } from "./book-loading";
 import { NavigationControls } from "./navigation-controls";
 import { ReaderSettings } from "./reader-settings";
@@ -43,6 +44,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
     setSelection,
     addHighlight,
     addNote,
+    notes,
+    removeNote,
+    removeAllNotes,
+    editNote,
   } = useEpubReader(url);
 
   // TODO: add book title
@@ -74,6 +79,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
               <div className="absolute left-4 flex gap-2">
                 <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
                 <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
+                <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
               </div>
               <div className="flex gap-4 mx-auto">
                 <NavigationControls goPrev={goPrev} goNext={goNext} />

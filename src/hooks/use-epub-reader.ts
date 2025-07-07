@@ -62,7 +62,7 @@ export type Highlight = {
 
 type HighlightType = "highlight" | "underline";
 
-type Bookmark = {
+export type Bookmark = {
   cfi: string;
   label?: string;
   createdAt: string;
@@ -70,7 +70,7 @@ type Bookmark = {
   page: number | null;
 };
 
-type Note = {
+export type Note = {
   cfi: string;
   text: string;
   note: string;
@@ -115,6 +115,9 @@ interface IUseEpubReaderReturn {
   removeAllHighlights: () => void;
   addNote: (note: Note) => void;
   notes: Note[];
+  removeNote: (cfi: string) => void;
+  removeAllNotes: () => void;
+  editNote: (cfi: string, newNote: string) => void;
   currentPage: number;
   totalPages: number;
   error: Error | null;
@@ -333,6 +336,39 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
       setSelection(null);
+    },
+    [STORAGE_KEY_NOTES],
+  );
+
+  const removeNote = useCallback(
+    (cfi: string) => {
+      renditionRef.current?.annotations.remove(cfi, "highlight");
+      setNotes((prev) => {
+        const updated = prev.filter((n) => n.cfi !== cfi);
+        localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(updated));
+        return updated;
+      });
+    },
+    [STORAGE_KEY_NOTES],
+  );
+
+  const removeAllNotes = useCallback(() => {
+    notes.forEach((note) => {
+      renditionRef.current?.annotations.remove(note.cfi, "highlight");
+    });
+    setNotes(() => {
+      localStorage.removeItem(STORAGE_KEY_NOTES);
+      return [];
+    });
+  }, [STORAGE_KEY_NOTES, notes]);
+
+  const editNote = useCallback(
+    (cfi: string, newNote: string) => {
+      setNotes((prev) => {
+        const updated = prev.map((n) => (n.cfi === cfi ? { ...n, note: newNote } : n));
+        localStorage.setItem(STORAGE_KEY_NOTES, JSON.stringify(updated));
+        return updated;
+      });
     },
     [STORAGE_KEY_NOTES],
   );
@@ -716,6 +752,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     goNext,
     goPrev,
     addNote,
+    removeNote,
+    removeAllNotes,
+    editNote,
     currentPage,
     totalPages,
     error,
