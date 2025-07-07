@@ -690,12 +690,12 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         if (currentSection) {
           setCurrentChapterTitle(currentSection.label);
 
-          const currentChapterStartIndex = book.spine.items.findIndex(item => item.cfi === currentSection.cfi);
+          const currentChapterStartIndex = book.spine.spineItems.findIndex(item => item.cfi === currentSection.cfi);
           let currentChapterEndCfi = currentSection.cfi;
 
           // Find the end of the current chapter/section
-          if (currentChapterStartIndex !== -1 && currentChapterStartIndex < book.spine.items.length - 1) {
-            currentChapterEndCfi = book.spine.items[currentChapterStartIndex + 1].cfi;
+          if (currentChapterStartIndex !== -1 && currentChapterStartIndex < book.spine.spineItems.length - 1) {
+            currentChapterEndCfi = book.spine.spineItems[currentChapterStartIndex + 1].cfi;
           } else if (book.locations.length() > 0) {
             // If it's the last chapter, use the end of the book
             currentChapterEndCfi = book.locations.end.cfi;
@@ -705,7 +705,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
             const chapterRange = book.locations.range(currentSection.cfi, currentChapterEndCfi);
             if (chapterRange) {
               const pagesInChapter = chapterRange.pages.length;
-              const currentPageInChapter = chapterRange.pages.findIndex(pageCfi => pageCfi === cfi) + 1;
+              const currentPageInChapter = chapterRange.pages.findIndex((pageCfi: string) => pageCfi === cfi) + 1;
               setPagesLeftInChapter(pagesInChapter - currentPageInChapter);
             }
           }
