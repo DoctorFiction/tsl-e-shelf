@@ -73,7 +73,7 @@ export function SearchPopover({
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <Typography variant="body2">
-                  {currentSearchResultIndex + 1} / {searchResults.length}
+                  {currentSearchResultIndex !== -1 ? `${currentSearchResultIndex + 1} / ${searchResults.length}` : ''}
                 </Typography>
                 <Button
                   variant="ghost"
