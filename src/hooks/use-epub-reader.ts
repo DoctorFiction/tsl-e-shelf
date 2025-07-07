@@ -74,6 +74,7 @@ export type Note = {
   cfi: string;
   text: string;
   note: string;
+  createdAt: string;
 };
 
 type SearchResult = {
@@ -323,8 +324,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   }, []);
 
   const addNote = useCallback(
-    ({ cfi, text, note }: Note) => {
-      const newNote: Note = { cfi, text, note };
+    ({ cfi, text, note }: Omit<Note, 'createdAt'>) => {
+      const newNote: Note = { cfi, text, note, createdAt: new Date().toISOString() };
 
       // visually annotate
       renditionRef.current?.annotations.add("highlight", cfi, { text }, undefined, defaultConfig.note.className, defaultConfig.note.style);

@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Typography } from "@/components/ui/typography";
 import { Note } from "@/hooks/use-epub-reader";
+import formatRelativeDate from "@/lib/format-relative-date";
 import { FilePenLine, Trash, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -100,6 +101,12 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                       goToCfi(note.cfi);
                     }}
                   >
+                    <div className="absolute top-3 right-3">
+                      <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400">
+                        {formatRelativeDate(note.createdAt)}
+                      </Typography>
+                    </div>
+
                     <div className="pr-12 mb-8">
                       <Typography variant="body2" className="line-clamp-3 text-gray-900 dark:text-gray-100 leading-relaxed">
                         {note.text}
