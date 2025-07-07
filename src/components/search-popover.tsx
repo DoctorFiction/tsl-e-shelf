@@ -6,6 +6,9 @@ import { Typography } from "@/components/ui/typography";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useRef } from "react";
 
+// FIX: fix the next/prev section layout, when has more search results than 100
+// FIX: lags a bit when too many results. add enter on search, debouncelags a bit when too many results.
+
 interface SearchPopoverProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -15,14 +18,7 @@ interface SearchPopoverProps {
   goToSearchResult: (index: number) => void;
 }
 
-export function SearchPopover({
-  searchQuery,
-  setSearchQuery,
-  searchResults,
-  goToCfi,
-  currentSearchResultIndex,
-  goToSearchResult,
-}: SearchPopoverProps) {
+export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goToCfi, currentSearchResultIndex, goToSearchResult }: SearchPopoverProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -64,23 +60,11 @@ export function SearchPopover({
                 {searchResults.length} results found:
               </Typography>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => goToSearchResult(currentSearchResultIndex - 1)}
-                  disabled={currentSearchResultIndex <= 0}
-                >
+                <Button variant="ghost" size="sm" onClick={() => goToSearchResult(currentSearchResultIndex - 1)} disabled={currentSearchResultIndex <= 0}>
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <Typography variant="body2">
-                  {currentSearchResultIndex !== -1 ? `${currentSearchResultIndex + 1} / ${searchResults.length}` : ''}
-                </Typography>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => goToSearchResult(currentSearchResultIndex + 1)}
-                  disabled={currentSearchResultIndex >= searchResults.length - 1}
-                >
+                <Typography variant="body2">{currentSearchResultIndex !== -1 ? `${currentSearchResultIndex + 1} / ${searchResults.length}` : ""}</Typography>
+                <Button variant="ghost" size="sm" onClick={() => goToSearchResult(currentSearchResultIndex + 1)} disabled={currentSearchResultIndex >= searchResults.length - 1}>
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </div>
