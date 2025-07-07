@@ -31,11 +31,11 @@ interface ReaderControlsDrawerProps {
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
   addNote: (args: Note) => void;
   highlights: Highlight[];
-  bookmarks: Bookmark[]; // TODO: Use Bookmark[] type
+  bookmarks: Bookmark[];
   notes: Note[];
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-  searchResults: SearchResult[]; // TODO: Use SearchResult[] type
+  searchResults: SearchResult[];
   goToCfi: (cfi: string) => void;
   removeBookmark: (cfiToRemove: string) => void;
   removeAllBookmarks: () => void;
@@ -46,7 +46,7 @@ interface ReaderControlsDrawerProps {
   isBookmarked: boolean;
   addBookmark: () => void;
   location: string | null;
-  toc: EnhancedNavItem[]; // TODO: Use EnhancedNavItem[] type
+  toc: EnhancedNavItem[];
   goToHref: (href: string) => void;
 }
 
