@@ -52,7 +52,6 @@ interface ReaderStyleSwitchProps {
 }
 
 // TODO: When there are any highlights or notes and the styles is updated, reload the page. Handle the updating state
-// TODO: Add theme toggler
 
 const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
   const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
