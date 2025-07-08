@@ -51,8 +51,6 @@ interface ReaderStyleSwitchProps {
   description?: string;
 }
 
-// TODO: When there are any highlights or notes and the styles is updated, reload the page. Handle the updating state
-
 const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
   const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const atomValue = Number(pendingOverrides[field]) || min;
