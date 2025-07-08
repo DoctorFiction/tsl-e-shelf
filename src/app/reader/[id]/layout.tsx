@@ -3,7 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../../globals.css";
-import { DevTools } from "@/components/dev-tools";
+// import { DevTools } from "@/components/dev-tools";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +31,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <ProgressBarProvider>
             <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">{children}</div>
-            <DevTools />
+            {/* <DevTools /> */}
           </ProgressBarProvider>
         </ThemeProvider>
       </body>
