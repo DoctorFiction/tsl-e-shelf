@@ -49,6 +49,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
   // TODO: add book page number
   // TODO: make the reader responsive
   // TODO: add home, profile, logout etc drawer
+  // TODO: fix next/prev page button width
 
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
 
