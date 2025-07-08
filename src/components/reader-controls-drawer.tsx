@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
-import { Underline, Trash2, X, NotebookPen, Pin, PinOff, ChevronUp, Settings } from "lucide-react";
+import { Underline, Trash2, X, NotebookPen, Pin, PinOff, ChevronUp, Settings, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { ReaderSettings } from "./reader-settings";
 import { ModeToggle } from "./mode-toggle";
 import { Typography } from "./ui/typography";
+import Image from "next/image";
 
 const HIGHLIGHT_COLORS = [
   { name: "Yellow", color: "#FFDE63" },
@@ -52,6 +53,13 @@ interface ReaderControlsDrawerProps {
   currentSearchResultIndex: number;
   goToSearchResult: (index: number) => void;
   onDrawerStateChange?: (isPinned: boolean) => void;
+  bookInfoOpen?: boolean;
+  setBookInfoOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+  bookTitle?: string | null;
+  bookAuthor?: string | null;
+  bookCover?: string | null;
+  totalPages?: number;
+  progress?: number;
 }
 
 export function ReaderControlsDrawer({
@@ -83,6 +91,13 @@ export function ReaderControlsDrawer({
   currentSearchResultIndex,
   goToSearchResult,
   onDrawerStateChange,
+  bookInfoOpen,
+  setBookInfoOpen,
+  bookTitle,
+  bookAuthor,
+  bookCover,
+  totalPages,
+  progress,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -283,6 +298,14 @@ export function ReaderControlsDrawer({
               <ReaderSettings />
               {isPinned && <Typography>Settings</Typography>}
             </div>
+            {setBookInfoOpen && (
+              <div className="flex flex-row gap-2 items-center">
+                <Button variant="ghost" onClick={() => setBookInfoOpen(true)} className="p-2 flex items-center justify-center">
+                  <Info className="w-6 h-6" />
+                </Button>
+                {isPinned && <Typography>Book Info</Typography>}
+              </div>
+            )}
           </div>
         )}
 
@@ -424,7 +447,7 @@ export function ReaderControlsDrawer({
 
           {/* Mobile Main Controls - only show when no selection or clicked highlight */}
           {!selection && !clickedHighlight && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-2">
                 <TableOfContentsPopover toc={toc} goToHref={goToHref} />
                 <Typography className="text-xs">Contents</Typography>
@@ -464,6 +487,14 @@ export function ReaderControlsDrawer({
                 <ModeToggle />
                 <Typography className="text-xs">Theme</Typography>
               </div>
+              {setBookInfoOpen && (
+                <div className="flex flex-col items-center gap-2">
+                  <Button variant="ghost" onClick={() => setBookInfoOpen(true)} className="p-2 flex items-center justify-center">
+                    <Info className="w-6 h-6" />
+                  </Button>
+                  <Typography className="text-xs">Book Info</Typography>
+                </div>
+              )}
             </div>
           )}
 
@@ -519,6 +550,33 @@ export function ReaderControlsDrawer({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Book Information Modal */}
+      {bookInfoOpen !== undefined && setBookInfoOpen && (
+        <Dialog open={bookInfoOpen} onOpenChange={setBookInfoOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Book Information</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {bookCover && (
+                <div className="flex justify-center">
+                  <Image src={bookCover} alt={bookTitle || "Book cover"} width={128} height={192} className="max-w-32 max-h-48 object-contain rounded-lg shadow-md" />
+                </div>
+              )}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">{bookTitle || "Unknown Title"}</h3>
+                {bookAuthor && <p className="text-sm text-muted-foreground">Author: {bookAuthor}</p>}
+                {totalPages && totalPages > 0 && <p className="text-sm text-muted-foreground">Total Pages: {totalPages}</p>}
+                {progress !== undefined && <p className="text-sm text-muted-foreground">Reading Progress: {Math.round(progress)}%</p>}
+                <p className="text-sm text-muted-foreground">Total Bookmarks: {bookmarks.length}</p>
+                <p className="text-sm text-muted-foreground">Total Highlights: {highlights.length}</p>
+                <p className="text-sm text-muted-foreground">Total Notes: {notes.length}</p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

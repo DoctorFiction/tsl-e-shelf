@@ -5,9 +5,7 @@ import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
 // import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
-import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EpubReaderProps {
   url: string;
@@ -50,7 +48,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
     goToSearchResult,
   } = useEpubReader(url);
 
-  // TODO: add book title
   // TODO: add book page number
   // TODO: make the reader responsive
   // TODO: add home, profile, logout etc drawer
@@ -146,12 +143,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-
-        <div className={`fixed left-4 top-4 z-50 transition-opacity duration-300 ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <button onClick={() => setBookInfoOpen(true)} className=" transition-all duration-200 p-3 " aria-label="Book information">
-            <Info className="w-5 h-5" />
-          </button>
-        </div>
       </div>
       <ReaderControlsDrawer
         selection={selection}
@@ -182,32 +173,14 @@ export default function EpubReader({ url }: EpubReaderProps) {
         currentSearchResultIndex={currentSearchResultIndex}
         goToSearchResult={goToSearchResult}
         onDrawerStateChange={setDrawerPinned}
+        bookInfoOpen={bookInfoOpen}
+        setBookInfoOpen={setBookInfoOpen}
+        bookTitle={bookTitle}
+        bookAuthor={bookAuthor}
+        bookCover={bookCover}
+        totalPages={totalPages}
+        progress={progress}
       />
-
-      {/* Book Information Modal */}
-      <Dialog open={bookInfoOpen} onOpenChange={setBookInfoOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Book Information</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {bookCover && (
-              <div className="flex justify-center">
-                <Image src={bookCover} alt={bookTitle || "Book cover"} width={128} height={192} className="max-w-32 max-h-48 object-contain rounded-lg shadow-md" />
-              </div>
-            )}
-            <div className="space-y-2">
-              <h3 className="font-semibold text-lg">{bookTitle || "Unknown Title"}</h3>
-              {bookAuthor && <p className="text-sm text-muted-foreground">Author: {bookAuthor}</p>}
-              {totalPages > 0 && <p className="text-sm text-muted-foreground">Total Pages: {totalPages}</p>}
-              {progress !== undefined && <p className="text-sm text-muted-foreground">Reading Progress: {Math.round(progress)}%</p>}
-              <p className="text-sm text-muted-foreground">Total Bookmarks: {bookmarks.length}</p>
-              <p className="text-sm text-muted-foreground">Total Highlights: {highlights.length}</p>
-              <p className="text-sm text-muted-foreground">Total Notes: {notes.length}</p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
