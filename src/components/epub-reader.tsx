@@ -58,10 +58,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
 
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
 
-  // Touch/swipe handling for mobile
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't handle key events when typing in input fields
@@ -82,99 +78,12 @@ export default function EpubReader({ url }: EpubReaderProps) {
       }
     };
 
-    const handleTouchStart = (e: TouchEvent) => {
-      setTouchEnd(null);
-      setTouchStart({
-        x: e.targetTouches[0].clientX,
-        y: e.targetTouches[0].clientY,
-      });
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      setTouchEnd({
-        x: e.targetTouches[0].clientX,
-        y: e.targetTouches[0].clientY,
-      });
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (!touchStart || !touchEnd) return;
-
-      const distanceX = touchStart.x - touchEnd.x;
-      const distanceY = touchStart.y - touchEnd.y;
-      const isLeftSwipe = distanceX > 30; // Reduced threshold for easier swiping
-      const isRightSwipe = distanceX < -30; // Reduced threshold for easier swiping
-      const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX);
-
-      console.log(`Touch end: distanceX=${distanceX}, distanceY=${distanceY}, isVerticalSwipe=${isVerticalSwipe}`);
-
-      // Only trigger page change if it's a horizontal swipe
-      if (!isVerticalSwipe) {
-        if (isLeftSwipe) {
-          console.log("Swipe left - going to next page");
-          e.preventDefault();
-          goNext();
-        } else if (isRightSwipe) {
-          console.log("Swipe right - going to previous page");
-          e.preventDefault();
-          goPrev();
-        }
-      }
-
-      // Reset touch states
-      setTouchStart(null);
-      setTouchEnd(null);
-    };
-
-    // Mobile click handling for page navigation
-    const handleClick = (e: MouseEvent) => {
-      // Only handle clicks on mobile devices
-      if (window.innerWidth >= 768) return; // md breakpoint
-
-      const target = e.target as HTMLElement;
-      const viewerElement = viewerRef.current;
-
-      // Make sure click is on the viewer
-      if (!viewerElement || !viewerElement.contains(target)) return;
-
-      // Check if click is on any interactive element
-      if (target.closest('button, a, input, textarea, [role="button"]')) return;
-
-      const rect = viewerElement.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const viewerWidth = rect.width;
-
-      // Left third for previous, right third for next, middle third does nothing
-      if (clickX < viewerWidth * 0.33) {
-        console.log("Click left - going to previous page");
-        goPrev();
-      } else if (clickX > viewerWidth * 0.67) {
-        console.log("Click right - going to next page");
-        goNext();
-      }
-    };
-
     window.addEventListener("keydown", handleKeyDown);
-
-    // Add touch event listeners for mobile swipe
-    const viewerElement = viewerRef.current;
-    if (viewerElement) {
-      viewerElement.addEventListener("touchstart", handleTouchStart, { passive: false });
-      viewerElement.addEventListener("touchmove", handleTouchMove, { passive: false });
-      viewerElement.addEventListener("touchend", handleTouchEnd, { passive: false });
-      viewerElement.addEventListener("click", handleClick, { passive: true });
-    }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      if (viewerElement) {
-        viewerElement.removeEventListener("touchstart", handleTouchStart);
-        viewerElement.removeEventListener("touchmove", handleTouchMove);
-        viewerElement.removeEventListener("touchend", handleTouchEnd);
-        viewerElement.removeEventListener("click", handleClick);
-      }
     };
-  }, [goPrev, goNext, touchStart, touchEnd, viewerRef]);
+  }, [goPrev, goNext]);
 
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -214,7 +123,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <div className="relative w-full flex-1">
         <div ref={viewerRef} className="w-full h-full" />
 
-        {/* Navigation Controls - Side positioning - Hidden on mobile */}
         <div className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <button
             onClick={goPrev}
@@ -239,13 +147,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
           </button>
         </div>
 
-        {/* Book Info Icon - Top left corner */}
         <div className={`fixed left-4 top-4 z-50 transition-opacity duration-300 ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-          <button
-            onClick={() => setBookInfoOpen(true)}
-            className="bg-white/90 hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 backdrop-blur-sm"
-            aria-label="Book information"
-          >
+          <button onClick={() => setBookInfoOpen(true)} className=" transition-all duration-200 p-3 " aria-label="Book information">
             <Info className="w-5 h-5" />
           </button>
         </div>
