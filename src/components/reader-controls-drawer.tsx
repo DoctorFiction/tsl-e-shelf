@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
-import { Underline, Trash2, X, NotebookPen, Pin, PinOff } from "lucide-react";
+import { Underline, Trash2, X, NotebookPen, Pin, PinOff, ChevronUp, Settings } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { SearchPopover } from "./search-popover";
 import { BookmarkButton } from "./bookmark-button";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { ReaderSettings } from "./reader-settings";
+import { ModeToggle } from "./mode-toggle";
 import { Typography } from "./ui/typography";
 
 const HIGHLIGHT_COLORS = [
@@ -85,6 +86,7 @@ export function ReaderControlsDrawer({
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -124,25 +126,50 @@ export function ReaderControlsDrawer({
   };
 
   return (
-    <div
-      ref={barRef}
-      className={`fixed right-0 top-0 h-full bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-md p-4 mt-1 flex flex-col space-y-4 transition-all duration-300 z-50
-        ${isPinned ? "w-64" : "w-20 items-center"}`}
-    >
-      <Button variant="ghost" className="" onClick={() => setIsPinned(!isPinned)} aria-label={isPinned ? "Unpin drawer" : "Pin drawer"}>
-        {isPinned ? <PinOff className="w-6 h-6" /> : <Pin className="w-6 h-6" />}
-      </Button>
+    <>
+      {/* Desktop Drawer */}
+      <div
+        ref={barRef}
+        className={`hidden md:flex fixed right-0 top-0 h-full bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-md p-4 mt-1 flex-col space-y-4 transition-all duration-300 z-50
+          ${isPinned ? "w-64" : "w-20 items-center"}`}
+      >
+        <Button variant="ghost" className="" onClick={() => setIsPinned(!isPinned)} aria-label={isPinned ? "Unpin drawer" : "Pin drawer"}>
+          {isPinned ? <PinOff className="w-6 h-6" /> : <Pin className="w-6 h-6" />}
+        </Button>
 
-      {/* Highlight Options */}
-      {selection && (
-        <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
-          <Typography variant="body2" className="font-bold">
-            Highlight & Note
-          </Typography>
-          <div className="flex flex-wrap gap-2">
-            {HIGHLIGHT_COLORS.map((highlight) => (
+        {/* Highlight Options */}
+        {selection && (
+          <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
+            <Typography variant="body2" className="font-bold">
+              Highlight & Note
+            </Typography>
+            <div className="flex flex-wrap gap-2">
+              {HIGHLIGHT_COLORS.map((highlight) => (
+                <Button
+                  key={highlight.name}
+                  variant="ghost"
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => {
+                    if (selection) {
+                      addHighlight({
+                        cfi: selection.cfi,
+                        text: selection.text,
+                        color: highlight.color,
+                        createdAt: new Date().toISOString(),
+                      });
+                    }
+                  }}
+                >
+                  <div
+                    className="w-6 h-6 rounded-full border"
+                    style={{
+                      backgroundColor: highlight.color,
+                    }}
+                  />
+                  {isPinned && <span>{highlight.name}</span>}
+                </Button>
+              ))}
               <Button
-                key={highlight.name}
                 variant="ghost"
                 className="flex items-center gap-2 cursor-pointer"
                 onClick={() => {
@@ -150,121 +177,269 @@ export function ReaderControlsDrawer({
                     addHighlight({
                       cfi: selection.cfi,
                       text: selection.text,
-                      color: highlight.color,
+                      type: "underline",
                       createdAt: new Date().toISOString(),
                     });
                   }
                 }}
               >
-                <div
-                  className="w-6 h-6 rounded-full border"
-                  style={{
-                    backgroundColor: highlight.color,
-                  }}
-                />
-                {isPinned && <span>{highlight.name}</span>}
+                <Underline className="w-6 h-6" />
+                {isPinned && <span>Underline</span>}
               </Button>
-            ))}
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                if (selection) {
-                  addHighlight({
-                    cfi: selection.cfi,
-                    text: selection.text,
-                    type: "underline",
-                    createdAt: new Date().toISOString(),
-                  });
-                }
-              }}
-            >
-              <Underline className="w-6 h-6" />
-              {isPinned && <span>Underline</span>}
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                setIsNoteDialogOpen(true);
-              }}
-            >
-              <NotebookPen className="w-6 h-6" />
-              {isPinned && <span>Note</span>}
-            </Button>
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setIsNoteDialogOpen(true);
+                }}
+              >
+                <NotebookPen className="w-6 h-6" />
+                {isPinned && <span>Note</span>}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Clicked Highlight Options */}
+        {clickedHighlight && (
+          <Button
+            variant="ghost"
+            className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-700"
+            onClick={() => {
+              if (clickedHighlight) {
+                removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
+                setClickedHighlight(null);
+              }
+            }}
+          >
+            <Trash2 className="w-6 h-6" />
+            {isPinned && <span>Remove Highlight</span>}
+          </Button>
+        )}
+
+        {/* Main Controls */}
+        <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
+          <Typography variant="body2" className="font-bold">
+            Controls
+          </Typography>
+          <div className="flex flex-row gap-2 items-center">
+            <TableOfContentsPopover toc={toc} goToHref={goToHref} />
+            {isPinned && <Typography>Table of Contents</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
+            {isPinned && <Typography>Bookmark</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
+            {isPinned && <Typography>Bookmarks</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
+            {isPinned && <Typography>Highlights</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
+            {isPinned && <Typography>Notes</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <SearchPopover
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchResults={searchResults}
+              goToCfi={goToCfi}
+              currentSearchResultIndex={currentSearchResultIndex}
+              goToSearchResult={goToSearchResult}
+            />
+            {isPinned && <Typography>Search</Typography>}
+          </div>
+          <div className="flex flex-row gap-2 items-center">
+            <ReaderSettings />
+            {isPinned && <Typography>Settings</Typography>}
           </div>
         </div>
-      )}
 
-      {/* Clicked Highlight Options */}
-      {clickedHighlight && (
+        {/* Theme Toggle at Bottom */}
+        <div className="mt-auto mb-16 flex justify-center">
+          <ModeToggle />
+        </div>
+
         <Button
           variant="ghost"
-          className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-700"
+          className="absolute bottom-4 right-4"
           onClick={() => {
-            if (clickedHighlight) {
-              removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
-              setClickedHighlight(null);
-            }
+            setSelection(null);
+            setClickedHighlight(null);
           }}
         >
-          <Trash2 className="w-6 h-6" />
-          {isPinned && <span>Remove Highlight</span>}
+          <X className="w-6 h-6" />
         </Button>
-      )}
+      </div>
 
-      {/* Main Controls */}
-      <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
-        <Typography variant="body2" className="font-bold">
-          Controls
-        </Typography>
-        <div className="flex flex-row gap-2 items-center">
-          <TableOfContentsPopover toc={toc} goToHref={goToHref} />
-          {isPinned && <Typography>Table of Contents</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
-          {isPinned && <Typography>Bookmark</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
-          {isPinned && <Typography>Bookmarks</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
-          {isPinned && <Typography>Highlights</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
-          {isPinned && <Typography>Notes</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <SearchPopover
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            searchResults={searchResults}
-            goToCfi={goToCfi}
-            currentSearchResultIndex={currentSearchResultIndex}
-            goToSearchResult={goToSearchResult}
-          />
-          {isPinned && <Typography>Search</Typography>}
-        </div>
-        <div className="flex flex-row gap-2 items-center">
-          <ReaderSettings />
-          {isPinned && <Typography>Settings</Typography>}
+      {/* Mobile Controls Button */}
+      <Button
+        onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
+        className="fixed top-4 right-4 z-50 md:hidden bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200"
+        size="sm"
+      >
+        {isMobileDrawerOpen ? <ChevronUp className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
+      </Button>
+
+      {/* Mobile Drawer */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-2xl shadow-xl transition-transform duration-300 z-50 md:hidden ${
+          isMobileDrawerOpen ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="p-4 max-h-[80vh] overflow-y-auto">
+          {/* Mobile Highlight Options */}
+          {selection && (
+            <div className="mb-6">
+              <Typography variant="body2" className="font-bold mb-3">
+                Highlight & Note
+              </Typography>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {HIGHLIGHT_COLORS.map((highlight) => (
+                  <Button
+                    key={highlight.name}
+                    variant="ghost"
+                    className="flex flex-col items-center gap-1 h-auto py-3"
+                    onClick={() => {
+                      if (selection) {
+                        addHighlight({
+                          cfi: selection.cfi,
+                          text: selection.text,
+                          color: highlight.color,
+                          createdAt: new Date().toISOString(),
+                        });
+                        setIsMobileDrawerOpen(false);
+                      }
+                    }}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full border"
+                      style={{
+                        backgroundColor: highlight.color,
+                      }}
+                    />
+                    <span className="text-xs">{highlight.name}</span>
+                  </Button>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center gap-2"
+                  onClick={() => {
+                    if (selection) {
+                      addHighlight({
+                        cfi: selection.cfi,
+                        text: selection.text,
+                        type: "underline",
+                        createdAt: new Date().toISOString(),
+                      });
+                      setIsMobileDrawerOpen(false);
+                    }
+                  }}
+                >
+                  <Underline className="w-4 h-4" />
+                  <span>Underline</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setIsNoteDialogOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                >
+                  <NotebookPen className="w-4 h-4" />
+                  <span>Note</span>
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Clicked Highlight Options */}
+          {clickedHighlight && (
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 text-red-500 hover:text-red-700"
+                onClick={() => {
+                  if (clickedHighlight) {
+                    removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
+                    setClickedHighlight(null);
+                    setIsMobileDrawerOpen(false);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Remove Highlight</span>
+              </Button>
+            </div>
+          )}
+
+          {/* Mobile Main Controls */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col items-center gap-2">
+              <TableOfContentsPopover toc={toc} goToHref={goToHref} />
+              <Typography className="text-xs">Contents</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
+              <Typography className="text-xs">Bookmark</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
+              <Typography className="text-xs">Bookmarks</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
+              <Typography className="text-xs">Highlights</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
+              <Typography className="text-xs">Notes</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <SearchPopover
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                searchResults={searchResults}
+                goToCfi={goToCfi}
+                currentSearchResultIndex={currentSearchResultIndex}
+                goToSearchResult={goToSearchResult}
+              />
+              <Typography className="text-xs">Search</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <ReaderSettings />
+              <Typography className="text-xs">Settings</Typography>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <ModeToggle />
+              <Typography className="text-xs">Theme</Typography>
+            </div>
+          </div>
+
+          {/* Close Button */}
+          <Button
+            variant="outline"
+            className="w-full mt-6"
+            onClick={() => {
+              setIsMobileDrawerOpen(false);
+              setSelection(null);
+              setClickedHighlight(null);
+            }}
+          >
+            Close
+          </Button>
         </div>
       </div>
 
-      <Button
-        variant="ghost"
-        className="absolute bottom-4 right-4"
-        onClick={() => {
-          setSelection(null);
-          setClickedHighlight(null);
-        }}
-      >
-        <X className="w-6 h-6" />
-      </Button>
+      {/* Mobile Backdrop */}
+      {isMobileDrawerOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileDrawerOpen(false)} />}
 
       <Dialog open={isNoteDialogOpen} onOpenChange={handleCloseNoteDialog}>
         <DialogContent
@@ -290,6 +465,6 @@ export function ReaderControlsDrawer({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

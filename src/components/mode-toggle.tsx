@@ -40,7 +40,7 @@ export function ModeToggle() {
   if (!mounted) {
     return (
       <button
-        className="relative w-full inline-flex items-center justify-center rounded-md border p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        className="relative inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
         aria-label="Toggle theme"
         disabled
       >
@@ -52,7 +52,7 @@ export function ModeToggle() {
 
   return (
     <button
-      className="relative w-full inline-flex items-center justify-center rounded-md border p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+      className="relative inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
       onClick={handleToggle}
       aria-label="Toggle theme"
     >

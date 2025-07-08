@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { NavigationControls } from "./navigation-controls";
 
 interface EpubReaderProps {
   url: string;
@@ -53,33 +53,111 @@ export default function EpubReader({ url }: EpubReaderProps) {
 
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
 
+  // Touch/swipe handling for mobile
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === "ArrowLeft") goPrev();
       else if (e.key === "ArrowRight") goNext();
     };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      setTouchEnd(null);
+      setTouchStart({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY,
+      });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      setTouchEnd({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY,
+      });
+    };
+
+    const handleTouchEnd = () => {
+      if (!touchStart || !touchEnd) return;
+
+      const distanceX = touchStart.x - touchEnd.x;
+      const distanceY = touchStart.y - touchEnd.y;
+      const isLeftSwipe = distanceX > 50;
+      const isRightSwipe = distanceX < -50;
+      const isVerticalSwipe = Math.abs(distanceY) > Math.abs(distanceX);
+
+      // Only trigger page change if it's a horizontal swipe
+      if (!isVerticalSwipe) {
+        if (isLeftSwipe) {
+          goNext();
+        } else if (isRightSwipe) {
+          goPrev();
+        }
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goPrev, goNext]);
+
+    // Add touch event listeners for mobile swipe
+    const viewerElement = viewerRef.current;
+    if (viewerElement) {
+      viewerElement.addEventListener("touchstart", handleTouchStart, { passive: true });
+      viewerElement.addEventListener("touchmove", handleTouchMove, { passive: true });
+      viewerElement.addEventListener("touchend", handleTouchEnd, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (viewerElement) {
+        viewerElement.removeEventListener("touchstart", handleTouchStart);
+        viewerElement.removeEventListener("touchmove", handleTouchMove);
+        viewerElement.removeEventListener("touchend", handleTouchEnd);
+      }
+    };
+  }, [goPrev, goNext, touchStart, touchEnd, viewerRef]);
 
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
-  const [, setControlsVisible] = useState(true);
+  const [controlsVisible, setControlsVisible] = useState(true);
+
+  // Hide controls after 3 seconds of inactivity
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setControlsVisible(false);
+    }, 3000);
+
+    const showControls = () => {
+      setControlsVisible(true);
+      clearTimeout(timer);
+    };
+
+    // Show controls on mouse move, touch, or interaction
+    const handleUserActivity = () => showControls();
+
+    window.addEventListener("mousemove", handleUserActivity);
+    window.addEventListener("touchstart", handleUserActivity);
+    window.addEventListener("click", handleUserActivity);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("mousemove", handleUserActivity);
+      window.removeEventListener("touchstart", handleUserActivity);
+      window.removeEventListener("click", handleUserActivity);
+    };
+  }, [controlsVisible]);
 
   return (
-    <div className="w-full h-screen overflow-hidden" onMouseEnter={() => setControlsVisible(true)} onMouseLeave={() => setControlsVisible(false)}>
+    <div className="w-full h-screen overflow-hidden flex flex-col">
       {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
-      <div className="relative w-full h-screen">
+      <div className="relative w-full flex-1">
         <div ref={viewerRef} className="w-full h-full" />
-        {/* Previous Page Button */}
-        <div className="absolute left-0 top-0 h-full w-1/5 flex items-center justify-start opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={goPrev}>
-          <ChevronLeft className="w-12 h-12 text-gray-600 dark:text-gray-300" />
-        </div>
-        {/* Next Page Button */}
-        <div className="absolute right-0 top-0 h-full w-1/5 flex items-center justify-end opacity-0 hover:opacity-100 transition-opacity duration-300 cursor-pointer" onClick={goNext}>
-          <ChevronRight className="w-12 h-12 text-gray-600 dark:text-gray-300" />
-        </div>
+      </div>
+
+      {/* Navigation Controls - Bottom fixed position - Hidden on mobile */}
+      <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30 transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <NavigationControls goPrev={goPrev} goNext={goNext} />
       </div>
       <ReaderControlsDrawer
         selection={selection}
