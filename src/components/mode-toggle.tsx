@@ -33,12 +33,8 @@ export function ModeToggle() {
     // Use resolvedTheme to get the actual active theme
     const currentTheme = theme || resolvedTheme;
 
-    console.log("🚀 ~ handleToggle ~ currentTheme:", currentTheme);
-    if (currentTheme === "light") {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
+    if (currentTheme === "light") setTheme("dark");
+    else setTheme("light");
   };
 
   if (!mounted) {
