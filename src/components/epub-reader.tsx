@@ -91,10 +91,44 @@ export default function EpubReader({ url }: EpubReaderProps) {
       // Only trigger page change if it's a horizontal swipe
       if (!isVerticalSwipe) {
         if (isLeftSwipe) {
+          console.log("Swipe left - going to next page");
           goNext();
         } else if (isRightSwipe) {
+          console.log("Swipe right - going to previous page");
           goPrev();
         }
+      }
+      
+      // Reset touch states
+      setTouchStart(null);
+      setTouchEnd(null);
+    };
+
+    // Mobile click handling for page navigation
+    const handleClick = (e: MouseEvent) => {
+      // Only handle clicks on mobile devices
+      if (window.innerWidth >= 768) return; // md breakpoint
+      
+      const target = e.target as HTMLElement;
+      const viewerElement = viewerRef.current;
+      
+      // Make sure click is on the viewer
+      if (!viewerElement || !viewerElement.contains(target)) return;
+      
+      // Check if click is on any interactive element
+      if (target.closest('button, a, input, textarea, [role="button"]')) return;
+      
+      const rect = viewerElement.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const viewerWidth = rect.width;
+      
+      // Left third for previous, right third for next, middle third does nothing
+      if (clickX < viewerWidth * 0.33) {
+        console.log("Click left - going to previous page");
+        goPrev();
+      } else if (clickX > viewerWidth * 0.67) {
+        console.log("Click right - going to next page");
+        goNext();
       }
     };
 
@@ -106,6 +140,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
       viewerElement.addEventListener("touchstart", handleTouchStart, { passive: true });
       viewerElement.addEventListener("touchmove", handleTouchMove, { passive: true });
       viewerElement.addEventListener("touchend", handleTouchEnd, { passive: true });
+      viewerElement.addEventListener("click", handleClick, { passive: true });
     }
 
     return () => {
@@ -114,6 +149,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         viewerElement.removeEventListener("touchstart", handleTouchStart);
         viewerElement.removeEventListener("touchmove", handleTouchMove);
         viewerElement.removeEventListener("touchend", handleTouchEnd);
+        viewerElement.removeEventListener("click", handleClick);
       }
     };
   }, [goPrev, goNext, touchStart, touchEnd, viewerRef]);

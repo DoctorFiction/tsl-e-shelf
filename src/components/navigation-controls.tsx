@@ -8,7 +8,7 @@ interface NavigationControlsProps {
 
 export function NavigationControls({ goPrev, goNext }: NavigationControlsProps) {
   return (
-    <div className="flex gap-2 sm:gap-4 mx-auto bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-full px-3 sm:px-4 py-2 shadow-lg border border-gray-200 dark:border-gray-700">
+    <div className="flex gap-2 sm:gap-4 mx-auto  px-3 sm:px-4 py-2 -lg ">
       <Button
         onClick={goPrev}
         size="sm"
