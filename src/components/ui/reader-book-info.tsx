@@ -42,12 +42,36 @@ export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, p
               )}
               <div className="space-y-2">
                 <h3 className="font-semibold text-lg">{bookTitle || "Unknown Title"}</h3>
-                {bookAuthor && <p className="text-sm text-muted-foreground">Author: {bookAuthor}</p>}
-                {totalPages && totalPages > 0 && <p className="text-sm text-muted-foreground">Total Pages: {totalPages}</p>}
-                {progress !== undefined && <p className="text-sm text-muted-foreground">Reading Progress: {Math.round(progress)}%</p>}
-                <p className="text-sm text-muted-foreground">Total Bookmarks: {bookmarks.length}</p>
-                <p className="text-sm text-muted-foreground">Total Highlights: {highlights.length}</p>
-                <p className="text-sm text-muted-foreground">Total Notes: {notes.length}</p>
+                {bookAuthor && (
+                  <div className="flex justify-between">
+                    <p className="text-sm text-muted-foreground">Author</p>
+                    <p className="text-sm">{bookAuthor}</p>
+                  </div>
+                )}
+                {totalPages && totalPages > 0 && (
+                  <div className="flex justify-between">
+                    <p className="text-sm text-muted-foreground">Total Pages</p>
+                    <p className="text-sm">{totalPages}</p>
+                  </div>
+                )}
+                {progress !== undefined && (
+                  <div className="flex justify-between">
+                    <p className="text-sm text-muted-foreground">Reading Progress</p>
+                    <p className="text-sm">{Math.round(progress)}%</p>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">Total Bookmarks</p>
+                  <p className="text-sm">{bookmarks.length}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">Total Highlights</p>
+                  <p className="text-sm">{highlights.length}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">Total Notes</p>
+                  <p className="text-sm">{notes.length}</p>
+                </div>
               </div>
             </div>
           </DialogContent>
