@@ -49,6 +49,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     currentChapterTitle,
   } = useEpubReader(url);
 
+  // TODO: Handle book title, page number, chapter on mobile
   // TODO: add home, profile, logout etc drawer
   // TODO: image previews
 
