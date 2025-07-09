@@ -132,6 +132,7 @@ interface IUseEpubReaderReturn {
   bookCover: string | null;
   selection: { cfi: string; text: string; rect: DOMRect } | null;
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
+  currentChapterTitle: string | null;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -159,6 +160,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [selectedCfi, setSelectedCfi] = useState<string>("");
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
   const [selection, setSelection] = useState<{ cfi: string; text: string; rect: DOMRect } | null>(null);
+  const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
@@ -191,7 +193,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
       setSelection(null);
     },
-    [STORAGE_KEY_HIGHLIGHTS]
+    [STORAGE_KEY_HIGHLIGHTS],
   );
 
   const removeHighlight = useCallback(
@@ -239,7 +241,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef]
+    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef],
   );
 
   const removeAllHighlights = useCallback(() => {
@@ -302,7 +304,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_BOOKMARK]
+    [STORAGE_KEY_BOOKMARK],
   );
 
   const removeAllBookmarks = useCallback(() => {
@@ -344,7 +346,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       });
       setSelection(null);
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const removeNote = useCallback(
@@ -356,7 +358,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const removeAllNotes = useCallback(() => {
@@ -377,7 +379,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
@@ -501,7 +503,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       setSearchResults(results);
       setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
     },
-    [bookRef, spine]
+    [bookRef, spine],
   );
 
   const goToSearchResult = useCallback(
@@ -513,7 +515,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         setCurrentSearchResultIndex(index);
       }
     },
-    [searchResults]
+    [searchResults],
   );
 
   // SEARCH EFFECT
@@ -560,7 +562,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       {}, // data
       undefined, // cb
       undefined, // no className
-      defaultConfig.selectedSearchResult.style
+      defaultConfig.selectedSearchResult.style,
     );
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
@@ -676,46 +678,16 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         setCurrentPage(newPage);
       }
 
+      if (bookRef.current) {
+        const chapter = await getChapterFromCfi(bookRef.current, cfi);
+        setCurrentChapterTitle(chapter);
+      }
+
       // Calculate progress percentage
       if (bookRef.current && bookRef.current.locations.length() > 0) {
         const progressPercentage = Math.round(Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100));
         setProgress(progressPercentage);
       }
-
-      // Update chapter information
-      // Removed for now as it was causing errors
-      // const book = bookRef.current;
-      // if (book && book.spine && book.locations) {
-      //   const currentSection = book.spine.get(cfi);
-      //   if (currentSection) {
-      //     setCurrentChapterTitle(currentSection.label);
-
-      //     const currentChapterStartIndex = book.spine.spineItems.findIndex(item => item.cfi === currentSection.cfi);
-      //     let currentChapterEndCfi = currentSection.cfi;
-
-      //     // Find the end of the current chapter/section
-      //     if (currentChapterStartIndex !== -1 && currentChapterStartIndex < book.spine.spineItems.length - 1) {
-      //       currentChapterEndCfi = book.spine.spineItems[currentChapterStartIndex + 1].cfi;
-      //     } else if (book.locations.length() > 0) {
-      //       // If it's the last chapter, use the end of the book
-      //       // This line was causing an error, removing for now.
-      //       // currentChapterEndCfi = book.locations.end.cfi;
-      //     }
-
-      //     if (currentSection.cfi && currentChapterEndCfi) {
-      //       // This range calculation was causing an error, removing for now.
-      //       // const chapterRange = book.locations.range(currentSection.cfi, currentChapterEndCfi);
-      //       // if (chapterRange) {
-      //       //   const pagesInChapter = chapterRange.pages.length;
-      //       //   const currentPageInChapter = chapterRange.pages.findIndex((pageCfi: string) => pageCfi === cfi) + 1;
-      //       //   setPagesLeftInChapter(pagesInChapter - currentPageInChapter);
-      //       // }
-      //       setPagesLeftInChapter(null); // Set to null to avoid errors
-      //     } else {
-      //       setPagesLeftInChapter(null); // Set to null to avoid errors
-      //     }
-      //   }
-      // }
     };
 
     rendition.on("relocated", handleRelocated);
@@ -837,5 +809,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     setSelection,
     currentSearchResultIndex,
     goToSearchResult,
+    currentChapterTitle,
   };
 }

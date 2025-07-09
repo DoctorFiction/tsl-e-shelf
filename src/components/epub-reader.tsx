@@ -46,6 +46,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     currentSearchResultIndex,
     goToSearchResult,
     currentPage,
+    currentChapterTitle,
   } = useEpubReader(url);
 
   // TODO: add home, profile, logout etc drawer
@@ -115,8 +116,15 @@ export default function EpubReader({ url }: EpubReaderProps) {
       {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
       <div className="relative w-full flex-1">
-        <div ref={viewerRef} className="w-full h-full" />
-        {!isLoading && <div className="absolute bottom-3 z-50 text-center w-full">{currentPage}</div>}
+        <div ref={viewerRef} className="w-full h-full">
+          {!isLoading && (
+            <div className="flex flex-row justify-between absolute bottom-0.5 z-50 text-center w-full px-12">
+              <p className="text-muted-foreground">{bookTitle}</p>
+              <p>{currentPage}</p>
+              <p className="text-muted-foreground">{currentChapterTitle}</p>
+            </div>
+          )}
+        </div>
         <div className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <button
             onClick={goPrev}
