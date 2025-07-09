@@ -1,15 +1,14 @@
 "use client";
 
-import { readerThemeNameAtom, readerPreferencesAtom, THEME_PRESETS, IReaderPreferenceConfig } from "@/atoms/reader-preferences";
-import { useAtom } from "jotai";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { ALargeSmall } from "lucide-react";
-import { FontSizeToggler } from "./font-size-toggler";
+import { IReaderPreferenceConfig, readerPreferencesAtom, readerThemeNameAtom, THEME_PRESETS } from "@/atoms/reader-preferences";
 import clsx from "clsx";
+import { useAtom } from "jotai";
+import { ALargeSmall } from "lucide-react";
 import { useTheme } from "next-themes";
+import { FontSizeToggler } from "./font-size-toggler";
 import { ReaderSettingsCustom } from "./reader-settings-custom";
-import { ModeToggle } from "./mode-toggle";
+import { Button } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 export const ReaderSettings = () => {
   const [themeName, setThemeName] = useAtom(readerThemeNameAtom);
@@ -32,9 +31,6 @@ export const ReaderSettings = () => {
       </PopoverTrigger>
       <PopoverContent className="w-[340px] p-4">
         <div className="flex flex-col gap-1">
-          <div className="flex-1">
-            <ModeToggle />
-          </div>
           {/* Font Size + Mode */}
           <div className="flex-1">
             <FontSizeToggler />
