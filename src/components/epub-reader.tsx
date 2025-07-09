@@ -85,7 +85,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [drawerPinned, setDrawerPinned] = useState(false);
-  const [bookInfoOpen, setBookInfoOpen] = useState(false);
 
   // Hide controls after 3 seconds of inactivity
   useEffect(() => {
@@ -173,8 +172,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
         currentSearchResultIndex={currentSearchResultIndex}
         goToSearchResult={goToSearchResult}
         onDrawerStateChange={setDrawerPinned}
-        bookInfoOpen={bookInfoOpen}
-        setBookInfoOpen={setBookInfoOpen}
         bookTitle={bookTitle}
         bookAuthor={bookAuthor}
         bookCover={bookCover}
