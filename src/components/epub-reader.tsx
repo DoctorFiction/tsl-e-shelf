@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
-// import { Button } from "./ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EpubReaderProps {
@@ -46,9 +45,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
     editNote,
     currentSearchResultIndex,
     goToSearchResult,
+    currentPage,
   } = useEpubReader(url);
 
-  // TODO: add book page number
   // TODO: add home, profile, logout etc drawer
   // TODO: image previews
 
@@ -117,7 +116,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
       <div className="relative w-full flex-1">
         <div ref={viewerRef} className="w-full h-full" />
-
+        {!isLoading && <div className="absolute bottom-3 z-50 text-center w-full">{currentPage}</div>}
         <div className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
           <button
             onClick={goPrev}
