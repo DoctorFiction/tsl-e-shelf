@@ -15,6 +15,7 @@ This project is a Next.js application for an e-shelf.
 *   Scan the project for TODOs and FIXMEs and update the roadmap in this file.
 *   Always wait for explicit instruction on which TODO, FIX, or roadmap item to implement.
 *   Do NOT remove any TODO, FIX, or roadmap item from this file without explicit user confirmation.
+*   **REMEMBER:** Update `README.md` with new features and development guidelines as they are added.
 
 ## Commit Messages
 
