@@ -1,9 +1,5 @@
 import { atom } from "jotai";
-import {
-  readerThemeNameAtom,
-  readerOverridesAtom,
-  THEME_PRESETS,
-} from "./reader-preferences";
+import { readerThemeNameAtom, readerOverridesAtom, THEME_PRESETS } from "./reader-preferences";
 
 export const computedReaderStylesAtom = atom((get) => {
   const themeName = get(readerThemeNameAtom);
@@ -17,7 +13,6 @@ export const computedReaderStylesAtom = atom((get) => {
     fontFamily: overrides.fontFamily ?? theme.fontFamily,
     lineHeight: overrides.lineHeight ?? theme.lineHeight,
     wordSpacing: overrides.wordSpacing ?? "normal",
-    margin: overrides.margin ?? 0,
     columnCount: overrides.columnCount ?? 1,
     textAlign: overrides.textAlign ?? theme.textAlign ?? "left",
     isBold: overrides.isBold ?? false,

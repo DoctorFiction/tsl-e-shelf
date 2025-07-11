@@ -8,11 +8,7 @@ interface BookProgressDisplayProps {
   currentChapterTitle: string | null;
 }
 
-export function BookProgressDisplay({
-  bookTitle,
-  currentPage,
-  currentChapterTitle,
-}: BookProgressDisplayProps) {
+export function BookProgressDisplay({ bookTitle, currentPage, currentChapterTitle }: BookProgressDisplayProps) {
   return (
     <div className="flex flex-row justify-between absolute bottom-0.5 z-50 text-center w-full px-12">
       <Typography variant="body2" className="text-muted-foreground">
