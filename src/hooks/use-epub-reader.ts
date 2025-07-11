@@ -758,7 +758,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
 
       const target = event.target as HTMLElement;
-      console.log("target", target);
 
       if (target.tagName === "IMG") {
         event.preventDefault();

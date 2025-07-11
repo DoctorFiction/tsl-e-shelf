@@ -1,11 +1,10 @@
 "use client";
 
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { Image as ImageIcon } from "lucide-react";
-import Image from "next/image";
-import { Typography } from "./ui/typography";
 import { BookImage } from "@/hooks/use-epub-reader";
+import { Image as ImageIcon } from "lucide-react";
+import { Button } from "./ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Typography } from "./ui/typography";
 
 interface ImagesPopoverProps {
   images: BookImage[];
@@ -16,7 +15,11 @@ export function ImagesPopover({ images, goToCfiAction }: ImagesPopoverProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-9 w-9" aria-label="Images">
+        <Button
+          className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
+          aria-label="Book Images"
+          type="button"
+        >
           <ImageIcon className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
