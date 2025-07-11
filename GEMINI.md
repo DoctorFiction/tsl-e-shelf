@@ -68,6 +68,10 @@ Commit messages must follow the format: `type(scope): description`.
 
 *   **TODO:** Handle book title, page number, and chapter display on mobile devices (`src/components/epub-reader.tsx`).
 *   **TODO:** Fit the cover page with no padding (`src/hooks/use-epub-reader.ts`).
+*   **TODO:** Refactor `src/components/reader-controls-drawer.tsx`: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
+*   **TODO:** Implement mobile-specific `onclick` event on the reader: Show the drawer popout button when the user taps the reader; otherwise, hide it.
+*   **TODO:** Implement mobile-specific display for book title, current page, and chapter name when the user taps the reader.
+*   **TODO:** Add swipe next/prev page navigation when on mobile.
 *   **TODO:** Add a main application drawer for navigation (e.g., home, profile) (`src/components/epub-reader.tsx`).
 
 ### Phase 2: API and Database Integration
