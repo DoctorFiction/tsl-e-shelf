@@ -123,16 +123,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
       <div className="relative w-full flex-1">
         <div ref={viewerRef} className="w-full h-full">
-          {!isLoading && (
-            <BookProgressDisplay
-              bookTitle={bookTitle}
-              currentPage={currentPage}
-              currentChapterTitle={currentChapterTitle}
-            />
-          )}
+          {!isLoading && <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />}
         </div>
 
-        <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         <div
           className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 text-center transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         >
@@ -195,6 +188,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         progress={progress}
         bookImages={bookImages}
       />
+      <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
     </div>
   );
 }
