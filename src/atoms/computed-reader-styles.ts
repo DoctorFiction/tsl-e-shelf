@@ -13,6 +13,7 @@ export const computedReaderStylesAtom = atom((get) => {
     fontFamily: overrides.fontFamily ?? theme.fontFamily,
     lineHeight: overrides.lineHeight ?? theme.lineHeight,
     wordSpacing: overrides.wordSpacing ?? "normal",
+    
     columnCount: overrides.columnCount ?? 1,
     textAlign: overrides.textAlign ?? theme.textAlign ?? "left",
     isBold: overrides.isBold ?? false,

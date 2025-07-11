@@ -11,7 +11,7 @@ This project is a Next.js application for an e-shelf.
 
 ## Pre-commit Checks
 
-*   **ALWAYS** run `pnpm lint` before every commit to ensure code quality. This step is mandatory.
+*   **ALWAYS** run `pnpm lint` and `pnpm type-check` before every commit to ensure code quality. This step is mandatory.
 *   Scan the project for TODOs and FIXMEs and update the roadmap in this file.
 *   Always wait for explicit instruction on which TODO, FIX, or roadmap item to implement.
 *   Do NOT remove any TODO, FIX, or roadmap item from this file without explicit user confirmation.
