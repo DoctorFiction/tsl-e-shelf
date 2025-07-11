@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
+import { BookProgressDisplay } from "./book-progress-display";
 import { ImagePreview } from "./image-preview";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -123,11 +124,11 @@ export default function EpubReader({ url }: EpubReaderProps) {
       <div className="relative w-full flex-1">
         <div ref={viewerRef} className="w-full h-full">
           {!isLoading && (
-            <div className="flex flex-row justify-between absolute bottom-0.5 z-50 text-center w-full px-12">
-              <p className="text-muted-foreground">{bookTitle}</p>
-              <p>{currentPage}</p>
-              <p className="text-muted-foreground">{currentChapterTitle}</p>
-            </div>
+            <BookProgressDisplay
+              bookTitle={bookTitle}
+              currentPage={currentPage}
+              currentChapterTitle={currentChapterTitle}
+            />
           )}
         </div>
 
