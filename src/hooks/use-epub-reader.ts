@@ -86,6 +86,14 @@ export type SearchResult = {
   chapterIndex: number;
 };
 
+export type BookImage = {
+  src: string;
+  cfi: string;
+  description: string;
+  chapter: string | null;
+  page: number | null;
+};
+
 export type EnhancedNavItem = NavItem & {
   page?: number;
   subitems?: EnhancedNavItem[];
@@ -99,6 +107,7 @@ interface IUseEpubReaderReturn {
   location: string | null;
   imagePreview: { src: string; description: string } | null;
   setImagePreview: React.Dispatch<React.SetStateAction<{ src: string; description: string } | null>>;
+  bookImages: BookImage[];
   goNext: () => void;
   goPrev: () => void;
   goToHref: (href: string) => void;
@@ -164,6 +173,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [selection, setSelection] = useState<{ cfi: string; text: string; rect: DOMRect } | null>(null);
   const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<{ src: string; description: string } | null>(null);
+  const [bookImages, setBookImages] = useState<BookImage[]>([]);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
@@ -624,6 +634,30 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
           setCurrentPage(getPageFromCfi(book, savedLocation) || 1);
         }
         setIsLoading(false);
+
+        // Extract images
+        const images: BookImage[] = [];
+        const spine = book.spine as ExtendedSpine;
+        for (const item of spine.spineItems) {
+          try {
+            await item.load(book.load.bind(book));
+            const doc = item.document;
+            if (!doc) continue;
+
+            const imgElements = doc.querySelectorAll("img");
+            for (const img of Array.from(imgElements)) {
+              const cfi = item.cfiFromElement(img);
+              const description = img.title || img.alt || "";
+              const chapter = await getChapterFromCfi(book, cfi);
+              const page = getPageFromCfi(book, cfi);
+              images.push({ src: img.src, cfi, description, chapter, page });
+            }
+            item.unload?.();
+          } catch (error) {
+            console.warn("Error extracting images from spine item:", error);
+          }
+        }
+        setBookImages(images);
       });
 
       bookRef.current = book;
@@ -854,5 +888,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     currentChapterTitle,
     imagePreview,
     setImagePreview,
+    bookImages,
   };
 }

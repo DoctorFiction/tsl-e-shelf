@@ -50,6 +50,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     currentChapterTitle,
     imagePreview,
     setImagePreview,
+    bookImages,
   } = useEpubReader(url);
 
   // TODO: Handle book title, page number, chapter on mobile
@@ -191,6 +192,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         bookCover={bookCover}
         totalPages={totalPages}
         progress={progress}
+        bookImages={bookImages}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
+import { BookImage, Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
 import { ChevronUp, NotebookPen, Pin, PinOff, Settings, Trash2, Underline, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
@@ -9,6 +9,7 @@ import { BookmarksListPopover } from "./bookmarks-list-popover";
 import { HighlightsListPopover } from "./highlights-list-popover";
 import { ModeToggle } from "./mode-toggle";
 import { NotesListPopover } from "./notes-list-popover";
+import { ImagesPopover } from "./images-popover";
 import { ReaderSettings } from "./reader-settings";
 import { SearchPopover } from "./search-popover";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
@@ -58,6 +59,7 @@ interface ReaderControlsDrawerProps {
   bookCover?: string | null;
   totalPages?: number;
   progress?: number;
+  bookImages: BookImage[];
 }
 
 export function ReaderControlsDrawer({
@@ -93,6 +95,7 @@ export function ReaderControlsDrawer({
   bookCover,
   totalPages,
   progress,
+  bookImages,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -290,6 +293,10 @@ export function ReaderControlsDrawer({
               {isPinned && <Typography>Search</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
+              <ImagesPopover images={bookImages} goToCfiAction={goToCfi} />
+              {isPinned && <Typography>Images</Typography>}
+            </div>
+            <div className="flex flex-row gap-2 items-center">
               <ReaderSettings />
               {isPinned && <Typography>Settings</Typography>}
             </div>
@@ -469,6 +476,10 @@ export function ReaderControlsDrawer({
                   goToSearchResult={goToSearchResult}
                 />
                 <Typography className="text-xs">Search</Typography>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <ImagesPopover images={bookImages} goToCfiAction={goToCfi} />
+                <Typography className="text-xs">Images</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <ReaderSettings />
