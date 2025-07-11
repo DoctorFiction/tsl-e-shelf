@@ -67,10 +67,8 @@ Commit messages must follow the format: `type(scope): description`.
 
 
 *   **TODO:** Handle book title, page number, and chapter display on mobile devices (`src/components/epub-reader.tsx`).
-*   **DONE:** Implemented image previews in the reader (`src/components/image-preview.tsx`).
 *   **TODO:** Fit the cover page with no padding (`src/hooks/use-epub-reader.ts`).
 *   **TODO:** Add a main application drawer for navigation (e.g., home, profile) (`src/components/epub-reader.tsx`).
-*   **DONE:** Implemented a book images section (`ImagesPopover`) in the reader controls drawer, listing all images with descriptions, chapter titles, and page numbers. Clicking an image navigates to its location in the book.
 
 ### Phase 2: API and Database Integration
 
