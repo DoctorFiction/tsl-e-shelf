@@ -661,6 +661,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       if (rendition?.themes) {
         rendition.themes.select("custom-theme");
       }
+      rendition.resize();
     });
   }, [isDark, computedStyles, renditionRef, overrides]);
 

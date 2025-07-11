@@ -23,7 +23,7 @@ import {
 } from "./ui/alert-dialog";
 
 // List of numeric override keys
-export type SliderField = "fontSize" | "lineHeight" | "characterSpacing" | "wordSpacing" | "margin";
+export type SliderField = "fontSize" | "lineHeight" | "characterSpacing" | "wordSpacing";
 
 export type SelectField = "fontFamily" | "textAlign" | "columnCount";
 export type SwitchField = "isBold";
@@ -222,8 +222,7 @@ export const ReaderSettingsCustom = () => {
       wordSpacing: `${pendingOverrides.wordSpacing}px`,
       textAlign: pendingOverrides.textAlign,
       columnCount: Number(pendingOverrides.columnCount) || 1,
-      paddingLeft: `${pendingOverrides.margin}px`,
-      paddingRight: `${pendingOverrides.margin}px`,
+      
     };
   }, [pendingOverrides, prefs.backgroundColor, prefs.textColor, isDark]);
 
@@ -283,15 +282,7 @@ export const ReaderSettingsCustom = () => {
           <ReaderStyleSlider label="Line Spacing" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
           <ReaderStyleSlider label="Character Spacing" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
           <ReaderStyleSlider label="Word Spacing" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
-          {/* FIX: ADD BACK WHEN MARGIN BUG IS SOLVED */}
-          {/* <ReaderStyleSlider */}
-          {/*   label="Margin" */}
-          {/*   field="margin" */}
-          {/*   min={0} */}
-          {/*   max={250} */}
-          {/*   step={1} */}
-          {/*   formatValue={(val) => `${val.toFixed(1)}px`} */}
-          {/* /> */}
+          
           <ReaderStyleSelect label="Columns" field="columnCount" options={columnOptions} placeholder="Select columns" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSelect label="Text Alignment" field="textAlign" options={textAlignOptions} placeholder="Select alignment" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSwitch label="Bold Text" field="isBold" description="Make text bold for better readability" />

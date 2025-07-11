@@ -25,7 +25,7 @@ export interface IReaderOverrides {
   fontFamily?: CSSProperties["fontFamily"];
   lineHeight?: CSSProperties["lineHeight"];
   wordSpacing?: CSSProperties["wordSpacing"];
-  margin?: CSSProperties["margin"];
+  
   columnCount?: CSSProperties["columnCount"];
   textAlign?: CSSProperties["textAlign"];
   isBold?: boolean;

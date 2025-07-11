@@ -17,7 +17,7 @@ export const getReaderTheme = (
     isBold,
     characterSpacing,
     wordSpacing,
-    margin,
+    
     columnCount,
   } = preferences;
 
@@ -30,8 +30,7 @@ export const getReaderTheme = (
       "line-height": Number(lineHeight) || 1.5, // Ensure number conversion
       "text-align": textAlign ?? "left",
       padding: "1.5rem 1rem",
-      "padding-left": `${margin}px !important`,
-      "padding-right": `${margin}px !important`,
+      
       "font-weight": isBold ? "bold" : "normal",
       "letter-spacing": characterSpacing
         ? `${Number(characterSpacing)}px`
@@ -43,7 +42,7 @@ export const getReaderTheme = (
           : Number(columnCount)
         : 1,
       "column-gap": columnCount && Number(columnCount) > 1 ? "2rem" : undefined,
-      margin: margin ? `${margin}px` : undefined,
+      
     },
 
     // Headings
