@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
+import { ImagePreview } from "./image-preview";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EpubReaderProps {
@@ -47,6 +48,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
     goToSearchResult,
     currentPage,
     currentChapterTitle,
+    imagePreview,
+    setImagePreview,
   } = useEpubReader(url);
 
   // TODO: Handle book title, page number, chapter on mobile
@@ -126,7 +129,11 @@ export default function EpubReader({ url }: EpubReaderProps) {
             </div>
           )}
         </div>
-        <div className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+
+        <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
+        <div
+          className={`fixed left-4 top-1/2 transform -translate-y-1/2 z-50 text-center transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        >
           <button
             onClick={goPrev}
             className="bg-white/90 hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 backdrop-blur-sm"

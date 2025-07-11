@@ -97,6 +97,8 @@ interface ExtendedSpine extends Spine {
 
 interface IUseEpubReaderReturn {
   location: string | null;
+  imagePreview: { src: string; description: string } | null;
+  setImagePreview: React.Dispatch<React.SetStateAction<{ src: string; description: string } | null>>;
   goNext: () => void;
   goPrev: () => void;
   goToHref: (href: string) => void;
@@ -161,6 +163,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [previousSelectedCfi, setPreviousSelectedCfi] = useState<string | null>(null);
   const [selection, setSelection] = useState<{ cfi: string; text: string; rect: DOMRect } | null>(null);
   const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<{ src: string; description: string } | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const { theme } = useTheme();
@@ -661,7 +664,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       if (rendition?.themes) {
         rendition.themes.select("custom-theme");
       }
-      rendition.resize();
     });
   }, [isDark, computedStyles, renditionRef, overrides]);
 
@@ -716,10 +718,49 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       }
     };
 
-    const handleClick = () => {
-      // Only clear selection if no text is currently selected
+    const handleClick = async (event: MouseEvent) => {
       if (!window.getSelection()?.toString()) {
         setSelection(null);
+      }
+
+      const target = event.target as HTMLElement;
+      console.log("target", target);
+
+      if (target.tagName === "IMG") {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const img = target as HTMLImageElement;
+        const description = img.title || img.alt || ""; // fallback to alt if no title
+
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("Failed to get canvas context");
+
+          ctx.drawImage(img, 0, 0);
+
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const objectUrl = URL.createObjectURL(blob);
+
+              // ✅ Set full preview object
+              setImagePreview({
+                src: objectUrl,
+                description,
+              });
+            } else {
+              console.error("Failed to convert image to blob");
+              setImagePreview(null);
+            }
+          }, "image/png");
+        } catch (error) {
+          console.error("Error capturing image preview:", error);
+          setImagePreview(null);
+        }
       }
     };
 
@@ -811,5 +852,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     currentSearchResultIndex,
     goToSearchResult,
     currentChapterTitle,
+    imagePreview,
+    setImagePreview,
   };
 }
