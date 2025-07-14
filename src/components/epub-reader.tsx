@@ -8,6 +8,8 @@ import { BookProgressDisplay } from "./book-progress-display";
 import { ImagePreview } from "./image-preview";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { EditNoteDialog } from "./edit-note-dialog";
+
 interface EpubReaderProps {
   url: string;
 }
@@ -23,6 +25,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     setSearchQuery,
     searchResults,
     highlights,
+    addHighlight,
     removeHighlight,
     removeAllHighlights,
     addBookmark,
@@ -39,12 +42,13 @@ export default function EpubReader({ url }: EpubReaderProps) {
     progress,
     selection,
     setSelection,
-    addHighlight,
     addNote,
     notes,
     removeNote,
     removeAllNotes,
     editNote,
+    editingNote,
+    setEditingNote,
     currentSearchResultIndex,
     goToSearchResult,
     currentPage,
@@ -189,6 +193,16 @@ export default function EpubReader({ url }: EpubReaderProps) {
         bookImages={bookImages}
       />
       <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
+      {editingNote && (
+        <EditNoteDialog
+          note={editingNote}
+          onSave={(newNote) => {
+            editNote(editingNote.cfi, newNote);
+            setEditingNote(null);
+          }}
+          onClose={() => setEditingNote(null)}
+        />
+      )}
     </div>
   );
 }

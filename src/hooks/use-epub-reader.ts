@@ -133,6 +133,8 @@ interface IUseEpubReaderReturn {
   removeNote: (cfi: string) => void;
   removeAllNotes: () => void;
   editNote: (cfi: string, newNote: string) => void;
+  editingNote: Note | null;
+  setEditingNote: React.Dispatch<React.SetStateAction<Note | null>>;
   currentPage: number;
   totalPages: number;
   error: Error | null;
@@ -156,6 +158,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [toc, setToc] = useState<EnhancedNavItem[]>([]);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
@@ -759,6 +762,28 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
       const target = event.target as HTMLElement;
 
+      // Check if the click is on a note annotation
+      const x = event.clientX;
+      const y = event.clientY;
+
+      for (const note of notes) {
+        try {
+          const range = renditionRef.current?.getRange(note.cfi);
+          if (range) {
+            const rects = range.getClientRects();
+            for (let i = 0; i < rects.length; i++) {
+              const rect = rects[i];
+              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                setEditingNote(note);
+                return; // Found the clicked note, no need to check further
+              }
+            }
+          }
+        } catch (error) {
+          console.warn("Error getting range for note CFI:", note.cfi, error);
+        }
+      }
+
       if (target.tagName === "IMG") {
         event.preventDefault();
         event.stopPropagation();
@@ -804,7 +829,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       rendition.off("selected", handleSelected);
       rendition.off("click", handleClick);
     };
-  }, []);
+  }, [notes]);
 
   // Effect for loading saved highlights
   useEffect(() => {
@@ -872,6 +897,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     removeNote,
     removeAllNotes,
     editNote,
+    editingNote,
+    setEditingNote,
     currentPage,
     totalPages,
     error,
