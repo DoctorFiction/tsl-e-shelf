@@ -88,3 +88,52 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Cloud Storage for Books:** Integrate with a cloud storage service for epub files.
 *   **Offline Access:** Implement offline reading capabilities.
 *   **Social Features:** Allow users to share annotations and book recommendations.
+
+## Testing Guidelines
+
+### Test Suite Stack
+
+*   **Jest**: The core JavaScript testing framework for running tests.
+*   **React Testing Library**: For testing React components in a user-centric way.
+*   **Babel**: Used by Jest to transpile TypeScript and JSX code.
+
+### Pre-commit Checks for Tests
+
+*   **ALWAYS** run `pnpm lint` and `pnpm type-check` before every commit. This is mandatory for all code, including tests.
+*   **Linting (`pnpm lint`)**: Ensures code style and catches potential errors.
+    *   **`@typescript-eslint/no-explicit-any`**: Avoid `any` type in tests. Use specific types or `unknown` with type assertions (`as unknown as Type`) when necessary.
+*   **Type Checking (`pnpm type-check`)**: Ensures type safety.
+    *   **Jest Global Types**: If `describe`, `it`, `expect`, `jest`, `beforeEach` are not recognized, ensure `@types/jest` is installed (`pnpm add -D @types/jest`) and `"jest"` is included in the `types` array in `tsconfig.json`.
+    *   **`@testing-library/jest-dom` Matchers**: For custom matchers like `toBeInTheDocument()`, ensure `/// <reference types="@testing-library/jest-dom" />` is added at the top of your test files.
+    *   **Mocking Complex Objects**: When mocking external libraries (e.g., `epubjs` `Book` object), define specific interfaces for your mocks to ensure type compatibility. Use `as unknown as OriginalType` for type assertions if the mock doesn't fully implement the original type.
+
+### Writing Tests
+
+*   **Test File Naming**: Test files should be placed in a `__tests__` directory alongside the code they are testing (e.g., `src/lib/__tests__/epub-utils.test.ts`, `src/components/__tests__/notes-list-popover.test.tsx`).
+*   **Test Descriptions**: Use clear and descriptive `describe` and `it` (or `test`) blocks to explain what is being tested.
+
+#### Unit Tests
+
+*   **Purpose**: To test individual functions or modules in isolation.
+*   **Isolation**: Mock external dependencies to control their behavior and ensure only the unit under test is being evaluated. Use `jest.fn()` for mocking functions and define mock objects with specific return values.
+*   **Setup**: Use `beforeEach` to set up a fresh state for each test, preventing test interference.
+*   **Assertions**: Focus on verifying the output of the function or the side effects it produces.
+
+#### Component Tests
+
+*   **Purpose**: To test React components, focusing on their rendered output and how they respond to user interactions.
+*   **User-Centric Approach**: Use `@testing-library/react` to test components from the user's perspective. Avoid testing internal state or implementation details.
+*   **Rendering**: Use `render` to mount the component into a simulated DOM.
+*   **Queries**: Use `screen` queries (e.g., `getByText`, `getByLabelText`, `getByRole`) to find elements as a user would. Use `within(element)` to scope queries to a specific part of the DOM.
+*   **Interactions**: Use `fireEvent` to simulate user interactions (e.g., `fireEvent.click`, `fireEvent.change`).
+*   **Asynchronous Operations**: Use `waitFor` for assertions that depend on asynchronous updates (e.g., state changes after a click).
+*   **Mocking Child Components**: Mock complex child components or external modules to isolate the component under test and speed up tests.
+
+### Reminder for New Features and Refactors
+
+*   **ALWAYS** write tests for new features and refactors.
+*   When implementing new features or refactoring existing code, I will **REMIND YOU** to write tests for those changes.
+*   Ensure new tests adhere to the guidelines outlined above.
+*   Run `pnpm lint` and `pnpm type-check` after writing tests and before committing.
+*   Run `pnpm test` to verify that all tests pass.
+
