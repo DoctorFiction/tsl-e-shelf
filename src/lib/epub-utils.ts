@@ -8,7 +8,7 @@ export const getChapterFromCfi = async (
     await book.ready;
   }
   const spine = await book.spine.get(cfi);
-  if (spine) {
+  if (spine && book.navigation) {
     const tocItem = book.navigation.toc.find((item) =>
       item.href.includes(spine.href),
     );

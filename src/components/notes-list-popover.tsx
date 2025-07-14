@@ -16,7 +16,7 @@ import { Typography } from "@/components/ui/typography";
 import { Note } from "@/hooks/use-epub-reader";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { FilePenLine, Trash, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { EditNoteDialog } from "./edit-note-dialog";
 
 interface NotesListPopoverProps {
