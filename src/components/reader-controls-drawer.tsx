@@ -164,7 +164,15 @@ export function ReaderControlsDrawer({
         </Button>
 
         {/* Highlight Options */}
-        {selection && (
+        {clickedHighlight ? (
+          <HighlightOptionsBar
+            clickedHighlight={clickedHighlight}
+            setClickedHighlight={setClickedHighlight}
+            removeHighlight={removeHighlight}
+            updateHighlightColor={updateHighlightColor}
+            isPinned={isPinned}
+          />
+        ) : selection ? (
           <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
             <Typography variant="body2" className="font-bold">
               Highlight & Note
@@ -224,21 +232,7 @@ export function ReaderControlsDrawer({
               </Button>
             </div>
           </div>
-        )}
-
-        {/* Clicked Highlight Options */}
-        {clickedHighlight && (
-          <HighlightOptionsBar
-            clickedHighlight={clickedHighlight}
-            setClickedHighlight={setClickedHighlight}
-            removeHighlight={removeHighlight}
-            updateHighlightColor={updateHighlightColor}
-            isPinned={isPinned}
-          />
-        )}
-
-        {/* Main Controls - only show when no selection or clicked highlight */}
-        {!selection && !clickedHighlight && (
+        ) : (
           <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
             <Typography variant="body2" className="font-bold">
               Controls
@@ -322,7 +316,15 @@ export function ReaderControlsDrawer({
       >
         <div className="p-4 max-h-[80vh] overflow-y-auto">
           {/* Mobile Highlight Options */}
-          {selection && (
+          {clickedHighlight ? (
+            <HighlightOptionsBar
+              clickedHighlight={clickedHighlight}
+              setClickedHighlight={setClickedHighlight}
+              removeHighlight={removeHighlight}
+              updateHighlightColor={updateHighlightColor}
+              isPinned={isPinned}
+            />
+          ) : selection ? (
             <div className="mb-6">
               <Typography variant="body2" className="font-bold mb-3">
                 Highlight & Note
@@ -387,21 +389,7 @@ export function ReaderControlsDrawer({
                 </Button>
               </div>
             </div>
-          )}
-
-          {/* Mobile Clicked Highlight Options */}
-          {clickedHighlight && (
-            <HighlightOptionsBar
-            clickedHighlight={clickedHighlight}
-            setClickedHighlight={setClickedHighlight}
-            removeHighlight={removeHighlight}
-            updateHighlightColor={updateHighlightColor}
-            isPinned={isPinned}
-          />
-          )}
-
-          {/* Mobile Main Controls - only show when no selection or clicked highlight */}
-          {!selection && !clickedHighlight && (
+          ) : (
             <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-2">
                 <TableOfContentsPopover toc={toc} goToHref={goToHref} />
