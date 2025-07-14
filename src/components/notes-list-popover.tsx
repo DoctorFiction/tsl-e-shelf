@@ -17,6 +17,7 @@ import { Note } from "@/hooks/use-epub-reader";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { FilePenLine, Trash, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { EditNoteDialog } from "./edit-note-dialog";
 
 interface NotesListPopoverProps {
   notes: Note[];
@@ -29,16 +30,14 @@ interface NotesListPopoverProps {
 export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, editNote }: NotesListPopoverProps) {
   const [noteDeleteDialogOpen, setNoteDeleteDialogOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [editedNoteText, setEditedNoteText] = useState("");
 
   const handleEditClick = (note: Note) => {
     setEditingNote(note);
-    setEditedNoteText(note.note);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (newNote: string) => {
     if (editingNote) {
-      editNote(editingNote.cfi, editedNoteText);
+      editNote(editingNote.cfi, newNote);
       setEditingNote(null);
     }
   };
@@ -113,19 +112,11 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                       </Typography>
                     </div>
 
-                    {editingNote?.cfi === note.cfi ? (
-                      <div>
-                        <textarea value={editedNoteText} onChange={(e) => setEditedNoteText(e.target.value)} className="w-full p-2 border rounded" />
-                        <Button onClick={handleSaveEdit}>Save</Button>
-                        <Button onClick={() => setEditingNote(null)}>Cancel</Button>
-                      </div>
-                    ) : (
-                      <div className="absolute bottom-3 left-4">
-                        <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400">
-                          {note.note}
-                        </Typography>
-                      </div>
-                    )}
+                    <div className="absolute bottom-3 left-4">
+                      <Typography variant="caption" className="text-xs text-gray-500 dark:text-gray-400">
+                        {note.note}
+                      </Typography>
+                    </div>
                   </div>
 
                   <div className="absolute bottom-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
@@ -161,6 +152,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
             </Typography>
           )}
         </ul>
+        {editingNote && <EditNoteDialog note={editingNote} onSave={handleSaveEdit} onClose={() => setEditingNote(null)} />}
       </PopoverContent>
     </Popover>
   );
