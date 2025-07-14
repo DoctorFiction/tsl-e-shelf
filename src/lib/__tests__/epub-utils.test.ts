@@ -1,7 +1,28 @@
 import { getChapterFromCfi, getPageFromCfi } from '../epub-utils';
+import { Book } from 'epubjs';
 
 describe('epub-utils', () => {
-  let mockBook: any;
+  let mockBook: MockBook;
+
+  interface MockNavigation {
+    toc: { href: string; label: string }[];
+  }
+
+  interface MockSpine {
+    get: jest.Mock;
+  }
+
+  interface MockLocations {
+    length: jest.Mock;
+    locationFromCfi: jest.Mock;
+  }
+
+  interface MockBook {
+    navigation: MockNavigation | null;
+    spine: MockSpine;
+    locations: MockLocations;
+    ready: Promise<boolean>;
+  }
 
   beforeEach(() => {
     mockBook = {
@@ -25,20 +46,20 @@ describe('epub-utils', () => {
           return 0;
         }),
       },
-      ready: Promise.resolve(),
+      ready: Promise.resolve(true),
     };
   });
 
   describe('getChapterFromCfi', () => {
     it('should return the correct chapter label for a given CFI', async () => {
       const cfi = 'epubcfi(/6/2[chapter1]/4/2)';
-      const chapter = await getChapterFromCfi(mockBook, cfi);
+      const chapter = await getChapterFromCfi(mockBook as unknown as Book, cfi);
       expect(chapter).toBe('Chapter 1');
     });
 
     it('should return null if chapter not found', async () => {
       const cfi = 'epubcfi(/6/2[unknown]/4/2)';
-      const chapter = await getChapterFromCfi(mockBook, cfi);
+      const chapter = await getChapterFromCfi(mockBook as unknown as Book, cfi);
       expect(chapter).toBeNull();
     });
 
@@ -58,7 +79,7 @@ describe('epub-utils', () => {
       });
 
       const cfi = 'epubcfi(/6/2[chapter1]/4/2)';
-      const chapter = await getChapterFromCfi(mockBook, cfi);
+      const chapter = await getChapterFromCfi(mockBook as unknown as Book, cfi);
       expect(chapter).toBe('Chapter 1');
     });
   });
@@ -66,14 +87,14 @@ describe('epub-utils', () => {
   describe('getPageFromCfi', () => {
     it('should return the correct 1-indexed page number for a given CFI', () => {
       const cfi = 'epubcfi(/6/2[chapter1]/4/2/page10)';
-      const page = getPageFromCfi(mockBook, cfi);
+      const page = getPageFromCfi(mockBook as unknown as Book, cfi);
       expect(page).toBe(10);
     });
 
     it('should return null if locations are not generated', () => {
       mockBook.locations.length.mockReturnValue(0);
       const cfi = 'epubcfi(/6/2[chapter1]/4/2)';
-      const page = getPageFromCfi(mockBook, cfi);
+      const page = getPageFromCfi(mockBook as unknown as Book, cfi);
       expect(page).toBeNull();
     });
   });

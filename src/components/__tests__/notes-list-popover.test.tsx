@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom" />
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { NotesListPopover } from '../notes-list-popover';
@@ -6,7 +7,7 @@ import { Note } from '@/hooks/use-epub-reader';
 // Mock external dependencies
 jest.mock('@/lib/format-relative-date', () => jest.fn(() => '2 days ago'));
 jest.mock('../edit-note-dialog', () => ({
-  EditNoteDialog: ({ note, onSave, onClose }: any) => (
+  EditNoteDialog: ({ note, onSave, onClose }: { note: Note; onSave: (newNote: string) => void; onClose: () => void }) => (
     <div data-testid="edit-note-dialog">
       <p>{note.note}</p>
       <button onClick={() => onSave('Updated Note')}>Save</button>
