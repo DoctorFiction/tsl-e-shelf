@@ -8,7 +8,8 @@ import Spine from "epubjs/types/spine";
 import { useAtom } from "jotai";
 import { useTheme } from "next-themes";
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
-// TODO: fit cover page with no padding
+// TODO: Fit the cover page with no padding
+// TODO: Add swipe next/prev page navigation when on mobile
 
 const defaultConfig = {
   highlight: {

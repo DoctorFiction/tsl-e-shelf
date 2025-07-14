@@ -18,6 +18,8 @@ import { ReaderBookInfo } from "./ui/reader-book-info";
 import { Typography } from "./ui/typography";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 
+// TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
+
 const HIGHLIGHT_COLORS = [
   { name: "Yellow", color: "#FFDE63" },
   { name: "Green", color: "#AFE99C" },

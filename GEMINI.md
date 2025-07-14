@@ -66,7 +66,6 @@ Commit messages must follow the format: `type(scope): description`.
 
 ### Phase 1: Bug Fixes and UI Improvements
 
-
 *   **TODO:** Handle book title, page number, and chapter display on mobile devices (`src/components/epub-reader.tsx`).
 *   **TODO:** Fit the cover page with no padding (`src/hooks/use-epub-reader.ts`).
 *   **TODO:** Refactor `src/components/reader-controls-drawer.tsx`: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
@@ -74,7 +73,6 @@ Commit messages must follow the format: `type(scope): description`.
 *   **TODO:** Implement mobile-specific display for book title, current page, and chapter name when the user taps the reader.
 *   **TODO:** Add swipe next/prev page navigation when on mobile.
 *   **TODO:** Add a main application drawer for navigation (e.g., home, profile) (`src/components/epub-reader.tsx`).
-*   **TODO:** When a note is clicked, the edit note dialog should open, and let the user to update the note
 
 ### Phase 2: API and Database Integration
 
