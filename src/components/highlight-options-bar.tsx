@@ -1,10 +1,7 @@
-import { Underline, Trash2, X, NotebookPen } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
-import { Highlight, Note } from "@/hooks/use-epub-reader";
-import { Button } from "./ui/button";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Typography } from "@/components/ui/typography";
+import { Highlight } from "@/hooks/use-epub-reader";
+import { Trash2, X } from "lucide-react";
 
 const HIGHLIGHT_COLORS = [
   { name: "Yellow", color: "#FFDE63" },
@@ -15,168 +12,63 @@ const HIGHLIGHT_COLORS = [
 ];
 
 interface HighlightOptionsBarProps {
-  selection: { cfi: string; text: string; rect: DOMRect } | null;
-  addHighlight: (args: Highlight) => void;
   clickedHighlight: Highlight | null;
-  removeHighlight: (cfi: string, type: "highlight" | "underline") => void;
   setClickedHighlight: React.Dispatch<React.SetStateAction<Highlight | null>>;
-  setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
-  addNote: (args: Note) => void;
+  removeHighlight: (cfi: string, type: "highlight" | "underline") => void;
+  updateHighlightColor: (cfi: string, newColor: string) => void;
+  isPinned: boolean;
 }
 
-export function HighlightOptionsBar({ selection, addHighlight, clickedHighlight, removeHighlight, setClickedHighlight, setSelection, addNote }: HighlightOptionsBarProps) {
-  const barRef = useRef<HTMLDivElement>(null);
-  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
-  const [noteContent, setNoteContent] = useState("");
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (barRef.current && !barRef.current.contains(event.target as Node)) {
-        if (!isNoteDialogOpen) {
-          setSelection(null);
-          setClickedHighlight(null);
-        }
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [setSelection, setClickedHighlight, isNoteDialogOpen]);
-
-  const handleSaveNote = () => {
-    if (selection && noteContent.trim() !== "") {
-      addNote({
-        cfi: selection.cfi,
-        text: selection.text,
-        note: noteContent,
-        createdAt: new Date().toISOString(),
-      });
-      setNoteContent("");
-      setIsNoteDialogOpen(false);
-      setSelection(null);
-    }
-  };
-
-  const handleCloseNoteDialog = () => {
-    setNoteContent("");
-    setIsNoteDialogOpen(false);
-    setSelection(null);
-    setClickedHighlight(null);
-  };
-
-  if (!selection && !clickedHighlight) return null;
-
+export function HighlightOptionsBar({ clickedHighlight, setClickedHighlight, removeHighlight, updateHighlightColor, isPinned }: HighlightOptionsBarProps) {
   return (
-    <div ref={barRef} className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-md p-4 flex items-center justify-center space-x-4">
-      {selection && (
-        <>
-          {HIGHLIGHT_COLORS.map((highlight) => (
-            <Button
-              key={highlight.name}
-              variant="ghost"
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                if (selection) {
-                  addHighlight({
-                    cfi: selection.cfi,
-                    text: selection.text,
-                    color: highlight.color,
-                    createdAt: new Date().toISOString(),
-                  });
-                }
-              }}
-            >
-              <div
-                className="w-6 h-6 rounded-full border"
-                style={{
-                  backgroundColor: highlight.color,
-                }}
-              />
-              <span>{highlight.name}</span>
-            </Button>
-          ))}
+    <div className="flex flex-col space-y-2">
+      <Typography variant="body2" className="font-bold">
+        Highlight Actions
+      </Typography>
+      <div className="flex flex-wrap gap-2">
+        {HIGHLIGHT_COLORS.map((highlightColor) => (
           <Button
+            key={highlightColor.name}
             variant="ghost"
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => {
-              if (selection) {
-                addHighlight({
-                  cfi: selection.cfi,
-                  text: selection.text,
-                  type: "underline",
-                  createdAt: new Date().toISOString(),
-                });
+              if (clickedHighlight) {
+                updateHighlightColor(clickedHighlight.cfi, highlightColor.color);
               }
             }}
           >
-            <Underline className="w-6 h-6" />
-            <span>Underline</span>
+            <div
+              className={`w-6 h-6 rounded-full border ${clickedHighlight?.color === highlightColor.color ? "border-4 border-white" : ""}`}
+              style={{
+                backgroundColor: highlightColor.color,
+              }}
+            />
           </Button>
-          <Button
-            variant="ghost"
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={() => {
-              setIsNoteDialogOpen(true);
-            }}
-          >
-            <NotebookPen className="w-6 h-6" />
-            <span>Note</span>
-          </Button>
-        </>
-      )}
-
-      {clickedHighlight && (
-        <Button
-          variant="ghost"
-          className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-700"
-          onClick={() => {
-            if (clickedHighlight) {
-              removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
-              setClickedHighlight(null);
-            }
-          }}
-        >
-          <Trash2 className="w-6 h-6" />
-          <span>Remove Highlight</span>
-        </Button>
-      )}
+        ))}
+      </div>
       <Button
         variant="ghost"
-        className="absolute right-4 top-1/2 -translate-y-1/2"
+        className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-700"
         onClick={() => {
-          setSelection(null);
+          if (clickedHighlight) {
+            removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
+            setClickedHighlight(null);
+          }
+        }}
+      >
+        <Trash2 className="w-6 h-6" />
+        {isPinned && <span>Remove Highlight</span>}
+      </Button>
+      <Button
+        variant="ghost"
+        className="flex items-center gap-2 cursor-pointer"
+        onClick={() => {
           setClickedHighlight(null);
         }}
       >
         <X className="w-6 h-6" />
+        {isPinned && <span>Close</span>}
       </Button>
-
-      <Dialog open={isNoteDialogOpen} onOpenChange={handleCloseNoteDialog}>
-        <DialogContent
-          onPointerDownOutside={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {selection && <blockquote className="mt-6 border-l-2 pl-6 italic">{selection.text}</blockquote>}
-            <Label htmlFor="note-content" className="sr-only">
-              Note
-            </Label>
-            <Textarea id="note-content" placeholder="Type your note here." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="min-h-[100px]" />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseNoteDialog}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveNote}>Save Note</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

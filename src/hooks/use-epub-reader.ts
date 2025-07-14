@@ -135,6 +135,9 @@ interface IUseEpubReaderReturn {
   editNote: (cfi: string, newNote: string) => void;
   editingNote: Note | null;
   setEditingNote: React.Dispatch<React.SetStateAction<Note | null>>;
+  clickedHighlight: Highlight | null;
+  setClickedHighlight: React.Dispatch<React.SetStateAction<Highlight | null>>;
+  updateHighlightColor: (cfi: string, newColor: string) => void;
   currentPage: number;
   totalPages: number;
   error: Error | null;
@@ -159,6 +162,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
   const [spine, setSpine] = useState<ExtendedSpine | null>(null);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
@@ -396,6 +400,26 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       });
     },
     [STORAGE_KEY_NOTES],
+  );
+
+  const updateHighlightColor = useCallback(
+    (cfi: string, newColor: string) => {
+      setHighlights((prev) => {
+        const updated = prev.map((h) => {
+          if (h.cfi === cfi) {
+            // Remove old annotation
+            renditionRef.current?.annotations.remove(cfi, h.type || "highlight");
+            // Add new annotation with updated color
+            renditionRef.current?.annotations.add(h.type || "highlight", cfi, { text: h.text }, undefined, defaultConfig[h.type || "highlight"].className, { ...defaultConfig[h.type || "highlight"].style, fill: newColor, stroke: newColor });
+            return { ...h, color: newColor };
+          }
+          return h;
+        });
+        localStorage.setItem(STORAGE_KEY_HIGHLIGHTS, JSON.stringify(updated));
+        return updated;
+      });
+    },
+    [STORAGE_KEY_HIGHLIGHTS],
   );
 
   const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
@@ -760,6 +784,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         setSelection(null);
       }
 
+      // Clear any previously clicked highlight
+      setClickedHighlight(null);
+
       const target = event.target as HTMLElement;
 
       // Check if the click is on a note annotation
@@ -781,6 +808,25 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
           }
         } catch (error) {
           console.warn("Error getting range for note CFI:", note.cfi, error);
+        }
+      }
+
+      // Check if the click is on a highlight annotation
+      for (const highlight of highlights) {
+        try {
+          const range = renditionRef.current?.getRange(highlight.cfi);
+          if (range) {
+            const rects = range.getClientRects();
+            for (let i = 0; i < rects.length; i++) {
+              const rect = rects[i];
+              if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                setClickedHighlight(highlight);
+                return; // Found the clicked highlight, no need to check further
+              }
+            }
+          }
+        } catch (error) {
+          console.warn("Error getting range for highlight CFI:", highlight.cfi, error);
         }
       }
 
@@ -829,7 +875,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       rendition.off("selected", handleSelected);
       rendition.off("click", handleClick);
     };
-  }, [notes]);
+  }, [notes, highlights]);
 
   // Effect for loading saved highlights
   useEffect(() => {
@@ -899,6 +945,9 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     editNote,
     editingNote,
     setEditingNote,
+    clickedHighlight,
+    setClickedHighlight,
+    updateHighlightColor,
     currentPage,
     totalPages,
     error,

@@ -1,5 +1,5 @@
 "use client";
-import { Highlight, useEpubReader } from "@/hooks/use-epub-reader";
+import { useEpubReader } from "@/hooks/use-epub-reader";
 import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { BookLoading } from "./book-loading";
@@ -49,6 +49,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
     editNote,
     editingNote,
     setEditingNote,
+    clickedHighlight,
+    setClickedHighlight,
+    updateHighlightColor,
     currentSearchResultIndex,
     goToSearchResult,
     currentPage,
@@ -61,8 +64,6 @@ export default function EpubReader({ url }: EpubReaderProps) {
   // TODO: Handle book title, page number, chapter on mobile
   // TODO: add home, profile, logout etc drawer
   // TODO: image previews
-
-  const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -191,6 +192,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         totalPages={totalPages}
         progress={progress}
         bookImages={bookImages}
+        updateHighlightColor={updateHighlightColor}
       />
       <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
       {editingNote && (

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { BookImage, Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Pin, PinOff, Settings, Trash2, Underline, X } from "lucide-react";
+import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
+import { ChevronUp, NotebookPen, Pin, PinOff, Settings, Underline, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -16,6 +16,7 @@ import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { ReaderBookInfo } from "./ui/reader-book-info";
 import { Typography } from "./ui/typography";
+import { HighlightOptionsBar } from "./highlight-options-bar";
 
 const HIGHLIGHT_COLORS = [
   { name: "Yellow", color: "#FFDE63" },
@@ -29,8 +30,9 @@ interface ReaderControlsDrawerProps {
   selection: { cfi: string; text: string; rect: DOMRect } | null;
   addHighlight: (args: Highlight) => void;
   clickedHighlight: Highlight | null;
-  removeHighlight: (cfi: string, type: "highlight" | "underline") => void;
   setClickedHighlight: React.Dispatch<React.SetStateAction<Highlight | null>>;
+  updateHighlightColor: (cfi: string, newColor: string) => void;
+  removeHighlight: (cfi: string, type: "highlight" | "underline") => void;
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
   addNote: (args: Note) => void;
   highlights: Highlight[];
@@ -66,8 +68,9 @@ export function ReaderControlsDrawer({
   selection,
   addHighlight,
   clickedHighlight,
-  removeHighlight,
   setClickedHighlight,
+  updateHighlightColor,
+  removeHighlight,
   setSelection,
   addNote,
   highlights,
@@ -225,34 +228,13 @@ export function ReaderControlsDrawer({
 
         {/* Clicked Highlight Options */}
         {clickedHighlight && (
-          <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
-            <Typography variant="body2" className="font-bold">
-              Highlight Actions
-            </Typography>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 cursor-pointer text-red-500 hover:text-red-700"
-              onClick={() => {
-                if (clickedHighlight) {
-                  removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
-                  setClickedHighlight(null);
-                }
-              }}
-            >
-              <Trash2 className="w-6 h-6" />
-              {isPinned && <span>Remove Highlight</span>}
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center gap-2 cursor-pointer"
-              onClick={() => {
-                setClickedHighlight(null);
-              }}
-            >
-              <X className="w-6 h-6" />
-              {isPinned && <span>Close</span>}
-            </Button>
-          </div>
+          <HighlightOptionsBar
+            clickedHighlight={clickedHighlight}
+            setClickedHighlight={setClickedHighlight}
+            removeHighlight={removeHighlight}
+            updateHighlightColor={updateHighlightColor}
+            isPinned={isPinned}
+          />
         )}
 
         {/* Main Controls - only show when no selection or clicked highlight */}
@@ -409,38 +391,13 @@ export function ReaderControlsDrawer({
 
           {/* Mobile Clicked Highlight Options */}
           {clickedHighlight && (
-            <div className="mb-6">
-              <Typography variant="body2" className="font-bold mb-3">
-                Highlight Actions
-              </Typography>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  className="flex items-center justify-center gap-2 text-red-500 hover:text-red-700"
-                  onClick={() => {
-                    if (clickedHighlight) {
-                      removeHighlight(clickedHighlight.cfi, clickedHighlight.type || "highlight");
-                      setClickedHighlight(null);
-                      setIsMobileDrawerOpen(false);
-                    }
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Remove</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center justify-center gap-2"
-                  onClick={() => {
-                    setClickedHighlight(null);
-                    setIsMobileDrawerOpen(false);
-                  }}
-                >
-                  <X className="w-4 h-4" />
-                  <span>Close</span>
-                </Button>
-              </div>
-            </div>
+            <HighlightOptionsBar
+            clickedHighlight={clickedHighlight}
+            setClickedHighlight={setClickedHighlight}
+            removeHighlight={removeHighlight}
+            updateHighlightColor={updateHighlightColor}
+            isPinned={isPinned}
+          />
           )}
 
           {/* Mobile Main Controls - only show when no selection or clicked highlight */}
