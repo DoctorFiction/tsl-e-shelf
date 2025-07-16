@@ -44,8 +44,10 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
       <PopoverContent className="w-80 p-4" align="end" side="bottom">
         <div className="flex items-center gap-2 mb-2">
           <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder="Search in book..." className="flex-1" />
+          {/* TODO: Add a clear search icon button to the search text field. */}
         </div>
         <div>
+          {/* TODO: Show a "No results found" message when searchResults is empty and searchQuery is not empty. */}
           {searchQuery && searchResults.length === 0 && (
             <Typography variant="body2" className="text-gray-400">
               No results found.

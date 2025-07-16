@@ -458,6 +458,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     return Promise.all(tocItems.map((item, index) => enhanceItem(item, index)));
   }, []);
 
+  // TODO: Improve search function: debounce input, or search immediately on Enter key press.
   const searchBook = useCallback(
     async (query: string) => {
       const book = bookRef.current;
