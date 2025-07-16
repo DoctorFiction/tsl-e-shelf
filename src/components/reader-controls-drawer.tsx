@@ -65,6 +65,7 @@ interface ReaderControlsDrawerProps {
   totalPages?: number;
   progress?: number;
   bookImages: BookImage[];
+  isSearching: boolean;
 }
 
 export function ReaderControlsDrawer({
@@ -103,6 +104,7 @@ export function ReaderControlsDrawer({
   progress,
   bookImages,
   searchBook,
+  isSearching,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -271,6 +273,7 @@ export function ReaderControlsDrawer({
                 currentSearchResultIndex={currentSearchResultIndex}
                 goToSearchResult={goToSearchResult}
                 searchBook={searchBook}
+                isSearching={isSearching}
               />
               {isPinned && <Typography>Search</Typography>}
             </div>
@@ -426,6 +429,7 @@ export function ReaderControlsDrawer({
                   currentSearchResultIndex={currentSearchResultIndex}
                   goToSearchResult={goToSearchResult}
                   searchBook={searchBook}
+                  isSearching={isSearching}
                 />
                 <Typography className="text-xs">Search</Typography>
               </div>

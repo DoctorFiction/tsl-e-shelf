@@ -152,6 +152,7 @@ interface IUseEpubReaderReturn {
   selection: { cfi: string; text: string; rect: DOMRect } | null;
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
   currentChapterTitle: string | null;
+  isSearching: boolean;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -184,6 +185,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<{ src: string; description: string } | null>(null);
   const [bookImages, setBookImages] = useState<BookImage[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   const { theme } = useTheme();
@@ -459,9 +461,10 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     return Promise.all(tocItems.map((item, index) => enhanceItem(item, index)));
   }, []);
 
-  // TODO: Improve search function: debounce input, or search immediately on Enter key press.
+  
   const searchBook = useCallback(
     async (query: string) => {
+      setIsSearching(true);
       const book = bookRef.current;
       if (!query || !book || !spine) {
         console.warn(`Invalid searchBook call`);
@@ -550,6 +553,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       await Promise.all(promises);
       setSearchResults(results);
       setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
+      setIsSearching(false);
     },
     [bookRef, spine],
   );
@@ -973,5 +977,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     setImagePreview,
     bookImages,
     searchBook,
+    isSearching,
   };
 }

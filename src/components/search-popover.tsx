@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Typography } from "@/components/ui/typography";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useRef } from "react";
 
 interface SearchPopoverProps {
@@ -14,9 +14,10 @@ interface SearchPopoverProps {
   currentSearchResultIndex: number;
   goToSearchResult: (index: number) => void;
   searchBook: (query: string) => Promise<void>;
+  isSearching: boolean;
 }
 
-export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goToCfi, currentSearchResultIndex, goToSearchResult, searchBook }: SearchPopoverProps) {
+export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goToCfi, currentSearchResultIndex, goToSearchResult, searchBook, isSearching }: SearchPopoverProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,14 +47,51 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4" align="end" side="bottom">
         <div className="flex items-center gap-2 mb-2">
-          <Input ref={searchInputRef} type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={handleKeyDown} placeholder="Search in book..." className="flex-1" />
-          {/* TODO: Add a clear search icon button to the search text field. */}
+          <Input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (e.target.value === "") {
+                searchBook("");
+              }
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="Search in book..."
+            className="flex-1"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                searchBook("");
+              }}
+              className="h-auto p-1"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
         <div>
-          {/* TODO: Show a "No results found" message when searchResults is empty and searchQuery is not empty. */}
-          {searchQuery && searchResults.length === 0 && (
+          {isSearching && searchQuery.length > 0 && (
+            <div className="flex flex-row gap-2 items-center">
+              <Typography variant="body2" className="text-gray-400">
+                Searching...
+              </Typography>
+              <div className="h-4 w-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          {!isSearching && searchQuery && searchResults.length === 0 && (
             <Typography variant="body2" className="text-gray-400">
               No results found.
+            </Typography>
+          )}
+          {!searchQuery && (
+            <Typography variant="body2" className="text-gray-400">
+              Type to search in the book.
             </Typography>
           )}
           {searchResults.length > 0 && (
