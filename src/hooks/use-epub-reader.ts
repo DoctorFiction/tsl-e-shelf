@@ -411,7 +411,11 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
             // Remove old annotation
             renditionRef.current?.annotations.remove(cfi, h.type || "highlight");
             // Add new annotation with updated color
-            renditionRef.current?.annotations.add(h.type || "highlight", cfi, { text: h.text }, undefined, defaultConfig[h.type || "highlight"].className, { ...defaultConfig[h.type || "highlight"].style, fill: newColor, stroke: newColor });
+            renditionRef.current?.annotations.add(h.type || "highlight", cfi, { text: h.text }, undefined, defaultConfig[h.type || "highlight"].className, {
+              ...defaultConfig[h.type || "highlight"].style,
+              fill: newColor,
+              stroke: newColor,
+            });
             return { ...h, color: newColor };
           }
           return h;
@@ -767,21 +771,21 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     if (!rendition) return;
 
     const handleSelected = (cfiRange: string, contents: Contents) => {
-      const selectedText = contents.window.getSelection()?.toString() || "";
+      const selectedText = contents.window.getSelection()?.toString();
+      if (!selectedText) {
+        return;
+      }
+
       const range = contents.window.getSelection()?.getRangeAt(0);
       if (!range) return;
 
       const rect = range.getBoundingClientRect();
-
-      if (selectedText) {
-        setSelection({ cfi: cfiRange, text: selectedText, rect });
-      } else {
-        setSelection(null);
-      }
+      setSelection({ cfi: cfiRange, text: selectedText, rect });
     };
 
     const handleClick = async (event: MouseEvent) => {
-      if (!window.getSelection()?.toString()) {
+      const iframeWindow = (event.view as Window) ?? window;
+      if (!iframeWindow.getSelection()?.toString()) {
         setSelection(null);
       }
 
