@@ -203,6 +203,10 @@ export default function EpubReader({ url }: EpubReaderProps) {
             editNote(editingNote.cfi, newNote);
             setEditingNote(null);
           }}
+          onDelete={(cfi) => {
+            removeNote(cfi);
+            setEditingNote(null);
+          }}
           onClose={() => setEditingNote(null)}
         />
       )}

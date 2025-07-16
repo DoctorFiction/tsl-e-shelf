@@ -42,6 +42,11 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
     }
   };
 
+  const handleDeleteNote = (cfi: string) => {
+    removeNote(cfi);
+    setEditingNote(null);
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -152,7 +157,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
             </Typography>
           )}
         </ul>
-        {editingNote && <EditNoteDialog note={editingNote} onSave={handleSaveEdit} onClose={() => setEditingNote(null)} />}
+        {editingNote && <EditNoteDialog note={editingNote} onSave={handleSaveEdit} onDelete={handleDeleteNote} onClose={() => setEditingNote(null)} />}
       </PopoverContent>
     </Popover>
   );
