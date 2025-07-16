@@ -140,7 +140,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
           <button
             onClick={goPrev}
             className="bg-white/90 hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 backdrop-blur-sm"
-            aria-label="Previous page"
+            aria-label="Önceki sayfa"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -154,7 +154,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
           <button
             onClick={goNext}
             className="bg-white/90 hover:bg-white dark:bg-gray-800/90 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 backdrop-blur-sm"
-            aria-label="Next page"
+            aria-label="Sonraki sayfa"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

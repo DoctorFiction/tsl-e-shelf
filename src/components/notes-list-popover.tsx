@@ -52,7 +52,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
       <PopoverTrigger asChild>
         <Button
           className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
-          aria-label="Show notes"
+          aria-label="Notları Göster"
           type="button"
         >
           <FilePenLine className="w-4 h-4 text-purple-500" />
@@ -61,22 +61,22 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
       <PopoverContent className="w-96 p-4" align="start" side="bottom">
         <div className="flex items-center justify-between mb-2">
           <Typography variant="body1" className="font-bold">
-            Notes
+            Notlar
           </Typography>
           {notes && notes.length > 0 && (
             <AlertDialog open={noteDeleteDialogOpen} onOpenChange={setNoteDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Delete all notes">
+                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Tüm notları sil">
                   <Trash className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete All Notes</AlertDialogTitle>
-                  <AlertDialogDescription>This action will permanently delete all notes. This action cannot be undone.</AlertDialogDescription>
+                  <AlertDialogTitle>Tüm Notları Sil</AlertDialogTitle>
+                  <AlertDialogDescription>Bu işlem tüm notları kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>İptal</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
                       removeAllNotes();
@@ -84,7 +84,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                     }}
                     className="bg-red-600 hover:bg-red-700"
                   >
-                    Yes, Delete All
+                    Evet, Tümünü Sil
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -127,7 +127,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                   <div className="absolute bottom-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200">
                     <button
                       className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-all duration-200 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
-                      aria-label="Edit note"
+                      aria-label="Notu Düzenle"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditClick(note);
@@ -138,7 +138,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                     </button>
                     <button
                       className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
-                      aria-label="Delete note"
+                      aria-label="Notu Sil"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeNote?.(note.cfi);
@@ -153,7 +153,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
             })
           ) : (
             <Typography variant="body2" className="text-gray-400">
-              No notes found.
+              Not bulunamadı.
             </Typography>
           )}
         </ul>

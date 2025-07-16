@@ -18,10 +18,10 @@ export default function LibraryPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">📚 Library</h1>
+      <h1 className="text-2xl font-bold mb-4">📚 Kütüphane</h1>
       <ul className="space-y-2">
         {books.length === 0 ? (
-          <p>No local books</p>
+          <p>Yerel kitap bulunamadı</p>
         ) : (
           books.map((book, index) => (
             <li key={book.filename}>

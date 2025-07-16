@@ -24,7 +24,7 @@ export function TableOfContentsPopover({
       <PopoverTrigger asChild>
         <Button
           className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
-          aria-label="Table of Contents"
+          aria-label="İçindekiler Tablosu"
           type="button"
         >
           <List className="w-4 h-4 text-black dark:text-white" />
@@ -33,7 +33,7 @@ export function TableOfContentsPopover({
       <PopoverContent className="w-80 p-4" align="end" side="bottom">
         <div className="flex items-center justify-between mb-2">
           <Typography variant="body1" className="font-bold">
-            Table of Contents
+            İçindekiler Tablosu
           </Typography>
         </div>
         <ul className="max-h-64 overflow-y-auto pr-2">
@@ -83,7 +83,7 @@ export function TableOfContentsPopover({
             ))
           ) : (
             <Typography variant="body2" className="text-gray-400">
-              No table of contents available.
+              İçindekiler tablosu mevcut değil.
             </Typography>
           )}
         </ul>

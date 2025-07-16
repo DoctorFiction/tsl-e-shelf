@@ -39,9 +39,9 @@ export function EditNoteDialog({ note, onSave, onDelete, onClose }: EditNoteDial
       <AlertDialog open={true} onOpenChange={onClose}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Edit Note</AlertDialogTitle>
+            <AlertDialogTitle>Notu Düzenle</AlertDialogTitle>
             <AlertDialogDescription>
-              Update your note for the selected text.
+              Seçilen metin için notunuzu güncelleyin.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <Textarea
@@ -50,10 +50,10 @@ export function EditNoteDialog({ note, onSave, onDelete, onClose }: EditNoteDial
             className="w-full p-2 border rounded"
           />
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setShowDeleteConfirm(true)} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+            <AlertDialogAction onClick={() => setShowDeleteConfirm(true)} className="bg-red-500 hover:bg-red-600">Sil</AlertDialogAction>
             <div className="flex gap-2 ml-auto">
-              <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleSave}>Save</AlertDialogAction>
+              <AlertDialogCancel onClick={onClose}>İptal</AlertDialogCancel>
+              <AlertDialogAction onClick={handleSave}>Kaydet</AlertDialogAction>
             </div>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -63,14 +63,14 @@ export function EditNoteDialog({ note, onSave, onDelete, onClose }: EditNoteDial
         <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>Kesinlikle emin misiniz?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your note.
+                Bu işlem geri alınamaz. Notunuz kalıcı olarak silinecektir.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Delete</AlertDialogAction>
+              <AlertDialogCancel onClick={() => setShowDeleteConfirm(false)}>İptal</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">Sil</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

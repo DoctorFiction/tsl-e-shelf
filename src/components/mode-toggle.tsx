@@ -41,7 +41,7 @@ export function ModeToggle() {
     return (
       <button
         className="relative inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
-        aria-label="Toggle theme"
+        aria-label="Temayı değiştir"
         disabled
       >
         <SunIcon className="h-5 w-5 transition-all dark:scale-0 dark:-rotate-90" />
@@ -54,7 +54,7 @@ export function ModeToggle() {
     <button
       className="relative inline-flex items-center justify-center p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
       onClick={handleToggle}
-      aria-label="Toggle theme"
+      aria-label="Temayı değiştir"
     >
       <SunIcon className="h-5 w-5 transition-all dark:scale-0 dark:-rotate-90" />
       <MoonIcon className="absolute h-5 w-5 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />

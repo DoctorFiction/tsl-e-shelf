@@ -28,7 +28,7 @@ export function BookmarksListPopover({
       <PopoverTrigger asChild>
         <Button
           className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
-          aria-label="Show bookmarks"
+          aria-label="Yer İşaretlerini Göster"
           type="button"
         >
           <BookMarked className="w-4 h-4 text-blue-500" />
@@ -37,19 +37,19 @@ export function BookmarksListPopover({
       <PopoverContent className="w-96 p-4" align="start" side="bottom">
         <div className="flex items-center justify-between mb-2">
           <Typography variant="body1" className="font-bold">
-            Bookmarks
+            Yer İşaretleri
           </Typography>
           {bookmarks && bookmarks.length > 0 && (
             <AlertDialog open={bookmarkDeleteDialogOpen} onOpenChange={setBookmarkDeleteDialogOpen}>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Delete all bookmarks">
+                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950" aria-label="Tüm yer işaretlerini sil">
                   <Trash className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tüm İşaretleri Sil</AlertDialogTitle>
-                  <AlertDialogDescription>Bu işlem tüm işaretleri kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
+                  <AlertDialogTitle>Tüm Yer İşaretlerini Sil</AlertDialogTitle>
+                  <AlertDialogDescription>Bu işlem tüm yer işaretlerini kalıcı olarak silecek. Bu işlem geri alınamaz.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>İptal</AlertDialogCancel>
@@ -102,7 +102,7 @@ export function BookmarksListPopover({
 
                   <button
                     className="absolute bottom-2 right-2 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 opacity-0 group-hover:opacity-100 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
-                    aria-label="Delete bookmark"
+                    aria-label="Yer işaretini sil"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeBookmark?.(bm.cfi);
@@ -116,7 +116,7 @@ export function BookmarksListPopover({
             })
           ) : (
             <Typography variant="body2" className="text-gray-400">
-              No bookmarks found.
+              Yer işareti bulunamadı.
             </Typography>
           )}
         </ul>

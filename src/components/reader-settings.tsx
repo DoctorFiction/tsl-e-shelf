@@ -25,7 +25,7 @@ export const ReaderSettings = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="ml-2" aria-label="Remove bookmark" type="button">
+        <Button className="ml-2" aria-label="Ayarları aç" type="button">
           <ALargeSmall />
         </Button>
       </PopoverTrigger>

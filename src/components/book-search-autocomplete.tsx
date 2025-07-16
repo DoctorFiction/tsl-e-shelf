@@ -75,7 +75,7 @@ export default function BookSearchAutocomplete() {
       {showDropdown && !loading && (
         <ul className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 shadow-lg max-h-72 overflow-auto">
           {filtered.length === 0 ? (
-            <li className="px-4 py-2 text-center text-gray-500">No books found.</li>
+            <li className="px-4 py-2 text-center text-gray-500">Kitap bulunamadı.</li>
           ) : (
             filtered.map((book) => (
               <li key={book.id} className="px-4 py-2 cursor-pointer hover:bg-blue-100 transition-colors">

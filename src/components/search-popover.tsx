@@ -45,7 +45,7 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
       <PopoverTrigger asChild>
         <Button
           className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
-          aria-label="Search in book"
+          aria-label="Kitapta Ara"
           type="button"
           onClick={() => setTimeout(() => searchInputRef.current?.focus(), 50)}
         >
@@ -65,7 +65,7 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
               }
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Search in book..."
+            placeholder="Kitapta ara..."
             className="flex-1"
           />
           {searchQuery && (
@@ -86,25 +86,25 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
           {isSearching && searchQuery.length > 0 && (
             <div className="flex flex-row gap-2 items-center">
               <Typography variant="body2" className="text-gray-400">
-                Searching...
+                Aranıyor...
               </Typography>
               <div className="h-4 w-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
             </div>
           )}
           {!isSearching && searchQuery && searchResults.length === 0 && (
             <Typography variant="body2" className="text-gray-400">
-              No results found.
+              Sonuç bulunamadı.
             </Typography>
           )}
           {!searchQuery && (
             <Typography variant="body2" className="text-gray-400">
-              Type to search in the book.
+              Kitapta aramak için yazın.
             </Typography>
           )}
           {searchResults.length > 0 && (
             <div className="flex items-center justify-between mb-1">
               <Typography variant="body1" className="font-bold">
-                {searchResults.length} results found:
+                {searchResults.length} sonuç bulundu:
               </Typography>
               <div className="flex items-center gap-2">
                 <Typography variant="body2">{currentSearchResultIndex !== -1 ? `${currentSearchResultIndex + 1} / ${searchResults.length}` : ""}</Typography>

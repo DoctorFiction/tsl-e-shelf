@@ -165,7 +165,7 @@ export function ReaderControlsDrawer({
             setIsPinned(!isPinned);
             onDrawerStateChange?.(!isPinned);
           }}
-          aria-label={isPinned ? "Unpin drawer" : "Pin drawer"}
+          aria-label={isPinned ? "Çekmeceyi Sabitle" : "Çekmeceyi Çöz"}
         >
           {isPinned ? <PinOff className="w-6 h-6" /> : <Pin className="w-6 h-6" />}
         </Button>
@@ -182,7 +182,7 @@ export function ReaderControlsDrawer({
         ) : selection ? (
           <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
             <Typography variant="body2" className="font-bold">
-              Highlight & Note
+              Vurgu & Not
             </Typography>
             <div className="flex flex-wrap gap-2">
               {HIGHLIGHT_COLORS.map((highlight) => (
@@ -225,7 +225,7 @@ export function ReaderControlsDrawer({
                 }}
               >
                 <Underline className="w-6 h-6" />
-                {isPinned && <span>Underline</span>}
+                {isPinned && <span>Altını Çiz</span>}
               </Button>
               <Button
                 variant="ghost"
@@ -235,34 +235,34 @@ export function ReaderControlsDrawer({
                 }}
               >
                 <NotebookPen className="w-6 h-6" />
-                {isPinned && <span>Note</span>}
+                {isPinned && <span>Not</span>}
               </Button>
             </div>
           </div>
         ) : (
           <div className={`flex flex-col space-y-2 ${isPinned ? "items-start" : "items-center"}`}>
             <Typography variant="body2" className="font-bold">
-              Controls
+              Kontroller
             </Typography>
             <div className="flex flex-row gap-2 items-center">
               <TableOfContentsPopover toc={toc} goToHref={goToHref} />
-              {isPinned && <Typography>Table of Contents</Typography>}
+              {isPinned && <Typography>İçindekiler</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
-              {isPinned && <Typography>Bookmark</Typography>}
+              {isPinned && <Typography>Yer İşareti</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
-              {isPinned && <Typography>Bookmarks</Typography>}
+              {isPinned && <Typography>Yer İşaretleri</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
-              {isPinned && <Typography>Highlights</Typography>}
+              {isPinned && <Typography>Vurgular</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
-              {isPinned && <Typography>Notes</Typography>}
+              {isPinned && <Typography>Notlar</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <SearchPopover
@@ -275,19 +275,19 @@ export function ReaderControlsDrawer({
                 searchBook={searchBook}
                 isSearching={isSearching}
               />
-              {isPinned && <Typography>Search</Typography>}
+              {isPinned && <Typography>Ara</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <ImagesPopover images={bookImages} goToCfiAction={goToCfi} />
-              {isPinned && <Typography>Images</Typography>}
+              {isPinned && <Typography>Resimler</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <ReaderSettings />
-              {isPinned && <Typography>Settings</Typography>}
+              {isPinned && <Typography>Ayarlar</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
               <ReaderBookInfo bookCover={bookCover} bookTitle={bookTitle} totalPages={totalPages} progress={progress} highlights={highlights} bookmarks={bookmarks} notes={notes} />
-              {isPinned && <Typography>Book Info</Typography>}
+              {isPinned && <Typography>Kitap Bilgisi</Typography>}
             </div>
           </div>
         )}
@@ -383,7 +383,7 @@ export function ReaderControlsDrawer({
                   }}
                 >
                   <Underline className="w-4 h-4" />
-                  <span>Underline</span>
+                  <span>Altını Çiz</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -394,7 +394,7 @@ export function ReaderControlsDrawer({
                   }}
                 >
                   <NotebookPen className="w-4 h-4" />
-                  <span>Note</span>
+                  <span>Not</span>
                 </Button>
               </div>
             </div>
@@ -402,23 +402,23 @@ export function ReaderControlsDrawer({
             <div className="grid grid-cols-3 gap-3">
               <div className="flex flex-col items-center gap-2">
                 <TableOfContentsPopover toc={toc} goToHref={goToHref} />
-                <Typography className="text-xs">Contents</Typography>
+                <Typography className="text-xs">İçindekiler</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmarkProp} removeBookmark={removeBookmark} location={location} />
-                <Typography className="text-xs">Bookmark</Typography>
+                <Typography className="text-xs">Yer İşareti</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <BookmarksListPopover bookmarks={bookmarks} goToCfi={goToCfi} removeBookmark={removeBookmark} removeAllBookmarks={removeAllBookmarks} />
-                <Typography className="text-xs">Bookmarks</Typography>
+                <Typography className="text-xs">Yer İşaretleri</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <HighlightsListPopover highlights={highlights} goToCfi={goToCfi} removeHighlight={removeHighlight} removeAllHighlights={removeAllHighlights} />
-                <Typography className="text-xs">Highlights</Typography>
+                <Typography className="text-xs">Vurgular</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <NotesListPopover notes={notes} goToCfi={goToCfi} removeNote={removeNote} removeAllNotes={removeAllNotes} editNote={editNote} />
-                <Typography className="text-xs">Notes</Typography>
+                <Typography className="text-xs">Notlar</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <SearchPopover
@@ -431,23 +431,23 @@ export function ReaderControlsDrawer({
                   searchBook={searchBook}
                   isSearching={isSearching}
                 />
-                <Typography className="text-xs">Search</Typography>
+                <Typography className="text-xs">Ara</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <ImagesPopover images={bookImages} goToCfiAction={goToCfi} />
-                <Typography className="text-xs">Images</Typography>
+                <Typography className="text-xs">Resimler</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <ReaderSettings />
-                <Typography className="text-xs">Settings</Typography>
+                <Typography className="text-xs">Ayarlar</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <ModeToggle />
-                <Typography className="text-xs">Theme</Typography>
+                <Typography className="text-xs">Tema</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <ReaderBookInfo bookCover={bookCover} bookTitle={bookTitle} totalPages={totalPages} progress={progress} highlights={highlights} bookmarks={bookmarks} notes={notes} />
-                <Typography className="text-xs">Book Info</Typography>
+                <Typography className="text-xs">Kitap Bilgisi</Typography>
               </div>
             </div>
           )}
@@ -457,7 +457,7 @@ export function ReaderControlsDrawer({
             <div className="grid grid-cols-2 gap-3 mt-6">
               <div className="flex flex-col items-center gap-2">
                 <ModeToggle />
-                <Typography className="text-xs">Theme</Typography>
+                <Typography className="text-xs">Tema</Typography>
               </div>
             </div>
           )}
@@ -472,7 +472,7 @@ export function ReaderControlsDrawer({
               setClickedHighlight(null);
             }}
           >
-            Close
+            Kapat
           </Button>
         </div>
       </div>
@@ -487,20 +487,20 @@ export function ReaderControlsDrawer({
           }}
         >
           <DialogHeader>
-            <DialogTitle>Add Note</DialogTitle>
+            <DialogTitle>Not Ekle</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             {selection && <blockquote className="mt-6 border-l-2 pl-6 italic">{selection.text}</blockquote>}
             <Label htmlFor="note-content" className="sr-only">
-              Note
+              Not
             </Label>
-            <Textarea id="note-content" placeholder="Type your note here." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="min-h-[100px]" />
+            <Textarea id="note-content" placeholder="Notunuzu buraya yazın." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="min-h-[100px]" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseNoteDialog}>
-              Cancel
+              İptal
             </Button>
-            <Button onClick={handleSaveNote}>Save Note</Button>
+            <Button onClick={handleSaveNote}>Notu Kaydet</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

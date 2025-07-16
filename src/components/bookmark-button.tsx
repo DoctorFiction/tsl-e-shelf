@@ -20,7 +20,7 @@ export function BookmarkButton({
       onClick={() => {
         if (location) removeBookmark(location);
       }}
-      aria-label="Remove bookmark"
+      aria-label="Yer işaretini kaldır"
       type="button"
     >
       <Bookmark fill="currentColor" className="w-4 h-4 text-red-500" />
@@ -31,7 +31,7 @@ export function BookmarkButton({
       onClick={() => {
         addBookmark();
       }}
-      aria-label="Add bookmark"
+      aria-label="Yer işareti ekle"
       type="button"
     >
       <Bookmark className="w-4 h-4 text-black dark:text-white" />

@@ -83,7 +83,7 @@ const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: Re
   );
 };
 
-export const ReaderStyleSelect = ({ label, field, options, placeholder = "Select option", icon }: ReaderStyleSelectProps) => {
+export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçenek seçin", icon }: ReaderStyleSelectProps) => {
   const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const currentValue = pendingOverrides[field]?.toString() as string;
 
@@ -141,7 +141,7 @@ export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwit
 
 export const ReaderSettingsCustom = () => {
   const fontOptions = [
-    { value: "system", label: "System Default" },
+    { value: "system", label: "Sistem Varsayılanı" },
     { value: "Georgia, 'Times New Roman', serif", label: "Georgia" },
     { value: "Publico", label: "Publico" },
     {
@@ -155,17 +155,17 @@ export const ReaderSettingsCustom = () => {
   ];
 
   const columnOptions = [
-    { value: "1", label: "Single Column" },
-    { value: "2", label: "Two Columns" },
+    { value: "1", label: "Tek Sütun" },
+    { value: "2", label: "İki Sütun" },
   ];
 
   type TextAlignOption = "left" | "right" | "center" | "justify";
 
   const textAlignOptions: { value: TextAlignOption; label: string }[] = [
-    { value: "left", label: "Left" },
-    { value: "center", label: "Center" },
-    { value: "right", label: "Right" },
-    { value: "justify", label: "Justify" },
+    { value: "left", label: "Sol" },
+    { value: "center", label: "Orta" },
+    { value: "right", label: "Sağ" },
+    { value: "justify", label: "Yasla" },
   ];
 
   const { theme } = useTheme();
@@ -255,7 +255,7 @@ export const ReaderSettingsCustom = () => {
         <div className="flex flex-row gap-1 items-center">
           <Button variant="outline" className="gap-1 grow" onClick={() => setOpen(true)}>
             <Cog />
-            More customizations
+            Daha fazla özelleştirme
           </Button>
           {isCustomized ? <Asterisk className="flex-none" /> : ""}
         </div>
@@ -264,7 +264,7 @@ export const ReaderSettingsCustom = () => {
         <DialogHeader>
           <DialogTitle>
             <div className="flex flex-row gap-2">
-              <p>More customizations</p>
+              <p>Daha fazla özelleştirme</p>
             </div>
           </DialogTitle>
         </DialogHeader>
@@ -278,31 +278,31 @@ export const ReaderSettingsCustom = () => {
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
         </div>
         <div key={JSON.stringify(pendingOverrides)} className="flex flex-col gap-4">
-          <ReaderStyleSelect label="Font Family" field="fontFamily" options={fontOptions} placeholder="Select font" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSlider label="Line Spacing" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
-          <ReaderStyleSlider label="Character Spacing" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
-          <ReaderStyleSlider label="Word Spacing" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+          <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
+          <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+          <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
           
-          <ReaderStyleSelect label="Columns" field="columnCount" options={columnOptions} placeholder="Select columns" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSelect label="Text Alignment" field="textAlign" options={textAlignOptions} placeholder="Select alignment" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSwitch label="Bold Text" field="isBold" description="Make text bold for better readability" />
+          <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
         </div>
         <div className="flex justify-between items-center pt-4">
           {/* Reset Button on the left if customized */}
           <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" disabled={!isCustomized}>
-                Reset
+                Sıfırla
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Reset customizations?</AlertDialogTitle>
-                <AlertDialogDescription>This will remove all your custom styles and revert to the theme defaults.</AlertDialogDescription>
+                <AlertDialogTitle>Özelleştirmeleri sıfırla?</AlertDialogTitle>
+                <AlertDialogDescription>Bu işlem tüm özel stillerinizi kaldıracak ve varsayılan temaya geri dönecektir.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleReset}>Yes, Reset</AlertDialogAction>
+                <AlertDialogCancel>İptal</AlertDialogCancel>
+                <AlertDialogAction onClick={handleReset}>Evet, Sıfırla</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -310,10 +310,10 @@ export const ReaderSettingsCustom = () => {
           {/* Cancel + Save Buttons */}
           <div className="flex gap-2">
             <Button variant="ghost" onClick={handleCancel}>
-              Cancel
+              İptal
             </Button>
             <Button onClick={handleSave} disabled={!hasChanges}>
-              Save
+              Kaydet
             </Button>
           </div>
         </div>

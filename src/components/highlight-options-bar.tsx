@@ -23,7 +23,7 @@ export function HighlightOptionsBar({ clickedHighlight, setClickedHighlight, rem
   return (
     <div className="flex flex-col space-y-2">
       <Typography variant="body2" className="font-bold">
-        Highlight Actions
+        Vurgu Eylemleri
       </Typography>
       <div className="flex flex-wrap gap-2">
         {HIGHLIGHT_COLORS.map((highlightColor) => (
@@ -57,7 +57,7 @@ export function HighlightOptionsBar({ clickedHighlight, setClickedHighlight, rem
         }}
       >
         <Trash2 className="w-6 h-6" />
-        {isPinned && <span>Remove Highlight</span>}
+        {isPinned && <span>Vurguyu Kaldır</span>}
       </Button>
       <Button
         variant="ghost"
@@ -67,7 +67,7 @@ export function HighlightOptionsBar({ clickedHighlight, setClickedHighlight, rem
         }}
       >
         <X className="w-6 h-6" />
-        {isPinned && <span>Close</span>}
+        {isPinned && <span>Kapat</span>}
       </Button>
     </div>
   );
