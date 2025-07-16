@@ -29,6 +29,7 @@ export function ImagesPopover({ images, goToCfiAction }: ImagesPopoverProps) {
         </div>
         <div className="max-h-48 overflow-y-auto p-4 pt-0">
           {images.length === 0 ? (
+            // TODO: Book images popover no images message should be left aligned
             <Typography variant="body2" className="text-center text-muted-foreground">
               Bu kitapta resim bulunamadı.
             </Typography>
