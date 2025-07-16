@@ -42,6 +42,7 @@ export function EditNoteDialog({ note, onSave, onClose }: EditNoteDialogProps) {
           className="w-full p-2 border rounded"
         />
         <AlertDialogFooter>
+          {/* TODO: Add a 'Delete' button here that prompts the user for confirmation before deleting the note. */}
           <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
           <AlertDialogAction onClick={handleSave}>Save</AlertDialogAction>
         </AlertDialogFooter>
