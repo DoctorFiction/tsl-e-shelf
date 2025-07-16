@@ -357,7 +357,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       const newNote: Note = { cfi, text, note, createdAt: new Date().toISOString() };
 
       // visually annotate
-      // TODO: Add a small note icon on the left corner of the note highlight.
       renditionRef.current?.annotations.add("highlight", cfi, { text }, undefined, defaultConfig.note.className, defaultConfig.note.style);
 
       // update state + localStorage
