@@ -23,13 +23,20 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (e.shiftKey) {
-        goToSearchResult(currentSearchResultIndex - 1);
+
+      if (searchResults.length > 0) {
+        // If there are search results, navigate them.
+        if (e.shiftKey) {
+          goToSearchResult(currentSearchResultIndex - 1);
+        } else {
+          goToSearchResult(currentSearchResultIndex + 1);
+        }
       } else if (searchQuery.trim() !== "") {
+        // If no results yet, but there's a query, initiate a new search immediately.
+        // This will also trigger if isSearching is true, effectively restarting/confirming the search.
         searchBook(searchQuery);
-      } else {
-        goToSearchResult(currentSearchResultIndex + 1);
       }
+      // If searchQuery is empty and searchResults.length is 0, do nothing on Enter.
     }
   };
 
