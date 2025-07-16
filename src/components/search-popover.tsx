@@ -13,9 +13,10 @@ interface SearchPopoverProps {
   goToCfi: (cfi: string) => void;
   currentSearchResultIndex: number;
   goToSearchResult: (index: number) => void;
+  searchBook: (query: string) => Promise<void>;
 }
 
-export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goToCfi, currentSearchResultIndex, goToSearchResult }: SearchPopoverProps) {
+export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goToCfi, currentSearchResultIndex, goToSearchResult, searchBook }: SearchPopoverProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -23,6 +24,8 @@ export function SearchPopover({ searchQuery, setSearchQuery, searchResults, goTo
       e.preventDefault();
       if (e.shiftKey) {
         goToSearchResult(currentSearchResultIndex - 1);
+      } else if (searchQuery.trim() !== "") {
+        searchBook(searchQuery);
       } else {
         goToSearchResult(currentSearchResultIndex + 1);
       }

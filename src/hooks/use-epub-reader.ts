@@ -7,7 +7,8 @@ import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
 import { useAtom } from "jotai";
 import { useTheme } from "next-themes";
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import useDebounce from "@/hooks/use-debounce";
 // TODO: Fit the cover page with no padding
 // TODO: Add swipe next/prev page navigation when on mobile
 
@@ -127,6 +128,7 @@ interface IUseEpubReaderReturn {
   goToSearchResult: (index: number) => void;
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  searchBook: (query: string) => Promise<void>;
   removeHighlight: (cfi: string, type: HighlightType) => void;
   removeAllHighlights: () => void;
   addNote: (note: Note) => void;
@@ -182,7 +184,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [currentChapterTitle, setCurrentChapterTitle] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<{ src: string; description: string } | null>(null);
   const [bookImages, setBookImages] = useState<BookImage[]>([]);
-  const deferredSearchQuery = useDeferredValue(searchQuery);
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -566,16 +568,16 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
   // SEARCH EFFECT
   useEffect(() => {
-    if (deferredSearchQuery.trim().length === 0) {
+    if (debouncedSearchQuery.trim().length === 0) {
       setSearchResults([]);
       setCurrentSearchResultIndex(-1);
       return;
     }
 
-    if (deferredSearchQuery.length >= 3) {
-      searchBook(deferredSearchQuery);
+    if (debouncedSearchQuery.length >= 3) {
+      searchBook(debouncedSearchQuery);
     }
-  }, [deferredSearchQuery, searchBook]);
+  }, [debouncedSearchQuery, searchBook]);
 
   // HIGHLIGHT SEARCH RESULTS EFFECT
   useEffect(() => {
@@ -970,5 +972,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     imagePreview,
     setImagePreview,
     bookImages,
+    searchBook,
   };
 }

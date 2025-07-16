@@ -57,6 +57,7 @@ interface ReaderControlsDrawerProps {
   goToHref: (href: string) => void;
   currentSearchResultIndex: number;
   goToSearchResult: (index: number) => void;
+  searchBook: (query: string) => Promise<void>;
   onDrawerStateChange?: (isPinned: boolean) => void;
   bookTitle?: string | null;
   bookAuthor?: string | null;
@@ -101,6 +102,7 @@ export function ReaderControlsDrawer({
   totalPages,
   progress,
   bookImages,
+  searchBook,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -268,6 +270,7 @@ export function ReaderControlsDrawer({
                 goToCfi={goToCfi}
                 currentSearchResultIndex={currentSearchResultIndex}
                 goToSearchResult={goToSearchResult}
+                searchBook={searchBook}
               />
               {isPinned && <Typography>Search</Typography>}
             </div>
@@ -422,6 +425,7 @@ export function ReaderControlsDrawer({
                   goToCfi={goToCfi}
                   currentSearchResultIndex={currentSearchResultIndex}
                   goToSearchResult={goToSearchResult}
+                  searchBook={searchBook}
                 />
                 <Typography className="text-xs">Search</Typography>
               </div>
