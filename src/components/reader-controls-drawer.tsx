@@ -109,6 +109,7 @@ export function ReaderControlsDrawer({
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
+    // TODO: Close all popovers within this component when the reader is clicked.
     const handleClickOutside = (event: MouseEvent) => {
       if (barRef.current && !barRef.current.contains(event.target as Node)) {
         if (!isNoteDialogOpen) {
