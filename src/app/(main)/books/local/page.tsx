@@ -1,16 +1,8 @@
 import Link from "next/link";
-
-interface Book {
-  filename: string;
-  title: string;
-  id: string;
-}
+import { getLocalBooks, LocalBook } from "@/lib/local-books";
 
 export default async function LibraryPage() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/books/local`, {
-    cache: "no-store",
-  });
-  const books: Book[] = await response.json();
+  const books: LocalBook[] = await getLocalBooks();
 
   return (
     <div className="p-8">
@@ -21,10 +13,7 @@ export default async function LibraryPage() {
         ) : (
           books.map((book, index) => (
             <li key={book.filename}>
-              <Link
-                href={`/reader/${book.id}`}
-                className="text-blue-600 hover:underline"
-              >
+              <Link href={`/reader/${book.id}`} className="text-blue-600 hover:underline">
                 {`${index + 1}. `} {book.title}
               </Link>
             </li>

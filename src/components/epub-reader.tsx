@@ -134,12 +134,14 @@ export default function EpubReader({ url }: EpubReaderProps) {
         {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
         <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
         <div className="relative w-full h-full">
-          <div ref={viewerRef} className="w-full h-full">
+          <div ref={viewerRef} className="w-full h-full" onContextMenu={(e) => e.preventDefault()}>
             {!isLoading && <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />}
           </div>
 
           <div
-            className={`fixed ${mainDrawerPinned ? "left-68" : "left-24"} top-1/2 transform -translate-y-1/2 z-50 text-center transition-opacity duration-300 hidden md:block ${controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+            className={`fixed ${mainDrawerPinned ? "left-68" : "left-24"} top-1/2 transform -translate-y-1/2 z-50 text-center transition-opacity duration-300 hidden md:block ${
+              controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           >
             <button
               onClick={goPrev}
