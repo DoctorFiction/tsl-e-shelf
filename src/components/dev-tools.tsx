@@ -138,19 +138,19 @@ export function DevTools() {
         <PopoverTrigger asChild>
           <Button variant="outline" className="rounded-full shadow-md">
             <BugPlay className="mr-2 h-4 w-4" />
-            Dev Araçları
+            Dev Tools
           </Button>
         </PopoverTrigger>
 
         <PopoverContent className="w-72 space-y-4 p-4" align="end">
           <h4 className="text-lg font-bold text-muted-foreground">
-            Geliştirici Araçları
+            Developer Tools
           </h4>
 
           <div className="space-y-2">
             <div className="flex gap-2">
-              <p className="text-sm font-medium">📄 Kayıtlar</p>
-              <p className="text-sm font-normal">Bu</p>
+              <p className="text-sm font-medium">📄 Logs</p>
+              <p className="text-sm font-normal">This</p>
               <Switch
                 checked={logAllMode}
                 onCheckedChange={() => {
@@ -161,7 +161,7 @@ export function DevTools() {
                   );
                 }}
               />
-              <p className="text-sm font-normal">Tümü</p>
+              <p className="text-sm font-normal">All</p>
             </div>
 
             <Button
@@ -171,7 +171,7 @@ export function DevTools() {
                 console.log("📚 TOC:", getParsed(STORAGE_KEYS.toc));
               }}
             >
-              📚 TOC Kaydet
+              📚 Log TOC
             </Button>
 
             <Button
@@ -184,7 +184,7 @@ export function DevTools() {
                 );
               }}
             >
-              📍Konumu Kaydet
+              📍 Log Location
             </Button>
 
             <Button
@@ -197,7 +197,7 @@ export function DevTools() {
                 );
               }}
             >
-              🔖 Yer İşaretlerini Kaydet
+              🔖 Log Bookmarks
             </Button>
 
             <Button
@@ -210,7 +210,7 @@ export function DevTools() {
                 );
               }}
             >
-              🖍️ Vurguları Kaydet
+              🖍️ Log Highlights
             </Button>
 
             <Button
@@ -220,7 +220,7 @@ export function DevTools() {
                 console.log("📝 Notes:", logEntry(STORAGE_KEYS.notes, "notes"));
               }}
             >
-              📝 Notları Kaydet
+              📝 Log Notes
             </Button>
 
             <Button
@@ -243,7 +243,7 @@ export function DevTools() {
                 console.log("📝 Notes:", logEntry(STORAGE_KEYS.notes, "notes"));
               }}
             >
-              Tüm Okuyucu Durumunu Kaydet
+              Log All Reader State
             </Button>
 
             <Button
@@ -255,14 +255,14 @@ export function DevTools() {
                 });
               }}
             >
-              localStorage&apos;ı Dök
+              Dump localStorage
             </Button>
           </div>
 
           <div className="space-y-2">
             <div className="flex gap-2">
-              <p className="text-sm font-medium">🗑️ Kaldır</p>
-              <p className="text-sm font-normal">Bu</p>
+              <p className="text-sm font-medium">🗑️ Remove</p>
+              <p className="text-sm font-normal">This</p>
               <Switch
                 checked={removeAllMode}
                 onCheckedChange={() => {
@@ -273,7 +273,7 @@ export function DevTools() {
                   );
                 }}
               />
-              <p className="text-sm font-normal">Tümü</p>
+              <p className="text-sm font-normal">All</p>
             </div>
 
             <Button
@@ -281,7 +281,7 @@ export function DevTools() {
               className="w-full"
               onClick={() => clear(STORAGE_KEYS.location, "location")}
             >
-              Konumu Temizle
+              Clear Location
             </Button>
 
             <Button
@@ -289,7 +289,7 @@ export function DevTools() {
               className="w-full"
               onClick={() => clear(STORAGE_KEYS.bookmarks, "bookmarks")}
             >
-              Yer İşaretlerini Temizle
+              Clear Bookmarks
             </Button>
 
             <Button
@@ -297,7 +297,7 @@ export function DevTools() {
               className="w-full"
               onClick={() => clear(STORAGE_KEYS.highlights, "highlights")}
             >
-              Vurguları Temizle
+              Clear Highlights
             </Button>
 
             <Button
@@ -305,16 +305,16 @@ export function DevTools() {
               className="w-full"
               onClick={() => clear(STORAGE_KEYS.notes, "notes")}
             >
-              Notları Temizle
+              Clear Notes
             </Button>
 
             <Button variant="destructive" className="w-full" onClick={clearAll}>
-              Tüm Okuyucu Verilerini Temizle
+              Clear All Reader Data
             </Button>
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">⚙️ Eylemler</p>
+            <p className="text-sm font-medium">⚙️ Actions</p>
             <div className="flex gap-2">
               <Switch
                 checked={autoReload}
@@ -326,10 +326,10 @@ export function DevTools() {
                   );
                 }}
               />
-              <p className="text-sm font-normal">Eylem sonrası yeniden yükle</p>
+              <p className="text-sm font-normal">Reload after action</p>
             </div>
             <Button className="w-full" onClick={reload}>
-              Okuyucuyu Yeniden Yükle
+              Reload Reader
             </Button>
           </div>
         </PopoverContent>
