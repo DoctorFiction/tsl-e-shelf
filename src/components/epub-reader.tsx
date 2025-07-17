@@ -68,6 +68,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
   // TODO: Handle book title, page number, and chapter display on mobile devices
   // TODO: Implement mobile-specific onclick event on the reader: Show the drawer popout button when the user taps the reader; otherwise, hide it.
   // TODO: Implement mobile-specific display for book title, current page, and chapter name when the user taps the reader.
+  // TODO: Add a main application drawer for navigation (e.g., home, profile)
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
