@@ -10,7 +10,11 @@ import { ReaderSettingsCustom } from "./reader-settings-custom";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
-export const ReaderSettings = () => {
+interface ReaderSettingsProps {
+  getPreviewText: (charCount?: number) => Promise<string | null>;
+}
+
+export const ReaderSettings = ({ getPreviewText }: ReaderSettingsProps) => {
   const [themeName, setThemeName] = useAtom(readerThemeNameAtom);
   const [, setReaderPrefs] = useAtom(readerPreferencesAtom);
   const { theme } = useTheme();
@@ -81,7 +85,7 @@ export const ReaderSettings = () => {
         </div>
         <div className="h-px bg-muted my-4" />
         <div className="flex flex-col gap-1">
-          <ReaderSettingsCustom />
+          <ReaderSettingsCustom getPreviewText={getPreviewText} />
         </div>
       </PopoverContent>
     </Popover>

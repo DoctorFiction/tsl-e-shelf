@@ -22,6 +22,32 @@ import {
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
 
+interface ReaderPreviewProps {
+  getPreviewText: (charCount?: number) => Promise<string | null>;
+  previewStyle: CSSProperties;
+}
+
+const ReaderPreview = ({ getPreviewText, previewStyle }: ReaderPreviewProps) => {
+  const [previewText, setPreviewText] = useState<string | null>(null);
+
+  useEffect(() => {
+    getPreviewText(250).then(setPreviewText);
+  }, [getPreviewText]);
+
+  return (
+    <div className="relative rounded-md p-4 border bg-background h-40 overflow-hidden">
+      {previewText ? (
+        <p style={previewStyle} className="text-sm leading-relaxed">
+          {previewText}...
+        </p>
+      ) : (
+        <p>Yükleniyor...</p>
+      )}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
+    </div>
+  );
+};
+
 // List of numeric override keys
 export type SliderField = "fontSize" | "lineHeight" | "characterSpacing" | "wordSpacing";
 
@@ -49,6 +75,10 @@ interface ReaderStyleSwitchProps {
   label: string;
   field: SwitchField;
   description?: string;
+}
+
+interface ReaderSettingsCustomProps {
+  getPreviewText: (charCount?: number) => Promise<string | null>;
 }
 
 const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
@@ -139,7 +169,7 @@ export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwit
   );
 };
 
-export const ReaderSettingsCustom = () => {
+export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomProps) => {
   const fontOptions = [
     { value: "system", label: "Sistem Varsayılanı" },
     { value: "Georgia, 'Times New Roman', serif", label: "Georgia" },
@@ -268,16 +298,7 @@ export const ReaderSettingsCustom = () => {
             </div>
           </DialogTitle>
         </DialogHeader>
-        <div className="relative rounded-md p-4 border bg-background h-40 overflow-hidden">
-          {/* TODO: Customization preview text section should be a section from the current book. */}
-          <p style={previewStyle} className="text-sm leading-relaxed">
-            Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no
-            pictures or conversations in it, “and what is the use of a book,” thought Alice “without pictures or conversations?” So she was considering in her own mind (as well as she could, for the
-            hot day made her feel very sleepy and stupid), whether the pleasure of making a daisy-chain would be worth the trouble of getting up and picking the daisies, when suddenly a White Rabbit
-            with pink eyes ran close by her.
-          </p>
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-background to-transparent" />
-        </div>
+        <ReaderPreview getPreviewText={getPreviewText} previewStyle={previewStyle} />
         <div key={JSON.stringify(pendingOverrides)} className="flex flex-col gap-4">
           <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />

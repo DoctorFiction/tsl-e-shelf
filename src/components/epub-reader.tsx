@@ -61,6 +61,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     bookImages,
     searchBook,
     isSearching,
+    getPreviewText,
   } = useEpubReader(url);
 
   // TODO: Handle book title, page number, and chapter display on mobile devices
@@ -198,6 +199,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         updateHighlightColor={updateHighlightColor}
         searchBook={searchBook}
         isSearching={isSearching}
+        getPreviewText={getPreviewText}
       />
       <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
       {editingNote && (

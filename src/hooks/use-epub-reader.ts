@@ -153,6 +153,7 @@ interface IUseEpubReaderReturn {
   setSelection: React.Dispatch<React.SetStateAction<{ cfi: string; text: string; rect: DOMRect } | null>>;
   currentChapterTitle: string | null;
   isSearching: boolean;
+  getPreviewText: (charCount?: number) => Promise<string | null>;
 }
 
 export function useEpubReader(url: string): IUseEpubReaderReturn {
@@ -570,6 +571,22 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     [searchResults],
   );
 
+  const getPreviewText = useCallback(async (charCount = 250) => {
+    const book = bookRef.current;
+    if (!book || !book.locations) return null;
+
+    // Use the middle of the book for the preview
+    const cfi = book.locations.cfiFromPercentage(0.5);
+    const section = await book.spine.get(cfi);
+    if (!section) return null;
+
+    await section.load(book.load.bind(book));
+    const text = section.document.body.textContent?.trim().slice(0, charCount) || null;
+    section.unload();
+
+    return text;
+  }, []);
+
   // SEARCH EFFECT
   useEffect(() => {
     if (debouncedSearchQuery.trim().length === 0) {
@@ -978,5 +995,6 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     bookImages,
     searchBook,
     isSearching,
+    getPreviewText,
   };
 }

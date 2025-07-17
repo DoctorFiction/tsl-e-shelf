@@ -66,6 +66,7 @@ interface ReaderControlsDrawerProps {
   progress?: number;
   bookImages: BookImage[];
   isSearching: boolean;
+  getPreviewText: (charCount?: number) => Promise<string | null>;
 }
 
 export function ReaderControlsDrawer({
@@ -105,6 +106,7 @@ export function ReaderControlsDrawer({
   bookImages,
   searchBook,
   isSearching,
+  getPreviewText,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
@@ -282,7 +284,7 @@ export function ReaderControlsDrawer({
               {isPinned && <Typography>Resimler</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
-              <ReaderSettings />
+              <ReaderSettings getPreviewText={getPreviewText} />
               {isPinned && <Typography>Ayarlar</Typography>}
             </div>
             <div className="flex flex-row gap-2 items-center">
@@ -438,7 +440,7 @@ export function ReaderControlsDrawer({
                 <Typography className="text-xs">Resimler</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <ReaderSettings />
+                <ReaderSettings getPreviewText={getPreviewText} />
                 <Typography className="text-xs">Ayarlar</Typography>
               </div>
               <div className="flex flex-col items-center gap-2">
