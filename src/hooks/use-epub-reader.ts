@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import useDebounce from "@/hooks/use-debounce";
 // TODO: Fit the cover page with no padding
 // TODO: Add swipe next/prev page navigation when on mobile
+// TODO: The books in the library are rented. Thus, the users should not be able to download, or copy the book content by any means. However, the system should allow the users to copy book content up to a percentage, up to 10% to the total book content, for example. When a section is copied, the copied content percentage should persist. When copying new sections, we should check if it is within allowed percentage or not. When copying content, the user should be prompted, and throughly be informed about their copying action. The user should clearly see what percent of their allowed content they are copying, how much will be left for them to copy, and they are absolutely sure about their copying action
 
 const defaultConfig = {
   highlight: {
