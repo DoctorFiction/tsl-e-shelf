@@ -29,10 +29,9 @@ export function ImagesPopover({ images, goToCfiAction }: ImagesPopoverProps) {
         </div>
         <div className="max-h-48 overflow-y-auto p-4 pt-0">
           {images.length === 0 ? (
-            // TODO: Book images popover no images message should be left aligned
             <Typography variant="body2" className="text-muted-foreground">
-              Bu kitapta resim bulunamadı.
-            </Typography>
+            Bu kitapta resim bulunamadı.
+          </Typography>
           ) : (
             images.map((image, index) => (
               <div key={index} className="flex items-center gap-4 p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer" onClick={() => goToCfiAction(image.cfi)}>

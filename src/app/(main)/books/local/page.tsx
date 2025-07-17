@@ -1,20 +1,16 @@
-import fs from "fs";
-import path from "path";
 import Link from "next/link";
 
-export default function LibraryPage() {
-  const booksDir = path.join(process.cwd(), "public", "books");
-  const filenames = fs
-    .readdirSync(booksDir)
-    .filter((name) => name.endsWith(".epub"));
+interface Book {
+  filename: string;
+  title: string;
+  id: string;
+}
 
-  const books = filenames.map((filename) => ({
-    filename,
-    title: decodeURIComponent(
-      filename.replace(/\.epub$/, "").replace(/[_-]/g, " "),
-    ),
-    id: encodeURIComponent(filename), // Use this as the [id] param
-  }));
+export default async function LibraryPage() {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/books/local`, {
+    cache: "no-store",
+  });
+  const books: Book[] = await response.json();
 
   return (
     <div className="p-8">
