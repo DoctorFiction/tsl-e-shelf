@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify } from "lucide-react";
+import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -298,6 +298,22 @@ export function ReaderControlsDrawer({
 
         {/* Bottom section with Theme and Close button */}
         <div className="mt-auto flex flex-col items-center gap-3 mb-4">
+          {selection && (
+            <Button
+              variant="ghost"
+              className={`flex items-center ${
+                isPinned ? "gap-2" : "justify-center"
+              } text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700`}
+              onClick={() => {
+                setSelection(null);
+                setClickedHighlight(null);
+              }}
+              title={!isPinned ? "Geri Dön" : undefined}
+            >
+              <ChevronLeft className={`${isPinned ? "w-4 h-4" : "w-6 h-6"}`} />
+              {isPinned && <span className="text-sm">Geri Dön</span>}
+            </Button>
+          )}
           <ModeToggle />
         </div>
       </div>
@@ -449,6 +465,21 @@ export function ReaderControlsDrawer({
           {/* Theme and Close Section for mobile - always show at bottom when there's selection or clicked highlight */}
           {(selection || clickedHighlight) && (
             <div className="grid grid-cols-2 gap-3 mt-6">
+              {selection && (
+                <div className="flex flex-col items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-transparent hover:bg-gray-50 dark:hover:bg-gray-700"
+                    onClick={() => {
+                      setSelection(null);
+                      setClickedHighlight(null);
+                    }}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span className="text-sm">Geri Dön</span>
+                  </Button>
+                </div>
+              )}
               <div className="flex flex-col items-center gap-2">
                 <ModeToggle />
                 <Typography className="text-xs">Tema</Typography>
@@ -501,4 +532,3 @@ export function ReaderControlsDrawer({
     </>
   );
 }
-
