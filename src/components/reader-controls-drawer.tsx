@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Pin, PinOff, Settings, Underline, X } from "lucide-react";
+import { ChevronUp, NotebookPen, Settings, Underline, X, AlignLeft, AlignJustify } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -160,17 +160,19 @@ export function ReaderControlsDrawer({
         className={`hidden md:flex fixed right-0 top-0 h-full bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-md p-4 mt-1 flex-col space-y-4 transition-all duration-300 z-50
           ${isPinned ? "w-64" : "w-20 items-center"}`}
       >
-        <Button
-          variant="ghost"
-          className=""
-          onClick={() => {
-            setIsPinned(!isPinned);
-            onDrawerStateChange?.(!isPinned);
-          }}
-          aria-label={isPinned ? "Çekmeceyi Sabitle" : "Çekmeceyi Çöz"}
-        >
-          {isPinned ? <PinOff className="w-6 h-6" /> : <Pin className="w-6 h-6" />}
-        </Button>
+        <div className="flex items-center justify-start w-full">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setIsPinned(!isPinned);
+              onDrawerStateChange?.(!isPinned);
+            }}
+            aria-label={isPinned ? "Collapse Drawer" : "Expand Drawer"}
+            className="p-2"
+          >
+            {isPinned ? <AlignLeft className="w-6 h-6" /> : <AlignJustify className="w-6 h-6" />}
+          </Button>
+        </div>
 
         {/* Highlight Options */}
         {clickedHighlight ? (
