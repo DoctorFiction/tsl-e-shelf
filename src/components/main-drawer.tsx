@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Settings, LogOut, Home, BookOpen, Pin, PinOff } from "lucide-react";
+import { Settings, LogOut, Home, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Typography } from "./ui/typography";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Card } from "./ui/card";
 
 interface Book {
   filename: string;
@@ -44,24 +44,28 @@ export function MainDrawer({ onDrawerStateChange }: MainDrawerProps) {
         }}
         aria-label={isPinned ? "Çekmeceyi Sabitle" : "Çekmeceyi Çöz"}
       >
-        {isPinned ? <PinOff className="w-6 h-6" /> : <Pin className="w-6 h-6" />}
+        <Menu className="w-6 h-6" />
       </Button>
 
       <Link href="/" className="flex items-center gap-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
         <Home className="w-6 h-6" />
-        {isPinned && <Typography variant="h6">TSL E-Shelf</Typography>}
+        {isPinned && (
+          <div className="flex flex-col items-start">
+            <Typography variant="h6">Nobel Yayın</Typography>
+            <Typography variant="body2" className="text-muted-foreground">TSL E-Shelf</Typography>
+          </div>
+        )}
       </Link>
 
       <div className="flex flex-col space-y-2 flex-grow">
-        <Typography variant="body2" className="font-bold">
+        <Typography variant="h6" className="font-bold">
           {isPinned && "Kitaplarım"}
         </Typography>
         <ul className="space-y-2">
           {books.map((book) => (
             <li key={book.id}>
               <Link href={`/reader/${book.id}`} className="flex items-center gap-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
-                <BookOpen className="w-5 h-5" />
-                {isPinned && <Typography variant="body2">{book.title}</Typography>}
+                {isPinned && <Typography variant="body2">• {book.title}</Typography>}
               </Link>
             </li>
           ))}
@@ -69,22 +73,21 @@ export function MainDrawer({ onDrawerStateChange }: MainDrawerProps) {
       </div>
 
       <div className="mt-auto flex flex-col items-center gap-3 mb-4">
-        <div className={`flex items-center gap-2 ${isPinned ? "flex-row" : "flex-col"}`}>
-          <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-            <AvatarFallback>HS</AvatarFallback>
-          </Avatar>
+        <Card className={`p-2 w-full ${isPinned ? "flex-row" : "flex-col"} items-center gap-2 bg-gray-200 dark:bg-gray-700`}>
+          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+            HÖ
+          </div>
           {isPinned && (
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-start flex-grow">
               <Typography variant="body1">Hasan Özçelik</Typography>
-              <Button variant="ghost" size="sm" className="p-0 h-auto">
+              <Button variant="ghost" size="sm" className="p-0 h-auto justify-start">
                 <Settings className="w-4 h-4 mr-1" />
                 Ayarlar
               </Button>
             </div>
           )}
-        </div>
-        <Button variant="ghost" className="w-full flex items-center gap-2">
+        </Card>
+        <Button variant="destructive" className="w-full flex items-center gap-2">
           <LogOut className="w-5 h-5" />
           {isPinned && <span>Çıkış Yap</span>}
         </Button>
