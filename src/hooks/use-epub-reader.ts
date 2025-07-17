@@ -748,11 +748,70 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       console.warn("Rendition themes not initialized");
     }
 
-    rendition.hooks.content.register(() => {
+    rendition.hooks.content.register((contents: Contents) => {
       // This hook is for content that is newly rendered or re-rendered
       // We still want to ensure the theme is applied here for new content
       if (rendition?.themes) {
         rendition.themes.select("custom-theme");
+      }
+
+      // Disable right-click context menu and copy shortcuts while preserving text selection
+      const doc = contents.document;
+      if (doc) {
+        // Disable context menu
+        doc.addEventListener(
+          "contextmenu",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          },
+          true
+        );
+
+        // Disable copy shortcuts (Ctrl+C, Ctrl+A, Ctrl+X, etc.)
+        doc.addEventListener(
+          "keydown",
+          (e) => {
+            // Disable copy, cut, select all, print shortcuts
+            if (e.ctrlKey || e.metaKey) {
+              if (["c", "x", "a", "p", "s"].includes(e.key.toLowerCase())) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+            }
+
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U (developer tools)
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) || (e.ctrlKey && e.key === "U") || (e.metaKey && e.altKey && e.key === "I")) {
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          },
+          true
+        );
+
+        // Disable drag and drop
+        doc.addEventListener(
+          "dragstart",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          },
+          true
+        );
+
+        // Disable text selection on images specifically
+        const images = doc.querySelectorAll("img");
+        images.forEach((img) => {
+          img.style.userSelect = "none";
+          img.style.webkitUserSelect = "none";
+          img.style.setProperty("-moz-user-select", "none");
+          img.style.setProperty("-ms-user-select", "none");
+          img.draggable = false;
+        });
       }
     });
   }, [isDark, computedStyles, renditionRef, overrides]);

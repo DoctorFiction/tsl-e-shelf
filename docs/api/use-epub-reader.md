@@ -21,11 +21,7 @@ function MyReaderComponent({ bookUrl }: { bookUrl: string }) {
   } = useEpubReader(bookUrl);
 
   // Your component logic here
-  return (
-    <div>
-      {/* Render your reader UI */}
-    </div>
-  );
+  return <div>{/* Render your reader UI */}</div>;
 }
 ```
 
@@ -33,7 +29,43 @@ function MyReaderComponent({ bookUrl }: { bookUrl: string }) {
 
 `useEpubReader` accepts a single parameter:
 
-*   `url`: `string` - The URL or path to the EPUB file to be loaded.
+- `url`: `string` - The URL or path to the EPUB file to be loaded.
+
+## Security Features
+
+The `useEpubReader` hook includes comprehensive content protection to prevent unauthorized copying and access to book content:
+
+### 🔒 Implemented Protections
+
+**Right-Click Menu Disabled**: `contextmenu` event is completely blocked
+**Keyboard Shortcuts Disabled**:
+
+- `Ctrl+C` (copy)
+- `Ctrl+X` (cut)
+- `Ctrl+A` (select all)
+- `Ctrl+P` (print)
+- `Ctrl+S` (save)
+
+**Developer Tools Disabled**:
+
+- `F12`
+- `Ctrl+Shift+I`
+- `Ctrl+Shift+J`
+- `Ctrl+Shift+C`
+- `Ctrl+U`
+- `Cmd+Alt+I` (Mac)
+
+**Drag & Drop Disabled**: `dragstart` event is blocked
+**Image Protection**: Special selection prevention on images
+
+### ✅ Preserved Features
+
+- **Text selection** still works (required for highlighting functionality)
+- **Reader functionality** remains intact
+- **Theme switching** continues to work
+- **All reader controls** function normally
+
+These protections are automatically applied to all EPUB content through the `content.register` hook, ensuring consistent security across all book pages and chapters.
 
 ## Return Value (`IUseEpubReaderReturn` Interface)
 
