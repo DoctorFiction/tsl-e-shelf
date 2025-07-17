@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Settings, Underline, X, AlignLeft, AlignJustify } from "lucide-react";
+import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -299,16 +299,6 @@ export function ReaderControlsDrawer({
         {/* Bottom section with Theme and Close button */}
         <div className="mt-auto flex flex-col items-center gap-3 mb-4">
           <ModeToggle />
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSelection(null);
-              setClickedHighlight(null);
-            }}
-            className="p-2 flex items-center justify-center"
-          >
-            <X className="w-5 h-5" />
-          </Button>
         </div>
       </div>
 
@@ -511,3 +501,4 @@ export function ReaderControlsDrawer({
     </>
   );
 }
+
