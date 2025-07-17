@@ -324,6 +324,13 @@ interface IUseEpubReaderReturn {
    * @type {string | null}
    */
   currentChapterTitle: string | null;
+
+  /**
+   * Fetches a text snippet from the middle of the book for preview purposes.
+   * @param {number} [charCount=250] - The maximum number of characters to return for the preview.
+   * @returns {Promise<string | null>}
+   */
+  getPreviewText: (charCount?: number) => Promise<string | null>;
 }
 ```
 
