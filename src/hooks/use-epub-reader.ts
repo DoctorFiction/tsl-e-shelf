@@ -1,3 +1,4 @@
+import { copiedCharsAtom, totalBookCharsAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
@@ -106,6 +107,12 @@ interface ExtendedSpine extends Spine {
   spineItems: Section[];
 }
 
+interface IUseEpubReader {
+  url: string;
+  isCopyProtected?: boolean;
+  copyAllowancePercentage?: number;
+}
+
 interface IUseEpubReaderReturn {
   location: string | null;
   imagePreview: { src: string; description: string } | null;
@@ -155,9 +162,12 @@ interface IUseEpubReaderReturn {
   currentChapterTitle: string | null;
   isSearching: boolean;
   getPreviewText: (charCount?: number) => Promise<string | null>;
+  copyText: (text: string) => Promise<void>;
+  totalBookChars: number;
+  copiedChars: number;
 }
 
-export function useEpubReader(url: string): IUseEpubReaderReturn {
+export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 10 }: IUseEpubReader): IUseEpubReaderReturn {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
@@ -196,11 +206,40 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
   const [computedStyles] = useAtom(computedReaderStylesAtom);
   const [overrides] = useAtom(readerOverridesAtom);
 
+  const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
+  console.log("totalBookChars", totalBookChars);
+  const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
+  console.log("copiedChars", copiedChars);
+
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
   const STORAGE_KEY_BOOKMARK = `epub-bookmarks-${url}`;
   const STORAGE_KEY_NOTES = `epub-notes-${url}`;
   const STORAGE_KEY_TOC = `epub-toc`;
+  const STORAGE_KEY_TOTAL_CHARS = `epub-total-chars-${url}`;
+  const STORAGE_KEY_COPIED_CHARS = `epub-copied-chars-${url}`;
+
+  const copyText = useCallback(
+    async (text: string) => {
+      if (!isCopyProtected) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const allowedChars = (totalBookChars * copyAllowancePercentage) / 100;
+      if (copiedChars + text.length > allowedChars) {
+        throw new Error("Copy limit exceeded");
+      }
+
+      await navigator.clipboard.writeText(text);
+      setCopiedChars((prev) => {
+        const newCopiedChars = prev + text.length;
+        localStorage.setItem(STORAGE_KEY_COPIED_CHARS, JSON.stringify(newCopiedChars));
+        return newCopiedChars;
+      });
+    },
+    [isCopyProtected, totalBookChars, copyAllowancePercentage, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS],
+  );
 
   const addHighlight = useCallback(
     ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
@@ -220,7 +259,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
 
       setSelection(null);
     },
-    [STORAGE_KEY_HIGHLIGHTS]
+    [STORAGE_KEY_HIGHLIGHTS],
   );
 
   const removeHighlight = useCallback(
@@ -268,7 +307,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef]
+    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef],
   );
 
   const removeAllHighlights = useCallback(() => {
@@ -331,7 +370,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_BOOKMARK]
+    [STORAGE_KEY_BOOKMARK],
   );
 
   const removeAllBookmarks = useCallback(() => {
@@ -373,7 +412,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       });
       setSelection(null);
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const removeNote = useCallback(
@@ -385,7 +424,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const removeAllNotes = useCallback(() => {
@@ -406,7 +445,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES],
   );
 
   const updateHighlightColor = useCallback(
@@ -430,7 +469,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS]
+    [STORAGE_KEY_HIGHLIGHTS],
   );
 
   const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
@@ -556,7 +595,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
       setIsSearching(false);
     },
-    [bookRef, spine]
+    [bookRef, spine],
   );
 
   const goToSearchResult = useCallback(
@@ -568,7 +607,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         setCurrentSearchResultIndex(index);
       }
     },
-    [searchResults]
+    [searchResults],
   );
 
   const getPreviewText = useCallback(async (charCount = 250) => {
@@ -631,7 +670,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       {}, // data
       undefined, // cb
       undefined, // no className
-      defaultConfig.selectedSearchResult.style
+      defaultConfig.selectedSearchResult.style,
     );
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
@@ -664,6 +703,30 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
         const originalToc = book.navigation?.toc || [];
         setSpine(book.spine as ExtendedSpine);
         await book.locations.generate(5000);
+
+        if (isCopyProtected) {
+          const savedTotalChars = localStorage.getItem(STORAGE_KEY_TOTAL_CHARS);
+          if (savedTotalChars) {
+            setTotalBookChars(JSON.parse(savedTotalChars));
+          } else {
+            const allText = await Promise.all(
+              (book.spine as ExtendedSpine).spineItems.map(async (item) => {
+                await item.load(book.load.bind(book));
+                const text = item.document.body.textContent || "";
+                item.unload();
+                return text;
+              }),
+            );
+            const totalChars = allText.join("").length;
+            setTotalBookChars(totalChars);
+            localStorage.setItem(STORAGE_KEY_TOTAL_CHARS, JSON.stringify(totalChars));
+          }
+
+          const savedCopiedChars = localStorage.getItem(STORAGE_KEY_COPIED_CHARS);
+          if (savedCopiedChars) {
+            setCopiedChars(JSON.parse(savedCopiedChars));
+          }
+        }
 
         setTotalPages(book.locations.length());
 
@@ -728,7 +791,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
       setError(err as Error);
       setIsLoading(false);
     }
-  }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC, enhanceTocWithPages]);
+  }, [url, STORAGE_KEY_LOC, STORAGE_KEY_TOC, enhanceTocWithPages, isCopyProtected, STORAGE_KEY_TOTAL_CHARS, setTotalBookChars, STORAGE_KEY_COPIED_CHARS, setCopiedChars]);
 
   // Effect for theming
   useEffect(() => {
@@ -766,7 +829,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
             e.stopPropagation();
             return false;
           },
-          true
+          true,
         );
 
         // Disable copy shortcuts (Ctrl+C, Ctrl+A, Ctrl+X, etc.)
@@ -789,7 +852,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
               return false;
             }
           },
-          true
+          true,
         );
 
         // Disable drag and drop
@@ -800,7 +863,7 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
             e.stopPropagation();
             return false;
           },
-          true
+          true,
         );
 
         // Disable text selection on images specifically
@@ -1055,5 +1118,8 @@ export function useEpubReader(url: string): IUseEpubReaderReturn {
     searchBook,
     isSearching,
     getPreviewText,
+    copyText,
+    totalBookChars,
+    copiedChars,
   };
 }

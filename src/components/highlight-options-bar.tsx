@@ -19,7 +19,13 @@ interface HighlightOptionsBarProps {
   isPinned: boolean;
 }
 
-export function HighlightOptionsBar({ clickedHighlight, setClickedHighlight, removeHighlight, updateHighlightColor, isPinned }: HighlightOptionsBarProps) {
+export function HighlightOptionsBar({
+  clickedHighlight,
+  setClickedHighlight,
+  removeHighlight,
+  updateHighlightColor,
+  isPinned,
+}: HighlightOptionsBarProps) {
   return (
     <div className="flex flex-col space-y-2">
       <Typography variant="body2" className="font-bold">

@@ -63,7 +63,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
     searchBook,
     isSearching,
     getPreviewText,
-  } = useEpubReader(url);
+    copyText,
+  } = useEpubReader({ url, isCopyProtected: true });
 
   // TODO: Handle book title, page number, and chapter display on mobile devices
   // TODO: Implement mobile-specific onclick event on the reader: Show the drawer popout button when the user taps the reader; otherwise, hide it.
@@ -205,6 +206,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
           searchBook={searchBook}
           isSearching={isSearching}
           getPreviewText={getPreviewText}
+          copyText={copyText}
         />
         <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         {editingNote && (
