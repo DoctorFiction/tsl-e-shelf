@@ -36,6 +36,7 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
           <DialogDescription>
             You are about to copy a selection of text. Please review the details below.
           </DialogDescription>
+          
         </DialogHeader>
         <div>
           <p>
@@ -62,10 +63,15 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
           </div>
         </div>
         <DialogFooter>
+          {remainingPercentage < 0 && (
+            <p className="text-sm text-red-500 mr-auto">
+              Warning: This selection exceeds your remaining copy allowance.
+            </p>
+          )}
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button onClick={onConfirm}>Confirm</Button>
+          <Button onClick={onConfirm} disabled={remainingPercentage < 0}>Confirm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
