@@ -27,9 +27,11 @@ function MyReaderComponent({ bookUrl }: { bookUrl: string }) {
 
 ## Parameters
 
-`useEpubReader` accepts a single parameter:
+`useEpubReader` accepts the following parameters:
 
 - `url`: `string` - The URL or path to the EPUB file to be loaded.
+- `isCopyProtected`: `boolean` (optional, default: `false`) - Enables or disables the copy protection feature.
+- `copyAllowancePercentage`: `number` (optional, default: `10`) - The percentage of the book content that can be copied.
 
 ## Security Features
 
@@ -363,6 +365,25 @@ interface IUseEpubReaderReturn {
    * @returns {Promise<string | null>}
    */
   getPreviewText: (charCount?: number) => Promise<string | null>;
+
+  /**
+   * Copies the given text to the clipboard, respecting copy protection limits if enabled.
+   * @param {string} text - The text to copy.
+   * @returns {Promise<void>}
+   */
+  copyText: (text: string) => Promise<void>;
+
+  /**
+   * The total number of characters in the book.
+   * @type {number}
+   */
+  totalBookChars: number;
+
+  /**
+   * The number of characters already copied by the user.
+   * @type {number}
+   */
+  copiedChars: number;
 }
 ```
 
