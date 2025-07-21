@@ -1,5 +1,6 @@
 import { totalBookCharsAtom, copiedCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,13 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
             <p>
               Remaining Allowance: <strong>{remainingPercentage.toFixed(2)}%</strong>
             </p>
+            <div className="mt-4">
+              <p className="mb-2 text-sm font-medium">Allowance Progress</p>
+              <Progress value={(currentCopiedPercentage / copyAllowance) * 100} className="h-2" />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {copiedChars.toFixed(0)} / {(totalBookChars * copyAllowance / 100).toFixed(0)} characters copied ({currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%)
+              </p>
+            </div>
           </div>
         </div>
         <DialogFooter>
