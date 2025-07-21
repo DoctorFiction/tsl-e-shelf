@@ -90,7 +90,7 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Cloud Storage for Books:** Integrate with a cloud storage service for epub files.
 *   **Offline Access:** Implement offline reading capabilities.
 *   **Social Features:** Allow users to share annotations and book recommendations.
-*   **Copy Protection:** Implemented copy protection and usage tracking for book content, allowing users to copy a limited percentage of the book content with clear usage information and confirmation.
+
 
 ## Testing Guidelines
 

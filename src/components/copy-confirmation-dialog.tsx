@@ -44,19 +44,19 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
           <p className="max-h-32 overflow-y-auto rounded-md border bg-muted p-2">{selectedText}</p>
           <div className="mt-4 space-y-2">
             <p>
-              Current Copied: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
+              Copied: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
             </p>
             <p>
-              This Selection: <strong>{selectionPercentage.toFixed(2)}%</strong>
+              Selection: <strong>{selectionPercentage.toFixed(2)}%</strong>
             </p>
             <p>
-              Remaining Allowance: <strong>{remainingPercentage.toFixed(2)}%</strong>
+              Remaining: <strong>{remainingPercentage.toFixed(2)}%</strong>
             </p>
             <div className="mt-4">
               <p className="mb-2 text-sm font-medium">Allowance Progress</p>
               <Progress value={(currentCopiedPercentage / copyAllowance) * 100} className="h-2" />
               <p className="mt-1 text-xs text-muted-foreground">
-                {copiedChars.toFixed(0)} / {(totalBookChars * copyAllowance / 100).toFixed(0)} characters copied ({currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%)
+                {copiedChars.toFixed(0)} of {(totalBookChars * copyAllowance / 100).toFixed(0)} characters copied ({currentCopiedPercentage.toFixed(2)}% of {copyAllowance.toFixed(2)}% allowance)
               </p>
             </div>
           </div>
