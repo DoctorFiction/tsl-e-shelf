@@ -220,21 +220,32 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const copyText = useCallback(
     async (text: string) => {
       if (!isCopyProtected) {
-        await navigator.clipboard.writeText(text);
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (err) {
+          console.error("Failed to copy text (unprotected):", err);
+        }
         return;
       }
 
       const allowedChars = (totalBookChars * copyAllowancePercentage) / 100;
+
       if (copiedChars + text.length > allowedChars) {
         throw new Error("Copy limit exceeded");
       }
 
-      await navigator.clipboard.writeText(text);
-      setCopiedChars((prev) => {
-        const newCopiedChars = prev + text.length;
-        localStorage.setItem(STORAGE_KEY_COPIED_CHARS, JSON.stringify(newCopiedChars));
-        return newCopiedChars;
-      });
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopiedChars((prev) => {
+          const newCopiedChars = prev + text.length;
+          localStorage.setItem(STORAGE_KEY_COPIED_CHARS, JSON.stringify(newCopiedChars));
+          return newCopiedChars;
+        });
+      } catch (err) {
+        console.error("Failed to copy text (protected):", err);
+        // Re-throw the error so the calling component can handle it if needed
+        throw err;
+      }
     },
     [isCopyProtected, totalBookChars, copyAllowancePercentage, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS],
   );

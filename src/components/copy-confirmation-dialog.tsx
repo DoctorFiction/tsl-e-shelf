@@ -12,12 +12,12 @@ import { useAtom } from "jotai";
 
 interface CopyConfirmationDialogProps {
   isOpen: boolean;
-  onClose: () => void;
   onConfirm: () => void;
+  onCancel: () => void;
   selectedText: string;
 }
 
-export function CopyConfirmationDialog({ isOpen, onClose, onConfirm, selectedText }: CopyConfirmationDialogProps) {
+export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedText }: CopyConfirmationDialogProps) {
   const [totalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars] = useAtom(copiedCharsAtom);
 
@@ -27,7 +27,7 @@ export function CopyConfirmationDialog({ isOpen, onClose, onConfirm, selectedTex
   const remainingPercentage = 10 - (currentCopiedPercentage + selectionPercentage);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirm Copy</DialogTitle>
@@ -53,7 +53,7 @@ export function CopyConfirmationDialog({ isOpen, onClose, onConfirm, selectedTex
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button onClick={onConfirm}>Confirm</Button>

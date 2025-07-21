@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft } from "lucide-react";
+import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -16,6 +16,7 @@ import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { ReaderBookInfo } from "./ui/reader-book-info";
 import { Typography } from "./ui/typography";
+import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 
 // TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
@@ -108,9 +109,11 @@ export function ReaderControlsDrawer({
   searchBook,
   isSearching,
   getPreviewText,
+  copyText,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const [isCopyConfirmationDialogOpen, setIsCopyConfirmationDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -118,11 +121,14 @@ export function ReaderControlsDrawer({
   useEffect(() => {
     // TODO: Close all popovers within this component when the reader is clicked.
     const handleClickOutside = (event: MouseEvent) => {
+      // Only clear selection if neither the note dialog nor the copy confirmation dialog is open
+      if (isNoteDialogOpen || isCopyConfirmationDialogOpen) {
+        return;
+      }
+
       if (barRef.current && !barRef.current.contains(event.target as Node)) {
-        if (!isNoteDialogOpen) {
-          setSelection(null);
-          setClickedHighlight(null);
-        }
+        setSelection(null);
+        setClickedHighlight(null);
       }
     };
 
@@ -130,7 +136,7 @@ export function ReaderControlsDrawer({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [setSelection, setClickedHighlight, isNoteDialogOpen]);
+  }, [setSelection, setClickedHighlight, isNoteDialogOpen, isCopyConfirmationDialogOpen]);
 
   const handleSaveNote = () => {
     if (selection && noteContent.trim() !== "") {
@@ -241,6 +247,16 @@ export function ReaderControlsDrawer({
               >
                 <NotebookPen className="w-6 h-6" />
                 {isPinned && <span>Not</span>}
+              </Button>
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => {
+                  setIsCopyConfirmationDialogOpen(true);
+                }}
+              >
+                <Copy className="w-6 h-6" />
+                {isPinned && <span>Kopyala</span>}
               </Button>
             </div>
           </div>
@@ -407,6 +423,17 @@ export function ReaderControlsDrawer({
                   <NotebookPen className="w-4 h-4" />
                   <span>Not</span>
                 </Button>
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setIsCopyConfirmationDialogOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                >
+                  <Copy className="w-4 h-4" />
+                  <span>Kopyala</span>
+                </Button>
               </div>
             </div>
           ) : (
@@ -526,10 +553,28 @@ export function ReaderControlsDrawer({
             <Button variant="outline" onClick={handleCloseNoteDialog}>
               İptal
             </Button>
-            <Button onClick={handleSaveNote}>Notu Kaydet</Button>
+            <Button onClick={handleSaveNote}>
+              Notu Kaydet
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CopyConfirmationDialog
+        isOpen={isCopyConfirmationDialogOpen}
+        onConfirm={async () => {
+          if (selection) {
+            await copyText(selection.text);
+            setIsCopyConfirmationDialogOpen(false);
+            setSelection(null);
+          }
+        }}
+        onCancel={() => {
+          setIsCopyConfirmationDialogOpen(false);
+          setSelection(null);
+        }}
+        selectedText={selection?.text || ""}
+      />
     </>
   );
 }
