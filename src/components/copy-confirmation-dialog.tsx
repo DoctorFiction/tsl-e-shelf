@@ -1,4 +1,4 @@
-import { totalBookCharsAtom, copiedCharsAtom } from "@/atoms/copy-protection";
+import { totalBookCharsAtom, copiedCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,11 +20,12 @@ interface CopyConfirmationDialogProps {
 export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedText }: CopyConfirmationDialogProps) {
   const [totalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars] = useAtom(copiedCharsAtom);
+  const [copyAllowance] = useAtom(copyAllowancePercentageAtom);
 
   const selectionLength = selectedText.length;
   const currentCopiedPercentage = totalBookChars > 0 ? (copiedChars / totalBookChars) * 100 : 0;
   const selectionPercentage = totalBookChars > 0 ? (selectionLength / totalBookChars) * 100 : 0;
-  const remainingPercentage = 10 - (currentCopiedPercentage + selectionPercentage);
+  const remainingPercentage = copyAllowance - (currentCopiedPercentage + selectionPercentage);
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>

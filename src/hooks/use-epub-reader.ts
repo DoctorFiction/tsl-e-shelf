@@ -1,4 +1,4 @@
-import { copiedCharsAtom, totalBookCharsAtom } from "@/atoms/copy-protection";
+import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
@@ -167,7 +167,7 @@ interface IUseEpubReaderReturn {
   copiedChars: number;
 }
 
-export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 10 }: IUseEpubReader): IUseEpubReaderReturn {
+export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 1 }: IUseEpubReader): IUseEpubReaderReturn {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
@@ -208,6 +208,17 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
 
   const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
+  const [copyAllowance, setCopyAllowance] = useAtom(copyAllowancePercentageAtom);
+
+  useEffect(() => {
+    if (copyAllowancePercentage !== undefined) {
+      if (copyAllowancePercentage < 0 || copyAllowancePercentage > 100) {
+        console.error("Invalid copyAllowancePercentage. It must be between 0 and 100.");
+        throw new Error("Invalid copyAllowancePercentage");
+      }
+      setCopyAllowance(copyAllowancePercentage);
+    }
+  }, [copyAllowancePercentage, setCopyAllowance]);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
@@ -228,7 +239,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return;
       }
 
-      const allowedChars = (totalBookChars * copyAllowancePercentage) / 100;
+      const allowedChars = (totalBookChars * copyAllowance) / 100;
 
       if (copiedChars + text.length > allowedChars) {
         throw new Error("Copy limit exceeded");
@@ -247,7 +258,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         throw err;
       }
     },
-    [isCopyProtected, totalBookChars, copyAllowancePercentage, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS],
+    [isCopyProtected, totalBookChars, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS, copyAllowance],
   );
 
   const addHighlight = useCallback(
