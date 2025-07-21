@@ -14,6 +14,7 @@ This project is a Next.js application for an e-shelf, designed to provide a rich
 *   **Annotations:** Users can add bookmarks, highlights, and notes.
 *   **Image Previews:** Implemented image previews in the reader (custom Tailwind CSS dialog).
 *   **Book Images Section:** A section in the reader controls drawer listing all images with descriptions, chapter titles, and page numbers. Clicking an image navigates to its location in the book.
+*   **Copy Protection:** Prevents unauthorized copying of book content with configurable allowance.
 
 ## Tech Stack
 

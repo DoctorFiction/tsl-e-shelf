@@ -54,10 +54,10 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
               <p className="max-h-32 overflow-y-auto rounded-md border bg-muted p-2">{selectedText}</p>
               <div className="mt-4 space-y-2">
                 <p>
-                  Kopyalandı: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
+                  Şu anki seçim: <strong>{selectionPercentage.toFixed(2)}%</strong>
                 </p>
                 <p>
-                  Seçim: <strong>{selectionPercentage.toFixed(2)}%</strong>
+                  Toplam kopyalanan: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
                 </p>
                 <p>
                   Kalan: <strong>{remainingPercentage.toFixed(2)}%</strong>
