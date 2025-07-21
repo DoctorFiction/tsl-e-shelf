@@ -1,4 +1,6 @@
 import { Bookmark, Highlight, Note } from "@/hooks/use-epub-reader";
+import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
+import { useAtom } from "jotai";
 import { Info } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./button";
@@ -17,6 +19,11 @@ interface ReaderBookInfoProps {
 }
 
 export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, progress, bookmarks, highlights, notes }: ReaderBookInfoProps) => {
+  const [totalBookChars] = useAtom(totalBookCharsAtom);
+  const [copiedChars] = useAtom(copiedCharsAtom);
+  const [copyAllowance] = useAtom(copyAllowancePercentageAtom);
+
+  const currentCopiedPercentage = totalBookChars > 0 ? (copiedChars / totalBookChars) * 100 : 0;
   const [bookInfoOpen, setBookInfoOpen] = useState(false);
   return (
     <>
@@ -71,6 +78,10 @@ export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, p
                 <div className="flex justify-between">
                   <p className="text-sm text-muted-foreground">Total Notes</p>
                   <p className="text-sm">{notes.length}</p>
+                </div>
+                <div className="flex justify-between">
+                  <p className="text-sm text-muted-foreground">Copied</p>
+                  <p className="text-sm">{currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%</p>
                 </div>
               </div>
             </div>
