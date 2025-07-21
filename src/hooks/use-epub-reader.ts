@@ -207,9 +207,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [overrides] = useAtom(readerOverridesAtom);
 
   const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
-  console.log("totalBookChars", totalBookChars);
   const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
-  console.log("copiedChars", copiedChars);
 
   const STORAGE_KEY_LOC = `epub-location-${url}`;
   const STORAGE_KEY_HIGHLIGHTS = `epub-highlights-${url}`;
