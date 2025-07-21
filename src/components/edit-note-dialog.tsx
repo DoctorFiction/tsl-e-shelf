@@ -20,6 +20,7 @@ interface EditNoteDialogProps {
   onClose: () => void;
 }
 
+// TODO (2025-07-22): Fix delete note when editing.
 export function EditNoteDialog({ note, onSave, onDelete, onClose }: EditNoteDialogProps) {
   const [editedNoteText, setEditedNoteText] = useState(note.note);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

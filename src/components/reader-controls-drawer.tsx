@@ -19,6 +19,7 @@ import { Typography } from "./ui/typography";
 import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 
+// TODO (2025-07-22): Refactor to make it readable and maintainable, create internal reusable components for repeated sections.
 // TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
 
 const HIGHLIGHT_COLORS = [
@@ -533,6 +534,7 @@ export function ReaderControlsDrawer({
       {/* Mobile Backdrop */}
       {isMobileDrawerOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileDrawerOpen(false)} />}
 
+      {/* TODO (2025-07-22): Refactor note dialog to own component on reader options drawer. */}
       <Dialog open={isNoteDialogOpen} onOpenChange={handleCloseNoteDialog}>
         <DialogContent
           onPointerDownOutside={(e) => {
