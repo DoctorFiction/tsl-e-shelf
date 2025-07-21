@@ -213,6 +213,31 @@ This document outlines the RESTful API endpoints required from the backend team 
         *   **Purpose:** Delete all notes for a specific book and user.
         *   **Response:** `204 No Content`
 
+#### 2.5. Copy Protection
+
+*   **Resource:** `/books/{bookId}/copy-protection`
+*   **Description:** Manages the number of characters copied by the user for a specific book.
+
+    *   **`GET /api/books/{bookId}/copy-protection`**
+        *   **Purpose:** Retrieve the total number of characters copied by the authenticated user for the specified book.
+        *   **Response:** `200 OK`
+            ```json
+            {
+              "copiedChars": 0
+            }
+            ```
+        *   **Note:** If no data is found, return `200 OK` with `0` or `404 Not Found`.
+
+    *   **`PUT /api/books/{bookId}/copy-protection`**
+        *   **Purpose:** Update the total number of characters copied by the authenticated user for the specified book.
+        *   **Request Body:**
+            ```json
+            {
+              "copiedChars": 0
+            }
+            ```
+        *   **Response:** `200 OK` (or `204 No Content`)
+
 ### 5. User Preferences
 
 *   **Description:** These endpoints manage general user preferences that are not tied to a specific book. The user context is assumed to be handled by authentication.
