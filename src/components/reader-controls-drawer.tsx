@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft, Copy } from "lucide-react";
+import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { ReaderBookInfo } from "./ui/reader-book-info";
 import { Typography } from "./ui/typography";
 import { HighlightOptionsBar } from "./highlight-options-bar";
-import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
 
 // TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
 
@@ -109,14 +108,12 @@ export function ReaderControlsDrawer({
   searchBook,
   isSearching,
   getPreviewText,
-  copyText,
 }: ReaderControlsDrawerProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [noteContent, setNoteContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
-  const [isCopyDialogOpen, setIsCopyDialogOpen] = useState(false);
 
   useEffect(() => {
     // TODO: Close all popovers within this component when the reader is clicked.
@@ -154,20 +151,6 @@ export function ReaderControlsDrawer({
     setIsNoteDialogOpen(false);
     setSelection(null);
     setClickedHighlight(null);
-  };
-
-  const handleCopyConfirm = async () => {
-    if (selection) {
-      try {
-        await copyText(selection.text);
-      } catch (error) {
-        // TODO: Show a toast notification to the user
-        console.error("Failed to copy text:", error);
-      } finally {
-        setIsCopyDialogOpen(false);
-        setSelection(null);
-      }
-    }
   };
 
   return (
@@ -258,14 +241,6 @@ export function ReaderControlsDrawer({
               >
                 <NotebookPen className="w-6 h-6" />
                 {isPinned && <span>Not</span>}
-              </Button>
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 cursor-pointer"
-                onClick={() => setIsCopyDialogOpen(true)}
-              >
-                <Copy className="w-6 h-6" />
-                {isPinned && <span>Copy</span>}
               </Button>
             </div>
           </div>
@@ -432,14 +407,6 @@ export function ReaderControlsDrawer({
                   <NotebookPen className="w-4 h-4" />
                   <span>Not</span>
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center justify-center gap-2"
-                  onClick={() => setIsCopyDialogOpen(true)}
-                >
-                  <Copy className="w-4 h-4" />
-                  <span>Copy</span>
-                </Button>
               </div>
             </div>
           ) : (
@@ -539,15 +506,6 @@ export function ReaderControlsDrawer({
       {/* Mobile Backdrop */}
       {isMobileDrawerOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileDrawerOpen(false)} />}
 
-      {selection && (
-        <CopyConfirmationDialog
-          isOpen={isCopyDialogOpen}
-          onClose={() => setIsCopyDialogOpen(false)}
-          onConfirm={handleCopyConfirm}
-          selectedText={selection.text}
-        />
-      )}
-
       <Dialog open={isNoteDialogOpen} onOpenChange={handleCloseNoteDialog}>
         <DialogContent
           onPointerDownOutside={(e) => {
@@ -575,3 +533,4 @@ export function ReaderControlsDrawer({
     </>
   );
 }
+

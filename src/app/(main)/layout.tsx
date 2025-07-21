@@ -4,7 +4,7 @@ import "../globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
-// // import { DevTools } from "@/components/dev-tools";
+import { DevTools } from "@/components/dev-tools";
 import ProgressBarProvider from "../providers/progress-provider";
 
 const geistSans = Geist({
@@ -35,7 +35,7 @@ export default function RootLayout({
             <div className="flex flex-col min-h-screen max-w-[1200px] mx-auto text-sm">
               <Header />
               {children}
-              {/* <DevTools /> */}
+              <DevTools />
               <Footer />
             </div>
           </ProgressBarProvider>
