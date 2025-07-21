@@ -1,14 +1,7 @@
 import { totalBookCharsAtom, copiedCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAtom } from "jotai";
 
 interface CopyConfirmationDialogProps {
@@ -51,68 +44,62 @@ export function CopyConfirmationDialog({ isOpen, onConfirm, onCancel, selectedTe
         {!showFinalConfirmation ? (
           <>
             <DialogHeader>
-              <DialogTitle>Confirm Copy</DialogTitle>
-              <DialogDescription>
-                You are about to copy a selection of text. Please review the details below.
-              </DialogDescription>
+              <DialogTitle>Kopyalamayı Onayla</DialogTitle>
+              <DialogDescription>Bir metin parçasını kopyalamak üzeresiniz. Lütfen aşağıdaki detayları inceleyin.</DialogDescription>
             </DialogHeader>
             <div>
               <p>
-                <strong>Selected Text:</strong>
+                <strong>Seçilen Metin:</strong>
               </p>
               <p className="max-h-32 overflow-y-auto rounded-md border bg-muted p-2">{selectedText}</p>
               <div className="mt-4 space-y-2">
                 <p>
-                  Copied: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
+                  Kopyalandı: <strong>{currentCopiedPercentage.toFixed(2)}%</strong>
                 </p>
                 <p>
-                  Selection: <strong>{selectionPercentage.toFixed(2)}%</strong>
+                  Seçim: <strong>{selectionPercentage.toFixed(2)}%</strong>
                 </p>
                 <p>
-                  Remaining: <strong>{remainingPercentage.toFixed(2)}%</strong>
+                  Kalan: <strong>{remainingPercentage.toFixed(2)}%</strong>
                 </p>
                 <div className="mt-4">
-                  <p className="mb-2 text-sm font-medium">Allowance Progress</p>
+                  <p className="mb-2 text-sm font-medium">İzin Durumu</p>
                   <Progress value={(currentCopiedPercentage / copyAllowance) * 100} className="h-2" />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {copiedChars.toFixed(0)} of {(totalBookChars * copyAllowance / 100).toFixed(0)} characters copied ({currentCopiedPercentage.toFixed(2)}% of {copyAllowance.toFixed(2)}% allowance)
+                    {copiedChars.toFixed(0)} / {((totalBookChars * copyAllowance) / 100).toFixed(0)} karakter kopyalandı ({currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%)
                   </p>
                 </div>
               </div>
             </div>
             <DialogFooter>
-              {remainingPercentage < 0 && (
-                <p className="text-sm text-red-500 mr-auto">
-                  Warning: This selection exceeds your remaining copy allowance.
-                </p>
-              )}
+              {remainingPercentage < 0 && <p className="text-sm text-red-500 mr-auto">Uyarı: Bu seçim, kalan kopyalama izninizi aşıyor.</p>}
               <Button variant="outline" onClick={handleCancel}>
-                Cancel
+                İptal
               </Button>
-              <Button onClick={handleInitialConfirm} disabled={remainingPercentage < 0}>Confirm</Button>
+              <Button onClick={handleInitialConfirm} disabled={remainingPercentage < 0}>
+                Onayla
+              </Button>
             </DialogFooter>
           </>
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Final Confirmation</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to copy this text? This action cannot be undone.
-              </DialogDescription>
+              <DialogTitle>Son Onay</DialogTitle>
+              <DialogDescription>Bu metni kopyalamak istediğinizden emin misiniz? Bu eylem geri alınamaz.</DialogDescription>
             </DialogHeader>
             <div className="space-y-2">
               <p>
-                You are copying: <strong>{selectionPercentage.toFixed(2)}%</strong> of the book.
+                Kitabın <strong>{selectionPercentage.toFixed(2)}%</strong>&apos;ini kopyalıyorsunuz.
               </p>
               <p>
-                After this, your remaining allowance will be: <strong>{remainingPercentage.toFixed(2)}%</strong>
+                Bundan sonra, kalan izniniz: <strong>{remainingPercentage.toFixed(2)}%</strong> olacak.
               </p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFinalConfirmation(false)}>
-                Back
+                Geri
               </Button>
-              <Button onClick={handleFinalConfirm}>Confirm Copy</Button>
+              <Button onClick={handleFinalConfirm}>Kopyalamayı Onayla</Button>
             </DialogFooter>
           </>
         )}
