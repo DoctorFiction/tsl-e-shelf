@@ -29,7 +29,9 @@ export function DevTools() {
     location: `${STORAGE_PREFIX}-location-${STORAGE_BOOK}`,
     highlights: `${STORAGE_PREFIX}-highlights-${STORAGE_BOOK}`,
     bookmarks: `${STORAGE_PREFIX}-bookmarks-${STORAGE_BOOK}`,
-    notes: `${STORAGE_PREFIX}-notes-${STORAGE_BOOK}`,
+    notes: "epub-notes-${STORAGE_BOOK}",
+    totalChars: `epub-total-chars-${bookId}`,
+    copiedChars: `epub-copied-chars-${bookId}`,
   };
 
   const [mounted, setMounted] = useState(false);
@@ -227,6 +229,26 @@ export function DevTools() {
               variant="secondary"
               className="w-full"
               onClick={() => {
+                console.log("Total Chars:", logEntry(STORAGE_KEYS.totalChars, "total-chars"));
+              }}
+            >
+              Total Chars
+            </Button>
+
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => {
+                console.log("Copied Chars:", logEntry(STORAGE_KEYS.copiedChars, "copied-chars"));
+              }}
+            >
+              Copied Chars
+            </Button>
+
+            <Button
+              variant="secondary"
+              className="w-full"
+              onClick={() => {
                 console.log("📚 TOC:", logEntry(STORAGE_KEYS.toc, "toc"));
                 console.log(
                   "📍Location:",
@@ -241,6 +263,8 @@ export function DevTools() {
                   logEntry(STORAGE_KEYS.highlights, "highlights"),
                 );
                 console.log("📝 Notes:", logEntry(STORAGE_KEYS.notes, "notes"));
+                console.log("Total Chars:", logEntry(STORAGE_KEYS.totalChars, "total-chars"));
+                console.log("Copied Chars:", logEntry(STORAGE_KEYS.copiedChars, "copied-chars"));
               }}
             >
               Log All Reader State
@@ -306,6 +330,22 @@ export function DevTools() {
               onClick={() => clear(STORAGE_KEYS.notes, "notes")}
             >
               Clear Notes
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => clear(STORAGE_KEYS.totalChars, "total-chars")}
+            >
+              Clear Total Chars
+            </Button>
+
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={() => clear(STORAGE_KEYS.copiedChars, "copied-chars")}
+            >
+              Clear Copied Chars
             </Button>
 
             <Button variant="destructive" className="w-full" onClick={clearAll}>
