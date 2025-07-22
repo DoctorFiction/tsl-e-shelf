@@ -167,7 +167,7 @@ interface IUseEpubReaderReturn {
   copiedChars: number;
 }
 
-export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 1 }: IUseEpubReader): IUseEpubReaderReturn {
+export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 10 }: IUseEpubReader): IUseEpubReaderReturn {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
