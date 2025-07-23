@@ -77,7 +77,6 @@ Commit messages must follow the format: `type(scope): description`.
 *   **TODO (2025-07-17):** Implement mobile-specific display for book title, current page, and chapter name when the user taps the reader.
 *   **TODO (2025-07-17):** Add swipe next/prev page navigation when on mobile.
 *   **TODO (2025-07-22):** Fix delete note when editing.
-*   **TODO (2025-07-22):** Refactor note dialog to own component on reader options drawer.
 *   **TODO (2025-07-22):** Refactor `src/components/reader-controls-drawer.tsx` to make it readable and maintainable, create internal reusable components for repeated sections.
 
 
