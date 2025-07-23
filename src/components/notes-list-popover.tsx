@@ -17,7 +17,8 @@ import { Note } from "@/hooks/use-epub-reader";
 import formatRelativeDate from "@/lib/format-relative-date";
 import { FilePenLine, Trash, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { EditNoteDialog } from "./edit-note-dialog";
+import { AddEditNoteDialog } from "./add-edit-note-dialog";
+import { DeleteNoteConfirmPrompt } from "./delete-note-confirm-prompt";
 
 interface NotesListPopoverProps {
   notes: Note[];
@@ -29,6 +30,7 @@ interface NotesListPopoverProps {
 
 export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, editNote }: NotesListPopoverProps) {
   const [noteDeleteDialogOpen, setNoteDeleteDialogOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
 
   const handleEditClick = (note: Note) => {
@@ -42,9 +44,15 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
     }
   };
 
-  const handleDeleteNote = (cfi: string) => {
-    removeNote(cfi);
+  const handleDeleteNote = (note?: Note) => {
+    const cfiToRemove = note ? note.cfi : editingNote ? editingNote.cfi : null;
+    if (!cfiToRemove) return;
+    removeNote(cfiToRemove);
     setEditingNote(null);
+  };
+
+  const handleShowDeletePrompt = () => {
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -139,15 +147,13 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
                     <button
                       className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all duration-200 bg-white dark:bg-gray-800 rounded-full p-1.5 shadow-md hover:shadow-lg"
                       aria-label="Notu Sil"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeNote?.(note.cfi);
-                      }}
+                      onClick={handleShowDeletePrompt}
                       type="button"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
+                  {showDeleteConfirm && <DeleteNoteConfirmPrompt open={showDeleteConfirm} setShowDeleteConfirm={setShowDeleteConfirm} handleDelete={() => handleDeleteNote(note)} />}
                 </Card>
               );
             })
@@ -157,7 +163,7 @@ export function NotesListPopover({ notes, goToCfi, removeNote, removeAllNotes, e
             </Typography>
           )}
         </ul>
-        {editingNote && <EditNoteDialog note={editingNote} onSave={handleSaveEdit} onDelete={handleDeleteNote} onClose={() => setEditingNote(null)} />}
+        {editingNote && <AddEditNoteDialog open={!!editingNote} note={editingNote} onSave={handleSaveEdit} onDelete={() => handleDeleteNote()} onClose={() => setEditingNote(null)} />}
       </PopoverContent>
     </Popover>
   );

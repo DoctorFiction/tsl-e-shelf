@@ -1,23 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Highlight, Note, SearchResult, BookImage, Bookmark, EnhancedNavItem } from "@/hooks/use-epub-reader";
-import { ChevronUp, NotebookPen, Settings, Underline, AlignLeft, AlignJustify, ChevronLeft, Copy } from "lucide-react";
+import { BookImage, Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
+import { AlignJustify, AlignLeft, ChevronLeft, ChevronUp, Copy, NotebookPen, Settings, Underline } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { AddEditNoteDialog } from "./add-edit-note-dialog";
 import { BookmarkButton } from "./bookmark-button";
 import { BookmarksListPopover } from "./bookmarks-list-popover";
+import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
+import { HighlightOptionsBar } from "./highlight-options-bar";
 import { HighlightsListPopover } from "./highlights-list-popover";
+import { ImagesPopover } from "./images-popover";
 import { ModeToggle } from "./mode-toggle";
 import { NotesListPopover } from "./notes-list-popover";
-import { ImagesPopover } from "./images-popover";
 import { ReaderSettings } from "./reader-settings";
 import { SearchPopover } from "./search-popover";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { ReaderBookInfo } from "./ui/reader-book-info";
 import { Typography } from "./ui/typography";
-import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
-import { HighlightOptionsBar } from "./highlight-options-bar";
 
 // TODO (2025-07-22): Refactor to make it readable and maintainable, create internal reusable components for repeated sections.
 // TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).
@@ -115,7 +113,6 @@ export function ReaderControlsDrawer({
   const barRef = useRef<HTMLDivElement>(null);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const [isCopyConfirmationDialogOpen, setIsCopyConfirmationDialogOpen] = useState(false);
-  const [noteContent, setNoteContent] = useState("");
   const [isPinned, setIsPinned] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
@@ -139,22 +136,20 @@ export function ReaderControlsDrawer({
     };
   }, [setSelection, setClickedHighlight, isNoteDialogOpen, isCopyConfirmationDialogOpen]);
 
-  const handleSaveNote = () => {
-    if (selection && noteContent.trim() !== "") {
+  const handleSaveNote = (note: string) => {
+    if (selection) {
       addNote({
         cfi: selection.cfi,
         text: selection.text,
-        note: noteContent,
+        note,
         createdAt: new Date().toISOString(),
       });
-      setNoteContent("");
       setIsNoteDialogOpen(false);
       setSelection(null);
     }
   };
 
   const handleCloseNoteDialog = () => {
-    setNoteContent("");
     setIsNoteDialogOpen(false);
     setSelection(null);
     setClickedHighlight(null);
@@ -534,34 +529,7 @@ export function ReaderControlsDrawer({
       {/* Mobile Backdrop */}
       {isMobileDrawerOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsMobileDrawerOpen(false)} />}
 
-      {/* TODO (2025-07-22): Refactor note dialog to own component on reader options drawer. */}
-      <Dialog open={isNoteDialogOpen} onOpenChange={handleCloseNoteDialog}>
-        <DialogContent
-          onPointerDownOutside={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>Not Ekle</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            {selection && <blockquote className="mt-6 border-l-2 pl-6 italic">{selection.text}</blockquote>}
-            <Label htmlFor="note-content" className="sr-only">
-              Not
-            </Label>
-            <Textarea id="note-content" placeholder="Notunuzu buraya yazın." value={noteContent} onChange={(e) => setNoteContent(e.target.value)} className="min-h-[100px]" />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseNoteDialog}>
-              İptal
-            </Button>
-            <Button onClick={handleSaveNote}>
-              Notu Kaydet
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
+      {isNoteDialogOpen && <AddEditNoteDialog open={isNoteDialogOpen} onSave={handleSaveNote} onClose={handleCloseNoteDialog} />}
       <CopyConfirmationDialog
         isOpen={isCopyConfirmationDialogOpen}
         onConfirm={async () => {
@@ -580,4 +548,3 @@ export function ReaderControlsDrawer({
     </>
   );
 }
-

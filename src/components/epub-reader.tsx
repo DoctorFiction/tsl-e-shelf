@@ -9,7 +9,7 @@ import { ImagePreview } from "./image-preview";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MainDrawer } from "./main-drawer";
 
-import { EditNoteDialog } from "./edit-note-dialog";
+import { AddEditNoteDialog } from "./add-edit-note-dialog";
 
 interface EpubReaderProps {
   url: string;
@@ -210,7 +210,8 @@ export default function EpubReader({ url }: EpubReaderProps) {
         />
         <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         {editingNote && (
-          <EditNoteDialog
+          <AddEditNoteDialog
+            open={!!editingNote}
             note={editingNote}
             onSave={(newNote) => {
               editNote(editingNote.cfi, newNote);
