@@ -29,7 +29,7 @@ export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, p
     <>
       <Button
         className="ml-2 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-gray-600 shadow-md hover:shadow-lg transition-all duration-75 rounded-lg"
-        aria-label="Show Book Info"
+        aria-label="Kitap Bilgisini Göster"
         type="button"
         onClick={() => setBookInfoOpen(true)}
       >
@@ -39,49 +39,51 @@ export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, p
         <Dialog open={bookInfoOpen} onOpenChange={setBookInfoOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Book Information</DialogTitle>
+              <DialogTitle>Kitap Bilgisi</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {bookCover && (
                 <div className="flex justify-center">
-                  <Image src={bookCover} alt={bookTitle || "Book cover"} width={128} height={192} className="max-w-32 max-h-48 object-contain rounded-lg shadow-md" />
+                  <Image src={bookCover} alt={bookTitle || "Kitap Kapağı"} width={128} height={192} className="max-w-32 max-h-48 object-contain rounded-lg shadow-md" />
                 </div>
               )}
               <div className="space-y-2">
-                <h3 className="font-semibold text-lg">{bookTitle || "Unknown Title"}</h3>
+                <h3 className="font-semibold text-lg">{bookTitle || "Bilinmeyen Başlık"}</h3>
                 {bookAuthor && (
                   <div className="flex justify-between">
-                    <p className="text-sm text-muted-foreground">Author</p>
+                    <p className="text-sm text-muted-foreground">Yazar</p>
                     <p className="text-sm">{bookAuthor}</p>
                   </div>
                 )}
                 {totalPages && totalPages > 0 && (
                   <div className="flex justify-between">
-                    <p className="text-sm text-muted-foreground">Total Pages</p>
+                    <p className="text-sm text-muted-foreground">Toplam Sayfa</p>
                     <p className="text-sm">{totalPages}</p>
                   </div>
                 )}
                 {progress !== undefined && (
                   <div className="flex justify-between">
-                    <p className="text-sm text-muted-foreground">Reading Progress</p>
+                    <p className="text-sm text-muted-foreground">Okuma İlerlemesi</p>
                     <p className="text-sm">{Math.round(progress)}%</p>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <p className="text-sm text-muted-foreground">Total Bookmarks</p>
+                  <p className="text-sm text-muted-foreground">Toplam Yer İşaretleri</p>
                   <p className="text-sm">{bookmarks.length}</p>
                 </div>
                 <div className="flex justify-between">
-                  <p className="text-sm text-muted-foreground">Total Highlights</p>
+                  <p className="text-sm text-muted-foreground">Toplam Vurgu</p>
                   <p className="text-sm">{highlights.length}</p>
                 </div>
                 <div className="flex justify-between">
-                  <p className="text-sm text-muted-foreground">Total Notes</p>
+                  <p className="text-sm text-muted-foreground">Toplam Not</p>
                   <p className="text-sm">{notes.length}</p>
                 </div>
                 <div className="flex justify-between">
-                  <p className="text-sm text-muted-foreground">Copied</p>
-                  <p className="text-sm">{currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%</p>
+                  <p className="text-sm text-muted-foreground">Kopyalanan</p>
+                  <p className="text-sm">
+                    {currentCopiedPercentage.toFixed(2)}% / {copyAllowance.toFixed(2)}%
+                  </p>
                 </div>
               </div>
             </div>
@@ -91,3 +93,4 @@ export const ReaderBookInfo = ({ bookCover, bookTitle, bookAuthor, totalPages, p
     </>
   );
 };
+
