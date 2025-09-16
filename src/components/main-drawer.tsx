@@ -77,9 +77,14 @@ export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading }: M
           {isPinned && "İçindekiler"}
         </Typography>
         <div className="flex-1 min-h-0 mt-2">
-          <ul role="list" aria-label={isPinned ? "İçindekiler" : "Liste"} className={`pr-2 ${isPinned ? "h-[calc(100%-6.5rem)] overflow-y-auto" : "overflow-hidden"} divide-y divide-border`}>
+          <ul
+            role="list"
+            aria-label={isPinned ? "İçindekiler" : "Liste"}
+            className={`pr-2 ${isPinned ? "h-full overflow-y-auto" : "overflow-hidden"} divide-y divide-border`}
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             {tocLoading ? (
-              <li className="flex items-center justify-center h-full">
+              <li className="flex items-center justify-center h-full py-6">
                 <CircularSpinner size={1.5} />
                 <span className="sr-only">Loading table of contents</span>
               </li>
@@ -100,7 +105,7 @@ export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading }: M
                 ))}
               </>
             ) : (
-              <li>
+              <li className="px-3 py-3">
                 <Typography variant="body2" className="text-muted-foreground">
                   İçindekiler tablosu mevcut değil.
                 </Typography>

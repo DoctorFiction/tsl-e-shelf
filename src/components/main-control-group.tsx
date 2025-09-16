@@ -80,10 +80,10 @@ export function MainControlGroup({
   if (variant === "mobile") {
     return (
       <div className="grid grid-cols-3 gap-3">
-        <div className="flex flex-col items-center gap-2">
+        {/* <div className="flex flex-col items-center gap-2">
           <TableOfContentsPopover toc={toc} goToHref={goToHref} />
           <Typography className="text-xs">İçindekiler</Typography>
-        </div>
+        </div> */}
         <div className="flex flex-col items-center gap-2">
           <BookmarkButton isBookmarked={isBookmarked} addBookmark={addBookmark} removeBookmark={removeBookmark} location={location} />
           <Typography className="text-xs">Yer İşareti</Typography>
@@ -134,7 +134,7 @@ export function MainControlGroup({
       <Typography variant="body2" className="font-bold">
         Kontroller
       </Typography>
-      <div className="flex flex-row gap-2 items-center">
+      <div className="flex-row gap-2 items-center hidden">
         <TableOfContentsPopover toc={toc} goToHref={goToHref} />
         {isPinned && <Typography>İçindekiler</Typography>}
       </div>
