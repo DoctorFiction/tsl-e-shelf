@@ -51,7 +51,7 @@ const ReaderPreview = ({ getPreviewText, previewStyle }: ReaderPreviewProps) => 
 // List of numeric override keys
 export type SliderField = "fontSize" | "lineHeight" | "characterSpacing" | "wordSpacing";
 
-export type SelectField = "fontFamily" | "textAlign" | "columnCount";
+export type SelectField = "fontFamily" | "textAlign" | "columnCount" | "margin";
 export type SwitchField = "isBold";
 
 interface ReaderStyleSliderProps {

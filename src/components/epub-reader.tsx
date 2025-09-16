@@ -76,6 +76,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     isSearching,
     getPreviewText,
     copyText,
+    resize,
   } = useEpubReader({ url, isCopyProtected: true });
 
   // TODO: Handle book title, page number, and chapter display on mobile devices
@@ -116,6 +117,14 @@ export default function EpubReader({ url }: EpubReaderProps) {
   const [controlsVisible, setControlsVisible] = useState(true);
   const [readerControlsDrawerPinned, setReaderControlsDrawerPinned] = useState(false);
   const [mainDrawerPinned, setMainDrawerPinned] = useState(false);
+
+  useEffect(() => {
+    if (resize) {
+      // A small delay to allow the DOM to update with the new class
+      const timer = setTimeout(() => resize(), 10);
+      return () => clearTimeout(timer);
+    }
+  }, [marginClass, resize]);
 
   // Hide controls after 3 seconds of inactivity
   useEffect(() => {

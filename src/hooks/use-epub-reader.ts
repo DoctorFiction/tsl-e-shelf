@@ -114,6 +114,7 @@ interface IUseEpubReader {
 }
 
 interface IUseEpubReaderReturn {
+  resize: () => void;
   location: string | null;
   imagePreview: { src: string; description: string } | null;
   setImagePreview: React.Dispatch<React.SetStateAction<{ src: string; description: string } | null>>;
@@ -199,6 +200,14 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [bookImages, setBookImages] = useState<BookImage[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+
+  const resize = useCallback(() => {
+    if (viewerRef.current) {
+      const width = viewerRef.current.clientWidth;
+      const height = viewerRef.current.clientHeight;
+      renditionRef.current?.resize(width, height);
+    }
+  }, [viewerRef]);
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -1144,5 +1153,6 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     copyText,
     totalBookChars,
     copiedChars,
+    resize,
   };
 }
