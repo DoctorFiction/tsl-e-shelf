@@ -154,7 +154,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
 
   return (
     <div className="w-full h-screen overflow-hidden flex">
-      <MainDrawer onDrawerStateChange={setMainDrawerPinned} />
+      <MainDrawer onDrawerStateChange={setMainDrawerPinned} toc={toc} goToHref={goToHref} tocLoading={isLoading} />
       <div className={`relative w-full flex-1 ${mainDrawerPinned ? "pl-64" : "pl-20"}`}>
         {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
         <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />

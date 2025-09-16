@@ -1,33 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { Settings, LogOut, Home, AlignRight, AlignJustify } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Typography } from "./ui/typography";
+import { CircularSpinner } from "./ui/circular-spinner";
 import Link from "next/link";
 import { Card } from "./ui/card";
 
-interface Book {
-  filename: string;
-  title: string;
-  id: string;
-}
+type EnhancedNavItem = {
+  label: string;
+  href: string;
+  subitems?: EnhancedNavItem[];
+  page?: number;
+};
 
 interface MainDrawerProps {
   onDrawerStateChange?: (isPinned: boolean) => void;
+  toc?: EnhancedNavItem[];
+  goToHref?: (href: string) => void;
+  tocLoading?: boolean;
 }
 
-export function MainDrawer({ onDrawerStateChange }: MainDrawerProps) {
+export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading }: MainDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const [isPinned, setIsPinned] = useState(false);
-  const [books, setBooks] = useState<Book[]>([]);
-
-  useEffect(() => {
-    const fetchBooks = async () => {
-      const response = await fetch("/api/books/local");
-      const data = await response.json();
-      setBooks(data);
-    };
-    fetchBooks();
-  }, []);
 
   return (
     <div
@@ -77,19 +72,42 @@ export function MainDrawer({ onDrawerStateChange }: MainDrawerProps) {
         </div>
       )}
 
-      <div className="flex flex-col space-y-2 flex-grow">
+      <div className="flex flex-col flex-1 min-h-0">
         <Typography variant="h6" className="font-bold">
-          {isPinned && "Kitaplarım"}
+          {isPinned && "İçindekiler"}
         </Typography>
-        <ul className="space-y-2">
-          {books.map((book) => (
-            <li key={book.id}>
-              <Link href={`/reader/${book.id}`} className="flex items-center gap-2 p-2 hover:bg-accent hover:text-accent-foreground rounded-md cursor-pointer">
-                {isPinned && <Typography variant="body2">• {book.title}</Typography>}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="flex-1 min-h-0 mt-2">
+          <ul role="list" aria-label={isPinned ? "İçindekiler" : "Liste"} className={`pr-2 ${isPinned ? "h-[calc(100%-6.5rem)] overflow-y-auto" : "overflow-hidden"} divide-y divide-border`}>
+            {tocLoading ? (
+              <li className="flex items-center justify-center h-full">
+                <CircularSpinner size={1.5} />
+                <span className="sr-only">Loading table of contents</span>
+              </li>
+            ) : toc && toc.length > 0 ? (
+              <>
+                {toc.map((item, i) => (
+                  <li key={`${item.href}-${i}`} className="last:pb-6">
+                    <button type="button" onClick={() => goToHref?.(item.href)} className="w-full text-left flex items-start gap-3 px-3 py-3 hover:bg-muted/50 cursor-pointer">
+                      <div className="flex-1">
+                        {isPinned && (
+                          <Typography variant="body2" className="text-foreground break-words leading-snug">
+                            {item.label}
+                          </Typography>
+                        )}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </>
+            ) : (
+              <li>
+                <Typography variant="body2" className="text-muted-foreground">
+                  İçindekiler tablosu mevcut değil.
+                </Typography>
+              </li>
+            )}
+          </ul>
+        </div>
       </div>
 
       <div className="mt-auto flex flex-col items-center gap-3 mb-4">
