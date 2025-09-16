@@ -69,6 +69,7 @@ interface ReaderStyleSelectProps {
   options: { value: string; label: string }[];
   placeholder?: string;
   icon?: React.ReactNode;
+  disabled?: boolean;
 }
 
 interface ReaderStyleSwitchProps {
@@ -113,7 +114,7 @@ const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: Re
   );
 };
 
-export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçenek seçin", icon }: ReaderStyleSelectProps) => {
+export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçenek seçin", icon, disabled }: ReaderStyleSelectProps) => {
   const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
   const currentValue = pendingOverrides[field]?.toString() as string;
 
@@ -127,7 +128,7 @@ export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçen
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <Select value={currentValue} onValueChange={handleValueChange}>
+      <Select value={currentValue} onValueChange={handleValueChange} disabled={disabled}>
         <SelectTrigger className="w-full">
           {icon && <span className="mr-2">{icon}</span>}
           <SelectValue placeholder={placeholder} />
@@ -212,6 +213,17 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
   const [prefs] = useAtom(readerPreferencesAtom);
   const [overrides, setOverrides] = useAtom(readerOverridesAtom);
   const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
+
+  const isSmallMargin = pendingOverrides.margin === 'small';
+
+  useEffect(() => {
+    if (isSmallMargin) {
+      setPendingOverrides((prev) => ({
+        ...prev,
+        columnCount: '1',
+      }));
+    }
+  }, [isSmallMargin, setPendingOverrides]);
 
   const handleSave = () => {
     setOverrides(pendingOverrides);
@@ -310,7 +322,7 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
           <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
           <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
           
-          <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} disabled={isSmallMargin} />
           <ReaderStyleSelect label="Kenar Boşluğu" field="margin" options={marginOptions} placeholder="Kenar boşluğu seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
