@@ -30,6 +30,7 @@ export interface IReaderOverrides {
   textAlign?: CSSProperties["textAlign"];
   isBold?: boolean;
   characterSpacing?: number;
+  margin?: "small" | "full";
 }
 
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
@@ -135,6 +136,7 @@ export const defaultOverrides: IReaderOverrides = {
   isBold: false,
   columnCount: 2,
   textAlign: "justify",
+  margin: "full",
 };
 
 export const readerThemeNameAtom = atomWithStorage<ReaderThemeName>(

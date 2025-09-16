@@ -2,6 +2,8 @@
 import { useEpubReader } from "@/hooks/use-epub-reader";
 import { useEffect, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
+import { useAtom } from "jotai";
+import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
 import { BookProgressDisplay } from "./book-progress-display";
@@ -14,6 +16,16 @@ import { AddEditNoteDialog } from "./add-edit-note-dialog";
 interface EpubReaderProps {
   url: string;
 }
+
+const getMarginClass = (marginValue?: "small" | "full") => {
+  switch (marginValue) {
+    case "small":
+      return "w-[13.5cm] mx-auto";
+    case "full":
+    default:
+      return "w-full";
+  }
+};
 
 export default function EpubReader({ url }: EpubReaderProps) {
   const {
@@ -97,6 +109,9 @@ export default function EpubReader({ url }: EpubReaderProps) {
     };
   }, [goPrev, goNext]);
 
+  const [overrides] = useAtom(readerOverridesAtom);
+  const marginClass = getMarginClass(overrides.margin);
+
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [readerControlsDrawerPinned, setReaderControlsDrawerPinned] = useState(false);
@@ -135,7 +150,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
         {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
         <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
         <div className="relative w-full h-full">
-          <div ref={viewerRef} className="w-full h-full" onContextMenu={(e) => e.preventDefault()}>
+          <div ref={viewerRef} className={`h-full ${marginClass}`} onContextMenu={(e) => e.preventDefault()}>
             {!isLoading && <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />}
           </div>
 

@@ -189,6 +189,11 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
     { value: "2", label: "İki Sütun" },
   ];
 
+  const marginOptions = [
+    { value: "small", label: "Küçük (13.5cm)" },
+    { value: "full", label: "Tam (100%)" },
+  ];
+
   type TextAlignOption = "left" | "right" | "center" | "justify";
 
   const textAlignOptions: { value: TextAlignOption; label: string }[] = [
@@ -306,6 +311,7 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
           <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
           
           <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} />
+          <ReaderStyleSelect label="Kenar Boşluğu" field="margin" options={marginOptions} placeholder="Kenar boşluğu seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
         </div>
