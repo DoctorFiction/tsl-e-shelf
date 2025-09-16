@@ -835,6 +835,9 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       // This hook is for content that is newly rendered or re-rendered
       // We still want to ensure the theme is applied here for new content
       if (rendition?.themes) {
+        if (contents.document.body) {
+          contents.document.body.className = "";
+        }
         rendition.themes.select("custom-theme");
       }
 
