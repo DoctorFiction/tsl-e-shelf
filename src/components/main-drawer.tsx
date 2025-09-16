@@ -77,22 +77,16 @@ export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading }: M
           {isPinned && "İçindekiler"}
         </Typography>
         <div className="flex-1 min-h-0 mt-2">
-          <ul
-            role="list"
-            aria-label={isPinned ? "İçindekiler" : "Liste"}
-            className={`pr-2 ${isPinned ? "h-full overflow-y-auto" : "overflow-hidden"} divide-y divide-border`}
-            style={{ WebkitOverflowScrolling: "touch" }}
-          >
+          <ul role="list" aria-label="İçindekiler" className={`pr-2 ${isPinned ? "h-full overflow-y-auto divide-y divide-border" : "overflow-hidden"}`}>
             {tocLoading ? (
               <li className="flex items-center justify-center h-full py-6">
                 <CircularSpinner size={1.5} />
-                <span className="sr-only">Loading table of contents</span>
               </li>
             ) : toc && toc.length > 0 ? (
               <>
                 {toc.map((item, i) => (
                   <li key={`${item.href}-${i}`} className="last:pb-6">
-                    <button type="button" onClick={() => goToHref?.(item.href)} className="w-full text-left flex items-start gap-3 px-3 py-3 hover:bg-muted/50 cursor-pointer">
+                    <button type="button" onClick={() => goToHref?.(item.href)} className="w-full text-left flex items-start gap-1 px-1 py-3 hover:bg-muted/50 cursor-pointer">
                       <div className="flex-1">
                         {isPinned && (
                           <Typography variant="body2" className="text-foreground break-words leading-snug">

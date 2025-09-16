@@ -202,10 +202,16 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   const resize = useCallback(() => {
-    if (viewerRef.current) {
-      const width = viewerRef.current.clientWidth;
-      const height = viewerRef.current.clientHeight;
-      renditionRef.current?.resize(width, height);
+    const viewer = viewerRef.current;
+    const rendition = renditionRef.current as (Rendition & { manager?: unknown }) | null;
+    if (!viewer || !rendition || !rendition.manager) return;
+
+    const width = viewer.clientWidth;
+    const height = viewer.clientHeight;
+    try {
+      rendition.resize(width, height);
+    } catch (e) {
+      console.warn("Rendition resize skipped:", e);
     }
   }, [viewerRef]);
 
@@ -267,7 +273,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         throw err;
       }
     },
-    [isCopyProtected, totalBookChars, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS, copyAllowance],
+    [isCopyProtected, totalBookChars, copiedChars, setCopiedChars, STORAGE_KEY_COPIED_CHARS, copyAllowance]
   );
 
   const addHighlight = useCallback(
@@ -288,7 +294,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
 
       setSelection(null);
     },
-    [STORAGE_KEY_HIGHLIGHTS],
+    [STORAGE_KEY_HIGHLIGHTS]
   );
 
   const removeHighlight = useCallback(
@@ -336,7 +342,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef],
+    [STORAGE_KEY_HIGHLIGHTS, location, renditionRef]
   );
 
   const removeAllHighlights = useCallback(() => {
@@ -399,7 +405,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return updated;
       });
     },
-    [STORAGE_KEY_BOOKMARK],
+    [STORAGE_KEY_BOOKMARK]
   );
 
   const removeAllBookmarks = useCallback(() => {
@@ -441,7 +447,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       });
       setSelection(null);
     },
-    [STORAGE_KEY_NOTES],
+    [STORAGE_KEY_NOTES]
   );
 
   const removeNote = useCallback(
@@ -453,7 +459,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES],
+    [STORAGE_KEY_NOTES]
   );
 
   const removeAllNotes = useCallback(() => {
@@ -474,7 +480,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return updated;
       });
     },
-    [STORAGE_KEY_NOTES],
+    [STORAGE_KEY_NOTES]
   );
 
   const updateHighlightColor = useCallback(
@@ -498,7 +504,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         return updated;
       });
     },
-    [STORAGE_KEY_HIGHLIGHTS],
+    [STORAGE_KEY_HIGHLIGHTS]
   );
 
   const enhanceTocWithPages = useCallback(async (tocItems: NavItem[], book: Book): Promise<EnhancedNavItem[]> => {
@@ -624,7 +630,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
       setIsSearching(false);
     },
-    [bookRef, spine],
+    [bookRef, spine]
   );
 
   const goToSearchResult = useCallback(
@@ -636,7 +642,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         setCurrentSearchResultIndex(index);
       }
     },
-    [searchResults],
+    [searchResults]
   );
 
   const getPreviewText = useCallback(async (charCount = 250) => {
@@ -699,7 +705,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       {}, // data
       undefined, // cb
       undefined, // no className
-      defaultConfig.selectedSearchResult.style,
+      defaultConfig.selectedSearchResult.style
     );
     setPreviousSelectedCfi(selectedCfi);
   }, [previousSelectedCfi, selectedCfi]);
@@ -744,7 +750,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
                 const text = item.document.body.textContent || "";
                 item.unload();
                 return text;
-              }),
+              })
             );
             const totalChars = allText.join("").length;
             setTotalBookChars(totalChars);
@@ -861,7 +867,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
             e.stopPropagation();
             return false;
           },
-          true,
+          true
         );
 
         // Disable copy shortcuts (Ctrl+C, Ctrl+A, Ctrl+X, etc.)
@@ -884,7 +890,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
               return false;
             }
           },
-          true,
+          true
         );
 
         // Disable drag and drop
@@ -895,7 +901,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
             e.stopPropagation();
             return false;
           },
-          true,
+          true
         );
 
         // Disable text selection on images specifically
