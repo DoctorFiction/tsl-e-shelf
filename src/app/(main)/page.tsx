@@ -9,15 +9,13 @@ import { useEffect } from "react";
 export default function Home() {
   const router = useRouter();
 
-  const handleRedirect = () => {
-    setTimeout(() => {
+  useEffect(() => {
+    const timeout = setTimeout(() => {
       router.push("/books/local/");
     }, 1);
-  };
 
-  useEffect(() => {
-    handleRedirect();
-  }, []);
+    return () => clearTimeout(timeout);
+  }, [router]);
 
   return (
     <div className="text-center pt-12">
