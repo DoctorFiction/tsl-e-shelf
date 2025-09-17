@@ -67,6 +67,11 @@ export type Highlight = {
 
 type HighlightType = "highlight" | "underline";
 
+type EpubjsSearchResult = {
+  cfi: string;
+  excerpt: string;
+};
+
 export type Bookmark = {
   cfi: string;
   label?: string;
@@ -180,7 +185,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [notes, setNotes] = useState<Note[]>([]);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
-  const [spine, setSpine] = useState<ExtendedSpine | null>(null);
+  
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -541,96 +546,59 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     async (query: string) => {
       setIsSearching(true);
       const book = bookRef.current;
-      if (!query || !book || !spine) {
+      if (!query || !book || !book.spine) {
         console.warn(`Invalid searchBook call`);
         setSearchResults([]);
         setCurrentSearchResultIndex(-1);
+        setIsSearching(false);
         return;
       }
 
-      const trimmedQuery = query.trim().toLowerCase();
+      const trimmedQuery = query.trim();
       if (!trimmedQuery) {
         setSearchResults([]);
         setCurrentSearchResultIndex(-1);
+        setIsSearching(false);
         return;
       }
 
-      const results: SearchResult[] = [];
-      const spineItems = (spine as ExtendedSpine)?.spineItems ?? [];
-      if (!Array.isArray(spineItems) || spineItems.length === 0) {
+      try {
+        const spineItems = (book.spine as ExtendedSpine).spineItems;
+        const searchPromises = spineItems.map(async (section) => {
+          await section.load(book.load.bind(book));
+          const results = await section.find(trimmedQuery);
+          section.unload();
+          return results;
+        });
+        const allResults = await Promise.all(searchPromises);
+        const flattenedResults = allResults.flat() as unknown as EpubjsSearchResult[];
+
+        const finalResults: SearchResult[] = await Promise.all(
+          flattenedResults.map(async (result) => {
+            const section = book.spine.get(result.cfi);
+            const chapterTitle = await getChapterFromCfi(book, result.cfi);
+
+            return {
+              cfi: result.cfi,
+              excerpt: result.excerpt,
+              href: section.href,
+              chapterTitle: chapterTitle || "",
+              chapterIndex: section.index,
+            };
+          }),
+        );
+
+        setSearchResults(finalResults);
+        setCurrentSearchResultIndex(finalResults.length > 0 ? 0 : -1);
+      } catch (error) {
+        console.error("Error during book search:", error);
         setSearchResults([]);
         setCurrentSearchResultIndex(-1);
-        return;
+      } finally {
+        setIsSearching(false);
       }
-      const contextLength = 30;
-
-      const promises = spineItems.map(async (item, chapterIndex) => {
-        try {
-          await item.load(book.load.bind(book));
-          const doc = item.document;
-          if (!doc) return;
-
-          const walker = doc.createTreeWalker(doc, NodeFilter.SHOW_TEXT);
-          const textNodes: Node[] = [];
-          let node: Node | null;
-          while ((node = walker.nextNode())) textNodes.push(node);
-
-          const fullText = textNodes
-            .map((n) => n.textContent || "")
-            .join("")
-            .toLowerCase();
-
-          let pos = fullText.indexOf(trimmedQuery);
-          while (pos !== -1) {
-            let offset = pos;
-            let nodeIndex = 0;
-
-            // Find the matching node and offset
-            while (nodeIndex < textNodes.length) {
-              const nodeText = textNodes[nodeIndex].textContent || "";
-              if (offset < nodeText.length) break;
-              offset -= nodeText.length;
-              nodeIndex++;
-            }
-
-            if (nodeIndex < textNodes.length) {
-              try {
-                const range = doc.createRange();
-                range.setStart(textNodes[nodeIndex], offset);
-                range.setEnd(textNodes[nodeIndex], offset + trimmedQuery.length);
-
-                const cfi = item.cfiFromRange(range);
-                const excerpt = fullText.substring(Math.max(0, pos - contextLength), pos + trimmedQuery.length + contextLength);
-
-                const chapterTitle = await getChapterFromCfi(book, cfi);
-
-                results.push({
-                  cfi,
-                  excerpt: `...${excerpt}...`,
-                  href: item.href,
-                  chapterTitle: chapterTitle || "",
-                  chapterIndex,
-                });
-              } catch (e) {
-                console.warn("Invalid range during search", e);
-              }
-            }
-
-            pos = fullText.indexOf(trimmedQuery, pos + 1);
-          }
-
-          item.unload?.();
-        } catch (error) {
-          console.error("Error searching spine item:", error);
-        }
-      });
-
-      await Promise.all(promises);
-      setSearchResults(results);
-      setCurrentSearchResultIndex(results.length > 0 ? 0 : -1);
-      setIsSearching(false);
     },
-    [bookRef, spine]
+    [bookRef],
   );
 
   const goToSearchResult = useCallback(
@@ -736,7 +704,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         const coverUrl = await book.coverUrl();
         setBookCover(coverUrl);
         const originalToc = book.navigation?.toc || [];
-        setSpine(book.spine as ExtendedSpine);
+        
         await book.locations.generate(5000);
 
         if (isCopyProtected) {
