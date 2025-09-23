@@ -6,6 +6,9 @@ export type SpeakOptions = {
   rate?: number; // 0.1 to 10
   pitch?: number; // 0 to 2
   volume?: number; // 0 to 1
+  onstart?: (ev: SpeechSynthesisEvent) => void;
+  onend?: (ev: SpeechSynthesisEvent) => void;
+  onboundary?: (ev: SpeechSynthesisEvent) => void;
 };
 
 type Status = "idle" | "speaking" | "paused";
@@ -54,7 +57,7 @@ export function useSpeechSynthesis() {
   }, [supported]);
 
   const speak = useCallback(
-    ({ text, voice: v, rate: r, pitch: p, volume: vol }: SpeakOptions) => {
+    ({ text, voice: v, rate: r, pitch: p, volume: vol, onstart, onend, onboundary }: SpeakOptions) => {
       if (!supported || !text?.trim()) return;
 
       // If speaking or paused, cancel first to start fresh
@@ -68,12 +71,19 @@ export function useSpeechSynthesis() {
       u.pitch = p ?? pitch;
       u.volume = vol ?? volume;
 
-      u.onstart = () => setStatus("speaking");
+      u.onstart = (ev) => {
+        setStatus("speaking");
+        onstart?.(ev);
+      };
       u.onpause = () => setStatus("paused");
       u.onresume = () => setStatus("speaking");
-      u.onend = () => {
+      u.onboundary = (ev) => {
+        onboundary?.(ev);
+      };
+      u.onend = (ev) => {
         setStatus("idle");
         utteranceRef.current = null;
+        onend?.(ev);
       };
       u.onerror = () => {
         setStatus("idle");

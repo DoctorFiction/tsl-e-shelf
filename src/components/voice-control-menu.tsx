@@ -51,10 +51,10 @@ export function VoiceControlMenu({ viewerRef, selectedText }: Props) {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80">
         <div className="flex items-center justify-between mb-2">
-          <div className="font-medium">Text-to-Speech</div>
+          <div className="font-medium">Metin Seslendirme</div>
           <select value={source} onChange={(e) => setSource(e.target.value as "selection" | "page")} className="rounded-md border px-2 py-1 text-sm">
-            <option value="selection">Selection</option>
-            <option value="page">Page</option>
+            <option value="selection">Seçili Metin</option>
+            <option value="page">Tüm Sayfa</option>
           </select>
         </div>
         <div className="flex items-center gap-2 mb-3">
@@ -80,13 +80,13 @@ export function VoiceControlMenu({ viewerRef, selectedText }: Props) {
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-sm text-muted-foreground">Voice (TR first, then EN)</label>
+          <label className="text-sm text-muted-foreground">Ses (Türkçe öncelikli)</label>
           <select value={voice?.name || ""} onChange={(e) => setVoice(curatedVoices.find((v) => v.name === e.target.value) || null)} className="rounded-md border px-2 py-1 text-sm">
             {curatedVoices.map((v) => (
               <option key={`${v.name}-${v.lang}`} value={v.name}>{`${v.name} (${v.lang})`}</option>
             ))}
           </select>
-          {curatedVoices.length === 0 && <div className="text-xs text-muted-foreground mt-1">No Turkish/English voices found in this browser.</div>}
+          {curatedVoices.filter((v) => (v.lang || "").toLowerCase().startsWith("tr")).length === 0 && <div className="text-xs text-muted-foreground mt-1">Türkçe ses bulunamadı.</div>}
         </div>
       </PopoverContent>
     </Popover>
