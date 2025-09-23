@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Square, Volume2, MessageSquareText } from "lucide-react";
@@ -13,8 +13,14 @@ type Props = {
 export function VoiceControlMenu({ viewerRef, selectedText }: Props) {
   const { supported, status, voices, voice, setVoice, rate, setRate, speak, cancel, toggle } = useSpeechSynthesis();
   const [source, setSource] = useState<"selection" | "page">("selection");
+  const sentencesRef = useRef<string[]>([]);
+  const curIndexRef = useRef<number>(0);
+  const cancelledRef = useRef<boolean>(false);
 
-  const textToRead = useMemo(() => {
+  // Track page changes to reset TTS state
+  const [pageContent, setPageContent] = useState<string>("");
+
+  const getTextToRead = useCallback(() => {
     if (source === "selection" && selectedText && selectedText.trim()) return selectedText.trim();
     const container = viewerRef.current;
     if (!container) return "";
@@ -24,11 +30,181 @@ export function VoiceControlMenu({ viewerRef, selectedText }: Props) {
     return text.replace(/\s+/g, " ").trim();
   }, [source, selectedText, viewerRef]);
 
+  const getIframe = useCallback(() => {
+    const container = viewerRef.current;
+    const iframe = container?.querySelector("iframe") as HTMLIFrameElement | null;
+    const doc = iframe?.contentDocument || null;
+    const win = iframe?.contentWindow || null;
+    return { iframe, doc, win } as const;
+  }, [viewerRef]);
+
+  const ensureTtsStyles = (doc: Document | null) => {
+    if (!doc) return;
+    if (doc.getElementById("tts-style-sheet")) return;
+    const style = doc.createElement("style");
+    style.id = "tts-style-sheet";
+    style.textContent = `
+      .tts-highlight { 
+        background: rgba(255, 235, 59, 0.55); 
+        border-radius: 4px; 
+        box-shadow: 0 0 8px rgba(255, 235, 59, 0.3);
+        transition: all 0.2s ease;
+      }
+      #tts-cursor { 
+        position: absolute; 
+        width: 4px; 
+        background: linear-gradient(45deg, #ef4444, #dc2626); 
+        border-radius: 3px; 
+        z-index: 2147483647; 
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.4);
+        animation: tts-pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes tts-pulse {
+        0%, 100% { opacity: 1; transform: scaleX(1); }
+        50% { opacity: 0.7; transform: scaleX(1.2); }
+      }
+    `;
+    doc.head.appendChild(style);
+  };
+
+  const clearHighlights = useCallback(() => {
+    const { doc } = getIframe();
+    if (!doc) return;
+    doc.querySelectorAll(".tts-highlight").forEach((el) => {
+      const parent = el.parentNode as Node | null;
+      if (!parent) return;
+      while (el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    });
+    const cursor = doc.getElementById("tts-cursor");
+    if (cursor?.parentElement) cursor.parentElement.removeChild(cursor);
+  }, [getIframe]);
+
+  // Effect to detect page changes and reset TTS
+  useEffect(() => {
+    const container = viewerRef.current;
+    if (!container) return;
+
+    const iframe = container.querySelector("iframe") as HTMLIFrameElement | null;
+    if (!iframe?.contentDocument) return;
+
+    const currentContent = iframe.contentDocument.body?.innerText || "";
+    if (currentContent !== pageContent) {
+      // Page has changed, reset TTS
+      if (status !== "idle") {
+        cancelledRef.current = true;
+        cancel();
+        clearHighlights();
+      }
+      setPageContent(currentContent);
+    }
+  }, [viewerRef, pageContent, status, cancel, clearHighlights]);
+
+  const normalize = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+
+  const highlightSentence = useCallback(
+    (sentence: string) => {
+      const { doc, win } = getIframe();
+      if (!doc || !win) return;
+      ensureTtsStyles(doc);
+      const target = normalize(sentence);
+      if (!target) return;
+
+      const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+      let node: Node | null = walker.nextNode();
+      while (node) {
+        const text = node.nodeValue || "";
+        const idx = normalize(text).indexOf(target);
+        if (idx !== -1) {
+          try {
+            const range = doc.createRange();
+            let rawIdx = text.toLowerCase().indexOf(sentence.trim().toLowerCase());
+            if (rawIdx === -1) rawIdx = Math.max(0, idx);
+            range.setStart(node, rawIdx);
+            const end = Math.min((node.nodeValue || "").length, rawIdx + sentence.length);
+            range.setEnd(node, end);
+
+            const span = doc.createElement("span");
+            span.className = "tts-highlight";
+            range.surroundContents(span);
+
+            let cursor = doc.getElementById("tts-cursor");
+            if (!cursor) {
+              cursor = doc.createElement("div");
+              cursor.id = "tts-cursor";
+              doc.body.appendChild(cursor);
+            }
+            const rect = span.getBoundingClientRect();
+            cursor.style.left = `${rect.left + win.scrollX - 8}px`;
+            cursor.style.top = `${rect.top + win.scrollY - 2}px`;
+            cursor.style.height = `${Math.max(20, rect.height + 4)}px`;
+            cursor.style.display = "block";
+
+            (span as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
+          } catch {
+            // ignore range errors
+          }
+          break;
+        }
+        node = walker.nextNode();
+      }
+    },
+    [getIframe]
+  );
+
+  const splitIntoSentences = (text: string) => {
+    const parts = text.match(/[^.!?\u2026]+[.!?\u2026]?/g) || [text];
+    return parts.map((s) => s.trim()).filter(Boolean);
+  };
+
+  const speakNext = useCallback(() => {
+    const sentences = sentencesRef.current;
+    const i = curIndexRef.current;
+    if (cancelledRef.current || i >= sentences.length) {
+      clearHighlights();
+      return;
+    }
+    const s = sentences[i];
+    speak({
+      text: s,
+      voice: voice,
+      rate: rate,
+      onstart: () => {
+        clearHighlights();
+        highlightSentence(s);
+      },
+      onend: () => {
+        curIndexRef.current = i + 1;
+        setTimeout(() => speakNext(), 10);
+      },
+    });
+  }, [speak, clearHighlights, highlightSentence, voice, rate]);
+
   const onToggle = useCallback(() => {
+    const textToRead = getTextToRead();
     if (!textToRead) return;
-    if (status === "idle") speak({ text: textToRead });
-    else toggle();
-  }, [status, speak, toggle, textToRead]);
+    if (status === "idle") {
+      cancelledRef.current = false;
+      sentencesRef.current = splitIntoSentences(textToRead);
+      curIndexRef.current = 0;
+      speakNext();
+    } else {
+      toggle();
+    }
+  }, [status, getTextToRead, speakNext, toggle]);
+
+  const onStop = useCallback(() => {
+    cancelledRef.current = true;
+    cancel();
+    clearHighlights();
+  }, [cancel, clearHighlights]);
+
+  useEffect(() => {
+    return () => {
+      cancelledRef.current = true;
+      clearHighlights();
+    };
+  }, [clearHighlights]);
 
   // Curate: ensure Turkish voices first, then English; keep list to a reasonable size
   const curatedVoices = useMemo(() => {
@@ -61,7 +237,7 @@ export function VoiceControlMenu({ viewerRef, selectedText }: Props) {
           <Button size="icon" className="h-9 w-9 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={onToggle} aria-label="Play/Pause">
             {status === "speaking" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </Button>
-          <Button size="icon" className="h-9 w-9 bg-red-600 hover:bg-red-700 text-white" onClick={cancel} aria-label="Stop">
+          <Button size="icon" className="h-9 w-9 bg-red-600 hover:bg-red-700 text-white" onClick={onStop} aria-label="Stop">
             <Square className="h-4 w-4" />
           </Button>
         </div>

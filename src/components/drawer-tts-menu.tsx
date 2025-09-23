@@ -18,6 +18,9 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
   const curIndexRef = useRef<number>(0);
   const cancelledRef = useRef<boolean>(false);
 
+  // Track page changes to reset TTS state
+  const [pageContent, setPageContent] = useState<string>("");
+
   const getTextToRead = useCallback(() => {
     if (source === "selection" && selectedText && selectedText.trim()) return selectedText.trim();
     const container = viewerRef?.current;
@@ -42,8 +45,25 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
     const style = doc.createElement("style");
     style.id = "tts-style-sheet";
     style.textContent = `
-      .tts-highlight { background: rgba(255, 235, 59, 0.45); border-radius: 4px; }
-      #tts-cursor { position: absolute; width: 3px; background: #ef4444; border-radius: 2px; z-index: 2147483647; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+      .tts-highlight { 
+        background: rgba(255, 235, 59, 0.55); 
+        border-radius: 4px; 
+        box-shadow: 0 0 8px rgba(255, 235, 59, 0.3);
+        transition: all 0.2s ease;
+      }
+      #tts-cursor { 
+        position: absolute; 
+        width: 4px; 
+        background: linear-gradient(45deg, #ef4444, #dc2626); 
+        border-radius: 3px; 
+        z-index: 2147483647; 
+        box-shadow: 0 0 12px rgba(239, 68, 68, 0.8), 0 0 20px rgba(239, 68, 68, 0.4);
+        animation: tts-pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes tts-pulse {
+        0%, 100% { opacity: 1; transform: scaleX(1); }
+        50% { opacity: 0.7; transform: scaleX(1.2); }
+      }
     `;
     doc.head.appendChild(style);
   };
@@ -60,6 +80,26 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
     const cursor = doc.getElementById("tts-cursor");
     if (cursor?.parentElement) cursor.parentElement.removeChild(cursor);
   }, [getIframe]);
+
+  // Effect to detect page changes and reset TTS
+  useEffect(() => {
+    const container = viewerRef?.current;
+    if (!container) return;
+
+    const iframe = container.querySelector("iframe") as HTMLIFrameElement | null;
+    if (!iframe?.contentDocument) return;
+
+    const currentContent = iframe.contentDocument.body?.innerText || "";
+    if (currentContent !== pageContent) {
+      // Page has changed, reset TTS
+      if (status !== "idle") {
+        cancelledRef.current = true;
+        cancel();
+        clearHighlights();
+      }
+      setPageContent(currentContent);
+    }
+  }, [viewerRef, pageContent, status, cancel, clearHighlights]);
 
   const normalize = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
 
@@ -96,9 +136,10 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
               doc.body.appendChild(cursor);
             }
             const rect = span.getBoundingClientRect();
-            cursor.style.left = `${rect.left + win.scrollX - 6}px`;
-            cursor.style.top = `${rect.top + win.scrollY}px`;
-            cursor.style.height = `${Math.max(16, rect.height)}px`;
+            cursor.style.left = `${rect.left + win.scrollX - 8}px`;
+            cursor.style.top = `${rect.top + win.scrollY - 2}px`;
+            cursor.style.height = `${Math.max(20, rect.height + 4)}px`;
+            cursor.style.display = "block";
 
             (span as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
           } catch {
@@ -127,6 +168,8 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
     const s = sentences[i];
     speak({
       text: s,
+      voice: voice,
+      rate: rate,
       onstart: () => {
         clearHighlights();
         highlightSentence(s);
@@ -136,7 +179,7 @@ export function DrawerTtsMenu({ viewerRef, selectedText, isPinned }: Props) {
         setTimeout(() => speakNext(), 10);
       },
     });
-  }, [speak, clearHighlights, highlightSentence]);
+  }, [speak, clearHighlights, highlightSentence, voice, rate]);
 
   const handlePlay = useCallback(() => {
     if (status === "idle") {
