@@ -12,6 +12,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MainDrawer } from "./main-drawer";
 
 import { AddEditNoteDialog } from "./add-edit-note-dialog";
+import { ReaderTtsControls } from "./reader-tts-controls";
 
 interface EpubReaderProps {
   url: string;
@@ -76,6 +77,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     isSearching,
     getPreviewText,
     copyText,
+    getCurrentPageText,
     resize,
   } = useEpubReader({ url, isCopyProtected: true });
 
@@ -232,6 +234,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
           getPreviewText={getPreviewText}
           copyText={copyText}
         />
+        <ReaderTtsControls viewerRef={viewerRef} selectedText={selection?.text} getCurrentPageText={getCurrentPageText} />
         <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         {editingNote && (
           <AddEditNoteDialog

@@ -168,6 +168,7 @@ interface IUseEpubReaderReturn {
   currentChapterTitle: string | null;
   isSearching: boolean;
   getPreviewText: (charCount?: number) => Promise<string | null>;
+  getCurrentPageText: () => string;
   copyText: (text: string) => Promise<void>;
   totalBookChars: number;
   copiedChars: number;
@@ -185,7 +186,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [notes, setNotes] = useState<Note[]>([]);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
-  
+
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -585,7 +586,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
               chapterTitle: chapterTitle || "",
               chapterIndex: section.index,
             };
-          }),
+          })
         );
 
         setSearchResults(finalResults);
@@ -598,7 +599,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         setIsSearching(false);
       }
     },
-    [bookRef],
+    [bookRef]
   );
 
   const goToSearchResult = useCallback(
@@ -704,7 +705,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         const coverUrl = await book.coverUrl();
         setBookCover(coverUrl);
         const originalToc = book.navigation?.toc || [];
-        
+
         await book.locations.generate(5000);
 
         if (isCopyProtected) {
@@ -1075,6 +1076,34 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     }
   }, [STORAGE_KEY_NOTES, renditionRef]);
 
+  const getCurrentPageText = useCallback(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return "";
+
+    try {
+      // Try to get the current view's iframe from the manager
+      const views = rendition.views();
+      if (!views || views.length === 0) return "";
+
+      const currentView = views[0]; // Get first view
+      // Try to access iframe through element property (epubjs internal structure)
+      const viewElement = (currentView as { element?: HTMLElement }).element;
+      const iframe = viewElement?.querySelector("iframe") as HTMLIFrameElement | null;
+
+      if (!iframe) return "";
+
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc) return "";
+
+      // Get the text content from the current page
+      const bodyText = doc.body?.innerText || doc.body?.textContent || "";
+      return bodyText.replace(/\s+/g, " ").trim();
+    } catch (error) {
+      console.warn("Error getting current page text:", error);
+      return "";
+    }
+  }, []);
+
   return {
     toc,
     location,
@@ -1124,6 +1153,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     searchBook,
     isSearching,
     getPreviewText,
+    getCurrentPageText,
     copyText,
     totalBookChars,
     copiedChars,

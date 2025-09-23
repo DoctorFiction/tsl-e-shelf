@@ -8,16 +8,23 @@ type Props = {
   viewerRef: React.RefObject<HTMLDivElement | null>;
   // optional currently selected text from reader, if available
   selectedText?: string | null;
+  // function to get current page text
+  getCurrentPageText?: () => string;
 };
 
-export function ReaderTtsControls({ viewerRef, selectedText }: Props) {
+export function ReaderTtsControls({ viewerRef, selectedText, getCurrentPageText }: Props) {
   const { supported, status, voices, voice, setVoice, rate, setRate, speak, cancel, toggle } = useSpeechSynthesis();
-  const [source, setSource] = useState<"selection" | "page">("selection");
+  const [source, setSource] = useState<"selection" | "page">("page"); // Default to "page"
 
   const buttonLabel = status === "speaking" ? "Pause" : status === "paused" ? "Resume" : "Play";
 
   const textToRead = useMemo(() => {
     if (source === "selection" && selectedText && selectedText.trim()) return selectedText.trim();
+
+    // Use getCurrentPageText if available, otherwise fallback to iframe method
+    if (getCurrentPageText) {
+      return getCurrentPageText();
+    }
 
     // Fallback: try to read the currently visible chapter/page text from the iframe
     const container = viewerRef.current;
@@ -27,7 +34,7 @@ export function ReaderTtsControls({ viewerRef, selectedText }: Props) {
     const text = doc?.body?.innerText || doc?.body?.textContent || "";
     // Trim and reduce multiple spaces/newlines for smoother TTS
     return text.replace(/\s+/g, " ").trim();
-  }, [source, selectedText, viewerRef]);
+  }, [source, selectedText, getCurrentPageText, viewerRef]);
 
   const onPlay = useCallback(() => {
     if (!textToRead) return;
@@ -40,42 +47,78 @@ export function ReaderTtsControls({ viewerRef, selectedText }: Props) {
     else toggle();
   }, [status, toggle, onPlay, textToRead]);
 
-  // Build a curated list: Turkish and English only, up to 2 male + 2 female if detectable
-  const curatedVoices = useMemo(() => {
-    const trEn = voices.filter((v) => {
+  // Create a consistent set of voices: Turkish and English, male and female
+  const standardVoices = useMemo(() => {
+    // First, filter to only Turkish and English voices
+    const trEnVoices = voices.filter((v) => {
       const lang = (v.lang || "").toLowerCase();
       return lang.startsWith("tr") || lang.startsWith("en");
     });
 
-    // Try to guess gender from voice name
-    const isFemale = (name: string) => /female|woman|samantha|victoria|zira|zira|zira|zira|zira|zira|zira|zira|zira/i.test(name);
-    const isMale = (name: string) => /male|man|daniel|fred|zira|alec|alex|michael|murat|yigit|yusuf|kerem/i.test(name);
+    // Define preferred voice patterns for better consistency
+    const preferredPatterns = [
+      // Turkish voices - common patterns
+      { pattern: /filiz|turkish.*female/i, lang: "tr", gender: "female", fallbackName: "Turkish Female" },
+      { pattern: /tolga|turkish.*male/i, lang: "tr", gender: "male", fallbackName: "Turkish Male" },
 
-    const females: SpeechSynthesisVoice[] = [];
-    const males: SpeechSynthesisVoice[] = [];
-    const unknown: SpeechSynthesisVoice[] = [];
+      // English voices - common patterns across different platforms
+      { pattern: /(zira|hazel|microsoft.*female|english.*female)/i, lang: "en", gender: "female", fallbackName: "English Female" },
+      { pattern: /(david|mark|microsoft.*male|english.*male)/i, lang: "en", gender: "male", fallbackName: "English Male" },
+    ];
 
-    for (const v of trEn) {
-      const name = v.name || "";
-      if (isFemale(name)) females.push(v);
-      else if (isMale(name)) males.push(v);
-      else unknown.push(v);
+    const foundVoices: { voice: SpeechSynthesisVoice; name: string; lang: string; gender: string }[] = [];
+
+    // Try to find preferred voices
+    for (const pattern of preferredPatterns) {
+      const matchedVoice = trEnVoices.find((v) => {
+        const nameMatch = pattern.pattern.test(v.name);
+        const langMatch = v.lang?.toLowerCase().startsWith(pattern.lang);
+        return nameMatch || (langMatch && pattern.pattern.test(v.name));
+      });
+
+      if (matchedVoice && !foundVoices.find((fv) => fv.voice.name === matchedVoice.name)) {
+        foundVoices.push({
+          voice: matchedVoice,
+          name: pattern.fallbackName,
+          lang: pattern.lang,
+          gender: pattern.gender,
+        });
+      }
     }
 
-    const pickUpTo = (arr: SpeechSynthesisVoice[], n: number) => arr.slice(0, n);
+    // If we don't have enough voices, add any remaining Turkish/English voices
+    if (foundVoices.length < 4) {
+      const remainingVoices = trEnVoices.filter((v) => !foundVoices.find((fv) => fv.voice.name === v.name));
 
-    const pickedFemales = pickUpTo(females, 2);
-    const pickedMales = pickUpTo(males, 2);
-    const remaining = 4 - (pickedFemales.length + pickedMales.length);
-    const pickedUnknown = remaining > 0 ? pickUpTo(unknown, remaining) : [];
+      for (const remainingVoice of remainingVoices) {
+        if (foundVoices.length >= 4) break;
 
-    const picked = [...pickedFemales, ...pickedMales, ...pickedUnknown];
-    // If we still have fewer than 4, fill from the remaining trEn pool without duplicates
-    if (picked.length < 4) {
-      const remainingPool = trEn.filter((v) => !picked.includes(v));
-      picked.push(...pickUpTo(remainingPool, 4 - picked.length));
+        const lang = remainingVoice.lang?.toLowerCase().startsWith("tr") ? "tr" : "en";
+        const langName = lang === "tr" ? "Turkish" : "English";
+
+        foundVoices.push({
+          voice: remainingVoice,
+          name: `${remainingVoice.name} (${langName})`,
+          lang: lang,
+          gender: "unknown",
+        });
+      }
     }
-    return picked;
+
+    // If still not enough, add the first 4 available voices as fallback
+    if (foundVoices.length === 0 && voices.length > 0) {
+      const fallbackVoices = voices.slice(0, 4);
+      fallbackVoices.forEach((v) => {
+        foundVoices.push({
+          voice: v,
+          name: v.name || "Unknown Voice",
+          lang: v.lang || "unknown",
+          gender: "unknown",
+        });
+      });
+    }
+
+    return foundVoices;
   }, [voices]);
 
   if (!supported) return null;
@@ -108,26 +151,33 @@ export function ReaderTtsControls({ viewerRef, selectedText }: Props) {
         />
       </div>
 
-      {/* Source */}
-      <select
-        value={source}
-        onChange={(e) => setSource(e.target.value as "selection" | "page")}
-        className="ml-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm px-2 py-1"
-        aria-label="Reading source"
-      >
-        <option value="selection">Selection</option>
-        <option value="page">Page</option>
-      </select>
+      {/* Source - only show if there's selected text */}
+      {selectedText && selectedText.trim() && (
+        <select
+          value={source}
+          onChange={(e) => setSource(e.target.value as "selection" | "page")}
+          className="ml-1 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm px-2 py-1"
+          aria-label="Reading source"
+        >
+          <option value="selection">Seçili Metin</option>
+          <option value="page">Sayfa</option>
+        </select>
+      )}
 
-      {/* Voice (TR/EN curated) */}
+      {/* Voice (Turkish/English curated) */}
       <select
         value={voice?.name || ""}
-        onChange={(e) => setVoice(curatedVoices.find((v) => v.name === e.target.value) || null)}
+        onChange={(e) => {
+          const selectedStandardVoice = standardVoices.find((sv) => sv.voice.name === e.target.value);
+          setVoice(selectedStandardVoice?.voice || null);
+        }}
         className="rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm px-2 py-1"
         aria-label="Voice"
       >
-        {curatedVoices.map((v) => (
-          <option key={`${v.name}-${v.lang}`} value={v.name}>{`${v.name} (${v.lang})`}</option>
+        {standardVoices.map((sv) => (
+          <option key={`${sv.voice.name}-${sv.voice.lang}`} value={sv.voice.name}>
+            {sv.name}
+          </option>
         ))}
       </select>
     </div>

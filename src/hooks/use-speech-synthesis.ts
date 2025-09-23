@@ -35,9 +35,39 @@ export function useSpeechSynthesis() {
     const loadVoices = () => {
       const v = synth.getVoices();
       setVoices(v);
-      // Prefer Turkish or English voices by default
-      const preferred = v.find((vv) => vv.lang?.toLowerCase().startsWith("tr")) || v.find((vv) => vv.lang?.toLowerCase().startsWith("en")) || v[0] || null;
-      setVoice((prev) => prev ?? preferred ?? null);
+
+      // Priority list for voice selection to ensure consistency across devices
+      const voicePriorities = [
+        // Microsoft voices (Windows)
+        "Microsoft Filiz - Turkish (Turkey)",
+        "Microsoft Tolga - Turkish (Turkey)",
+        "Microsoft Zira - English (United States)",
+        "Microsoft David - English (United States)",
+        // Alternative patterns
+        v.find((vv) => /filiz/i.test(vv.name) && vv.lang?.toLowerCase().startsWith("tr")),
+        v.find((vv) => /tolga/i.test(vv.name) && vv.lang?.toLowerCase().startsWith("tr")),
+        v.find((vv) => /zira/i.test(vv.name) && vv.lang?.toLowerCase().startsWith("en")),
+        v.find((vv) => /david/i.test(vv.name) && vv.lang?.toLowerCase().startsWith("en")),
+        // Generic Turkish/English fallbacks
+        v.find((vv) => vv.lang?.toLowerCase().startsWith("tr")),
+        v.find((vv) => vv.lang?.toLowerCase().startsWith("en")),
+        // Final fallback
+        v[0],
+      ].filter(Boolean);
+
+      let defaultVoice = null;
+
+      // First try to find exact name matches
+      for (const priority of voicePriorities) {
+        if (typeof priority === "string") {
+          defaultVoice = v.find((voice) => voice.name === priority);
+        } else {
+          defaultVoice = priority as SpeechSynthesisVoice;
+        }
+        if (defaultVoice) break;
+      }
+
+      setVoice((prev) => prev ?? (defaultVoice || null));
     };
 
     loadVoices();

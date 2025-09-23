@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Settings, LogOut, Home, AlignRight, AlignJustify } from "lucide-react";
+import { Home, AlignRight, AlignJustify } from "lucide-react";
 import { useRef, useState } from "react";
 import { Typography } from "./ui/typography";
 import { CircularSpinner } from "./ui/circular-spinner";
 import Link from "next/link";
-import { Card } from "./ui/card";
-import { DrawerTtsMenu } from "./drawer-tts-menu";
 
 type EnhancedNavItem = {
   label: string;
@@ -24,7 +22,7 @@ interface MainDrawerProps {
   selectedText?: string | null;
 }
 
-export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading, viewerRef, selectedText }: MainDrawerProps) {
+export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading }: MainDrawerProps) {
   const drawerRef = useRef<HTMLDivElement>(null);
   const [isPinned, setIsPinned] = useState(false);
 
@@ -111,26 +109,6 @@ export function MainDrawer({ onDrawerStateChange, toc, goToHref, tocLoading, vie
             )}
           </ul>
         </div>
-      </div>
-
-      <div className="mt-auto flex flex-col items-center gap-3 mb-4">
-        <DrawerTtsMenu viewerRef={viewerRef} selectedText={selectedText} isPinned={isPinned} />
-        <Card className={`p-2 w-full ${isPinned ? "flex-row" : "flex-col"} items-center gap-2 bg-gray-200 dark:bg-gray-700`}>
-          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">HÖ</div>
-          {isPinned && (
-            <div className="flex flex-col items-start flex-grow">
-              <Typography variant="body1">Hasan Özçelik</Typography>
-              <Button variant="ghost" size="sm" className="p-0 h-auto justify-start">
-                <Settings className="w-4 h-4 mr-1" />
-                Ayarlar
-              </Button>
-            </div>
-          )}
-        </Card>
-        <Button variant="destructive" className="w-full flex items-center gap-2">
-          <LogOut className="w-5 h-5" />
-          {isPinned && <span>Çıkış Yap</span>}
-        </Button>
       </div>
     </div>
   );
