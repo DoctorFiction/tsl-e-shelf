@@ -1,0 +1,131 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
+export type SpeakOptions = {
+  text: string;
+  voice?: SpeechSynthesisVoice | null;
+  rate?: number; // 0.1 to 10
+  pitch?: number; // 0 to 2
+  volume?: number; // 0 to 1
+};
+
+type Status = "idle" | "speaking" | "paused";
+
+export function useSpeechSynthesis() {
+  const [supported, setSupported] = useState<boolean>(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
+  // default slightly slower for better comprehension
+  const [rate, setRate] = useState<number>(0.9);
+  const [pitch, setPitch] = useState<number>(1);
+  const [volume, setVolume] = useState<number>(1);
+  const [status, setStatus] = useState<Status>("idle");
+
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    const hasSupport = typeof window !== "undefined" && "speechSynthesis" in window;
+    setSupported(hasSupport);
+    if (!hasSupport) return;
+
+    const synth = window.speechSynthesis;
+
+    const loadVoices = () => {
+      const v = synth.getVoices();
+      setVoices(v);
+      // Prefer Turkish or English voices by default
+      const preferred = v.find((vv) => vv.lang?.toLowerCase().startsWith("tr")) || v.find((vv) => vv.lang?.toLowerCase().startsWith("en")) || v[0] || null;
+      setVoice((prev) => prev ?? preferred ?? null);
+    };
+
+    loadVoices();
+    // Some browsers load voices asynchronously
+    synth.onvoiceschanged = loadVoices;
+
+    return () => {
+      synth.onvoiceschanged = null;
+    };
+  }, []);
+
+  const cancel = useCallback(() => {
+    if (!supported) return;
+    window.speechSynthesis.cancel();
+    utteranceRef.current = null;
+    setStatus("idle");
+  }, [supported]);
+
+  const speak = useCallback(
+    ({ text, voice: v, rate: r, pitch: p, volume: vol }: SpeakOptions) => {
+      if (!supported || !text?.trim()) return;
+
+      // If speaking or paused, cancel first to start fresh
+      if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
+        window.speechSynthesis.cancel();
+      }
+
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = v ?? voice ?? null;
+      u.rate = r ?? rate;
+      u.pitch = p ?? pitch;
+      u.volume = vol ?? volume;
+
+      u.onstart = () => setStatus("speaking");
+      u.onpause = () => setStatus("paused");
+      u.onresume = () => setStatus("speaking");
+      u.onend = () => {
+        setStatus("idle");
+        utteranceRef.current = null;
+      };
+      u.onerror = () => {
+        setStatus("idle");
+        utteranceRef.current = null;
+      };
+
+      utteranceRef.current = u;
+      window.speechSynthesis.speak(u);
+    },
+    [supported, voice, rate, pitch, volume]
+  );
+
+  const pause = useCallback(() => {
+    if (!supported) return;
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+      setStatus("paused");
+    }
+  }, [supported]);
+
+  const resume = useCallback(() => {
+    if (!supported) return;
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      setStatus("speaking");
+    }
+  }, [supported]);
+
+  const toggle = useCallback(() => {
+    if (status === "speaking") pause();
+    else if (status === "paused") resume();
+  }, [status, pause, resume]);
+
+  return {
+    // capabilities/state
+    supported,
+    status,
+    voices,
+    voice,
+    rate,
+    pitch,
+    volume,
+    // setters
+    setVoice,
+    setRate,
+    setPitch,
+    setVolume,
+    // controls
+    speak,
+    pause,
+    resume,
+    cancel,
+    toggle,
+  };
+}

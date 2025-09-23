@@ -3,7 +3,7 @@ import { BookImage, Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } f
 import { AlignJustify, AlignLeft, ChevronLeft } from "lucide-react";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 import { MainControlGroup } from "./main-control-group";
-import { ModeToggle } from "./mode-toggle";
+// import { ModeToggle } from "./mode-toggle";
 import { SelectionActionsBar } from "./selection-actions-bar";
 
 interface DesktopDrawerProps {
@@ -122,7 +122,7 @@ export function DesktopDrawer(props: DesktopDrawerProps) {
             {isPinned && <span className="text-sm">Geri Dön</span>}
           </Button>
         )}
-        <ModeToggle />
+        {/* <ModeToggle /> */}
       </div>
     </div>
   );
