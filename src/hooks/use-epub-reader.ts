@@ -185,7 +185,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [notes, setNotes] = useState<Note[]>([]);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [clickedHighlight, setClickedHighlight] = useState<Highlight | null>(null);
-  
+
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [currentSearchResultIndex, setCurrentSearchResultIndex] = useState<number>(-1);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -585,7 +585,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
               chapterTitle: chapterTitle || "",
               chapterIndex: section.index,
             };
-          }),
+          })
         );
 
         setSearchResults(finalResults);
@@ -598,7 +598,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
         setIsSearching(false);
       }
     },
-    [bookRef],
+    [bookRef]
   );
 
   const goToSearchResult = useCallback(
@@ -682,11 +682,14 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   useEffect(() => {
     if (!viewerRef.current) return;
 
+    console.log("useEpubReader: Starting book loading with URL:", url);
     setError(null); // Clear previous errors
     setIsLoading(true); // Set loading to true at the start
 
     try {
       const book = ePub(url);
+      console.log("useEpubReader: Created ePub book object");
+
       const rendition = book.renderTo(viewerRef.current, {
         width: "100%",
         height: "100%",
@@ -697,15 +700,18 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       renditionRef.current = rendition;
 
       book.ready.then(async () => {
+        console.log("useEpubReader: Book ready");
         const metadata = await book.loaded.metadata;
+        console.log("useEpubReader: Book metadata loaded:", metadata);
         setBookTitle(metadata.title);
         setBookAuthor(metadata.creator || null);
 
         const coverUrl = await book.coverUrl();
         setBookCover(coverUrl);
         const originalToc = book.navigation?.toc || [];
-        
+
         await book.locations.generate(5000);
+        console.log("useEpubReader: Book locations generated");
 
         if (isCopyProtected) {
           const savedTotalChars = localStorage.getItem(STORAGE_KEY_TOTAL_CHARS);

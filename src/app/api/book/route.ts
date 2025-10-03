@@ -15,21 +15,35 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    console.log("Fetching EPUB from URL:", url);
     const response = await fetch(url);
-    const contentType = response.headers.get("content-type") || "text/plain";
-    const body = await response.text();
 
-    return new Response(body, {
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.status} ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get("content-type") || "application/epub+zip";
+    console.log("Original content-type:", contentType);
+
+    const arrayBuffer = await response.arrayBuffer();
+    console.log("Fetched EPUB size:", arrayBuffer.byteLength);
+
+    return new Response(arrayBuffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "no-store",
+        "Content-Length": arrayBuffer.byteLength.toString(),
       },
     });
   } catch (err) {
-    console.warn("DEBUGPRINT[38]: route.ts:25: err=", err);
-    return new Response(JSON.stringify({ error: "Failed to fetch content" }), {
+    console.error("Error fetching EPUB:", err);
+    const errorMessage = err instanceof Error ? err.message : "Unknown error";
+    return new Response(JSON.stringify({ error: "Failed to fetch content", details: errorMessage }), {
       status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
 }

@@ -5,8 +5,21 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
     remotePatterns: [
-      new URL("https://www.gutenberg.org/**"),
-      new URL("https://www.atlaskitap.com/bakim/nobelyayin.png"),
+      {
+        protocol: "https",
+        hostname: "www.gutenberg.org",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.atlaskitap.com",
+        pathname: "/bakim/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.nobelyayin.com",
+        pathname: "/**",
+      },
     ],
   },
 };
