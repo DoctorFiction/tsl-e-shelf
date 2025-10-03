@@ -8,7 +8,7 @@ export default function Header() {
   return (
     <div className="border-black/10 border-b flex items-center justify-between p-4 bg-white dark:bg-gray-900">
       <Link href="/">
-        <Image src="https://www.atlaskitap.com/bakim/nobelyayin.png" alt="nobelyayin" width={80} height={80} />
+        <Image src="https://www.nobelyayin.com/templates/images/logo.png?v=01" alt="nobelyayin" width={80} height={80} />
       </Link>
       <ul className="flex items-center gap-3">
         {/* TODO: Add a 'Dev Tools' button here, visible only in development mode. */}
