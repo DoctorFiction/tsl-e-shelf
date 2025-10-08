@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-
-interface LocalBook {
-  filename: string;
-  title: string;
-  id: string;
-}
+import { useCallback, useEffect, useState } from "react";
 
 interface NobelBook {
   id: string;
@@ -22,28 +16,11 @@ interface NobelBook {
 }
 
 export default function LibraryPage() {
-  const [localBooks, setLocalBooks] = useState<LocalBook[]>([]);
   const [nobelBooks, setNobelBooks] = useState<NobelBook[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadLocalBooks() {
-      try {
-        const response = await fetch("/api/books/local");
-        if (!response.ok) {
-          throw new Error("Failed to fetch local books");
-        }
-        const books = await response.json();
-        setLocalBooks(books);
-      } catch (err) {
-        console.error("Failed to load local books:", err);
-      }
-    }
-    loadLocalBooks();
-  }, []);
-
-  const fetchNobelBooks = async () => {
+  const fetchNobelBooks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -66,7 +43,11 @@ export default function LibraryPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNobelBooks();
+  }, [fetchNobelBooks]);
 
   return (
     <div className="p-8">
@@ -74,9 +55,10 @@ export default function LibraryPage() {
 
       <div className="mb-6">
         <button onClick={fetchNobelBooks} disabled={isLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
-          {isLoading ? "Yükleniyor..." : "Nobel Kitapları Çek"}
+          {isLoading ? "Yükleniyor..." : "Nobel Kitaplarını Yenile"}
         </button>
         {error && <p className="text-red-500 mt-2">Hata: {error}</p>}
+        {!error && !isLoading && nobelBooks.length === 0 && <p className="text-gray-500 mt-2">Gösterilecek kitap bulunamadı.</p>}
       </div>
 
       {/* Nobel Books Section */}
@@ -98,22 +80,7 @@ export default function LibraryPage() {
           </div>
         </div>
       ) : (
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Yerel Kitaplar</h2>
-          <ul className="space-y-2">
-            {localBooks.length === 0 ? (
-              <p>Yerel kitap bulunamadı</p>
-            ) : (
-              localBooks.map((book, index) => (
-                <li key={book.filename}>
-                  <Link href={`/reader/${book.id}`} className="text-blue-600 hover:underline">
-                    {`${index + 1}. `} {book.title}
-                  </Link>
-                </li>
-              ))
-            )}
-          </ul>
-        </div>
+        <div className="text-gray-600">{isLoading ? "Kitaplar yükleniyor..." : "Listelenecek kitap bulunamadı."}</div>
       )}
     </div>
   );
