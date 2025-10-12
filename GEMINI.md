@@ -63,6 +63,7 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Annotations:** Users can add bookmarks, highlights, and notes.
 *   **Book Location API:** GET and PUT endpoints for managing book locations.
 *   **Highlights API:** GET for getting highlights, POST for adding highlights, PUT for updating highlights, and DELETE for deleting highlights.
+*   **Bookmarks API:** GET for getting bookmarks, POST for adding bookmarks, and DELETE for deleting bookmarks.
 
 ## User Preferences
 
