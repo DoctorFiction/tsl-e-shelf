@@ -2,48 +2,22 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAtom } from "jotai";
+import {
+  nobelBooksAtom,
+  isLoadingNobelBooksAtom,
+  errorNobelBooksAtom,
+  fetchNobelBooksAtom,
+} from "@/atoms/nobel-books-atom";
 
-interface NobelBook {
-  id: string;
-  title: string;
-  author: string;
-  coverUrl: string;
-  bookFileUrl: string;
-  filename: string;
-  totalPages: number;
-  urunId: number;
-}
+
 
 export default function LibraryPage() {
-  const [nobelBooks, setNobelBooks] = useState<NobelBook[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchNobelBooks = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/books/nobel", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const books: NobelBook[] = await response.json();
-      setNobelBooks(books);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Kitaplar yüklenirken hata oluştu");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [nobelBooks] = useAtom(nobelBooksAtom);
+  const [isLoading] = useAtom(isLoadingNobelBooksAtom);
+  const [error] = useAtom(errorNobelBooksAtom);
+  const [, fetchNobelBooks] = useAtom(fetchNobelBooksAtom);
 
   useEffect(() => {
     fetchNobelBooks();
@@ -54,7 +28,7 @@ export default function LibraryPage() {
       <h1 className="text-2xl font-bold mb-4">📚 Kütüphane</h1>
 
       <div className="mb-6">
-        <button onClick={fetchNobelBooks} disabled={isLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
+        <button onClick={() => fetchNobelBooks()} disabled={isLoading} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed">
           {isLoading ? "Yükleniyor..." : "Nobel Kitaplarını Yenile"}
         </button>
         {error && <p className="text-red-500 mt-2">Hata: {error}</p>}
