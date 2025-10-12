@@ -61,6 +61,7 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Recently Visited Books:** Displays a list of recently opened books.
 *   **Book Search:** Search for books within the shelf.
 *   **Annotations:** Users can add bookmarks, highlights, and notes.
+*   **Book Location API:** GET and PUT endpoints for managing book locations.
 
 ## User Preferences
 
