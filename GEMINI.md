@@ -62,6 +62,7 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Book Search:** Search for books within the shelf.
 *   **Annotations:** Users can add bookmarks, highlights, and notes.
 *   **Book Location API:** GET and PUT endpoints for managing book locations.
+*   **Highlights API:** POST for getting highlights, POST for adding highlights, PUT for updating highlights, and DELETE for deleting highlights.
 
 ## User Preferences
 
