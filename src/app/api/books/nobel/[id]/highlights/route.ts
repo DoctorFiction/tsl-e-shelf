@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function POST(
+export async function GET(
   request: Request,
   { params }: { params: { id: string } },
 ) {
@@ -36,7 +36,6 @@ export async function POST(
     const highlightsResponse = await fetch(
       `https://api.nobelyayin.com/books/${id}/highlights`,
       {
-        method: "POST", // As specified by the user for getting highlights
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
