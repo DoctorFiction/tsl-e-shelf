@@ -3,6 +3,7 @@ import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
 import { getReaderTheme } from "@/lib/get-reader-theme";
+import { NobelApiClient, isNobelBook as checkIsNobelBook, type NobelBookData } from "@/lib/nobel-api";
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
 import Section from "epubjs/types/section";
 import Spine from "epubjs/types/spine";
@@ -171,6 +172,13 @@ interface IUseEpubReaderReturn {
   copyText: (text: string) => Promise<void>;
   totalBookChars: number;
   copiedChars: number;
+  getNobelBookInfo: () => {
+    hasNotes: boolean;
+    hasHighlights: boolean;
+    hasBookmarks: boolean;
+    lastLocation: string | null;
+    copyProtectionEnabled: boolean;
+  } | null;
 }
 
 export function useEpubReader({ url, isCopyProtected = false, copyAllowancePercentage = 10 }: IUseEpubReader): IUseEpubReaderReturn {
@@ -178,6 +186,8 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const renditionRef = useRef<Rendition | null>(null);
   const bookRef = useRef<Book | null>(null);
   const previousSearchHighlights = useRef<string[]>([]);
+  const locationUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitialLocationRef = useRef<boolean>(true);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [location, setLocation] = useState<string | null>(null);
   const [toc, setToc] = useState<EnhancedNavItem[]>([]);
@@ -205,6 +215,12 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   const [bookImages, setBookImages] = useState<BookImage[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+
+  // Nobel API related state
+  const [nobelApiClient, setNobelApiClient] = useState<NobelApiClient | null>(null);
+  const [nobelData, setNobelData] = useState<NobelBookData | null>(null);
+  const [isNobelBook, setIsNobelBook] = useState<boolean>(false);
+  const [isBookReady, setIsBookReady] = useState<boolean>(false); // Track if book is fully loaded
 
   const resize = useCallback(() => {
     const viewer = viewerRef.current;
@@ -282,7 +298,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   );
 
   const addHighlight = useCallback(
-    ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
+    async ({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
       const config = {
         ...defaultConfig[type],
         style: { ...defaultConfig[type].style, fill: color, stroke: color },
@@ -290,6 +306,17 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       const newHighlight: Highlight = { cfi, text, color, type, createdAt: new Date().toISOString() };
 
       renditionRef.current?.annotations.add(type, cfi, { text }, undefined, config.className, config.style);
+
+      // If it's a Nobel book, also save to Nobel API (only for new user actions, not during restoration)
+      if (isNobelBook && nobelApiClient && isBookReady) {
+        try {
+          await nobelApiClient.addHighlight(cfi, text, color, type);
+          console.log("Highlight saved to Nobel API successfully");
+        } catch (error) {
+          console.error("Failed to save highlight to Nobel API:", error);
+          // Continue with local save even if Nobel API fails
+        }
+      }
 
       setHighlights((prev) => {
         const updated = [...prev, newHighlight];
@@ -299,8 +326,18 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
 
       setSelection(null);
     },
-    [STORAGE_KEY_HIGHLIGHTS]
+    [STORAGE_KEY_HIGHLIGHTS, isNobelBook, nobelApiClient, isBookReady]
   );
+
+  // Function to restore highlights without triggering API calls (for loading saved highlights)
+  const restoreHighlight = useCallback(({ cfi, text, type = "highlight", color = "yellow" }: Highlight) => {
+    const config = {
+      ...defaultConfig[type],
+      style: { ...defaultConfig[type].style, fill: color, stroke: color },
+    };
+
+    renditionRef.current?.annotations.add(type, cfi, { text }, undefined, config.className, config.style);
+  }, []);
 
   const removeHighlight = useCallback(
     (cfi: string, type: HighlightType) => {
@@ -386,12 +423,23 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       page,
     };
 
+    // If it's a Nobel book, also save to Nobel API (only for new user actions)
+    if (isNobelBook && nobelApiClient && isBookReady) {
+      try {
+        await nobelApiClient.addBookmark(location, chapter || undefined);
+        console.log("Bookmark saved to Nobel API successfully");
+      } catch (error) {
+        console.error("Failed to save bookmark to Nobel API:", error);
+        // Continue with local save even if Nobel API fails
+      }
+    }
+
     setBookmarks((prev) => {
       const updated = [...prev, newBookmark];
       localStorage.setItem(STORAGE_KEY_BOOKMARK, JSON.stringify(updated));
       return updated;
     });
-  }, [location, STORAGE_KEY_BOOKMARK]);
+  }, [location, STORAGE_KEY_BOOKMARK, isNobelBook, nobelApiClient, isBookReady]);
 
   const goToBookmark = useCallback((cfi: string) => {
     if (!cfi) {
@@ -438,11 +486,22 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
   }, []);
 
   const addNote = useCallback(
-    ({ cfi, text, note }: Note) => {
+    async ({ cfi, text, note }: Note) => {
       const newNote: Note = { cfi, text, note, createdAt: new Date().toISOString() };
 
       // visually annotate
       renditionRef.current?.annotations.add("highlight", cfi, { text }, undefined, defaultConfig.note.className, defaultConfig.note.style);
+
+      // If it's a Nobel book, also save to Nobel API (only for new user actions)
+      if (isNobelBook && nobelApiClient && isBookReady) {
+        try {
+          await nobelApiClient.addNote(cfi, text, note);
+          console.log("Note saved to Nobel API successfully");
+        } catch (error) {
+          console.error("Failed to save note to Nobel API:", error);
+          // Continue with local save even if Nobel API fails
+        }
+      }
 
       // update state + localStorage
       setNotes((prev) => {
@@ -452,7 +511,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       });
       setSelection(null);
     },
-    [STORAGE_KEY_NOTES]
+    [STORAGE_KEY_NOTES, isNobelBook, nobelApiClient, isBookReady]
   );
 
   const removeNote = useCallback(
@@ -686,6 +745,101 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     setError(null); // Clear previous errors
     setIsLoading(true); // Set loading to true at the start
 
+    // Reset initial location flag for new book
+    isInitialLocationRef.current = true;
+
+    // Extract book ID and check if it's a Nobel book
+    const extractBookId = (bookUrl: string): string | null => {
+      // Handle URLs like "/books/94FoN1xy0lUZ5Cd"
+      const booksMatch = bookUrl.match(/\/books\/([^\/\?]+)/);
+      if (booksMatch) return booksMatch[1];
+
+      // Handle URLs like "/api/book?url=https%3A%2F%2Fwww.nobelyayin.com%2FEkitaplar%2F9786057895554.epub"
+      const apiMatch = bookUrl.match(/\/api\/book\?url=.*%2F(\d+)\.epub/);
+      if (apiMatch) return apiMatch[1];
+
+      // Try to extract from any embedded Nobel URL
+      const nobelMatch = bookUrl.match(/nobelyayin\.com.*?(\d{13})\.epub/);
+      if (nobelMatch) return nobelMatch[1];
+
+      return null;
+    };
+    const bookId = extractBookId(url);
+    let nobelClient: NobelApiClient | null = null;
+
+    console.log("useEpubReader: Extracted book ID:", bookId, "from URL:", url);
+
+    if (bookId && checkIsNobelBook(bookId)) {
+      console.log("useEpubReader: Detected Nobel book with ID:", bookId);
+      setIsNobelBook(true);
+      nobelClient = new NobelApiClient(bookId);
+      setNobelApiClient(nobelClient);
+
+      // Fetch Nobel data in background
+      nobelClient
+        .fetchAllBookData()
+        .then((data) => {
+          console.log("Nobel data structure:", data);
+          console.log("Available properties:", Object.keys(data));
+          // Integrate Nobel data with local state
+          if (data.highlights && data.highlights.length > 0) {
+            console.log("useEpubReader: Loading Nobel highlights:", data.highlights.length);
+            // Convert Nobel highlights to local format and store them
+            const nobelHighlights: Highlight[] = data.highlights.map((h) => ({
+              id: h.id,
+              cfi: h.cfi,
+              text: h.text,
+              color: h.color || "yellow",
+              type: "highlight" as HighlightType,
+              createdAt: h.createdAt || new Date().toISOString(),
+            }));
+
+            // Add to state without triggering API calls
+            setHighlights((prev) => [...prev, ...nobelHighlights]);
+
+            // Note: Visual rendering will happen when the book is ready and localStorage effect runs
+          }
+
+          if (data.notes && data.notes.length > 0) {
+            console.log("useEpubReader: Loading Nobel notes:", data.notes.length);
+            // Convert Nobel notes to local format
+            const nobelNotes: Note[] = data.notes.map((n) => ({
+              cfi: n.cfi,
+              text: n.text,
+              note: n.note,
+              createdAt: n.createdAt || new Date().toISOString(),
+            }));
+            setNotes((prev) => [...prev, ...nobelNotes]);
+          }
+
+          if (data.bookmarks && data.bookmarks.length > 0) {
+            console.log("useEpubReader: Loading Nobel bookmarks:", data.bookmarks.length);
+            // Convert Nobel bookmarks to local format
+            const nobelBookmarks: Bookmark[] = data.bookmarks.map((b) => ({
+              cfi: b.cfi,
+              label: b.label,
+              createdAt: b.createdAt || new Date().toISOString(),
+              chapter: null, // Will be updated later
+              page: null, // Will be updated later
+            }));
+            setBookmarks((prev) => [...prev, ...nobelBookmarks]);
+          }
+
+          // If there's a saved location, navigate to it
+          if (data.location && data.location.cfi) {
+            console.log("useEpubReader: Restoring Nobel location:", data.location.cfi);
+            setLocation(data.location.cfi);
+          }
+        })
+        .catch((error) => {
+          console.error("useEpubReader: Error fetching Nobel book data:", error);
+        });
+    } else {
+      setIsNobelBook(false);
+      setNobelApiClient(null);
+      setNobelData(null);
+    }
+
     try {
       const book = ePub(url);
       console.log("useEpubReader: Created ePub book object");
@@ -762,6 +916,7 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
           setCurrentPage(getPageFromCfi(book, savedLocation) || 1);
         }
         setIsLoading(false);
+        setIsBookReady(true); // Mark book as fully ready for user interactions
 
         // Extract images
         const images: BookImage[] = [];
@@ -911,17 +1066,51 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       }
 
       // Calculate progress percentage
+      let progressPercentage = 0;
       if (bookRef.current && bookRef.current.locations.length() > 0) {
-        const progressPercentage = Math.round(Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100));
+        progressPercentage = Math.round(Math.round(bookRef.current.locations.percentageFromCfi(cfi) * 100));
         setProgress(progressPercentage);
       }
+
+      // If it's a Nobel book, update location on server (with debouncing)
+      // Skip on initial load - only update during user navigation
+      // TEMPORARILY DISABLED - page navigation buttons not working
+      /*
+      if (isNobelBook && nobelApiClient && isBookReady) {
+        if (isInitialLocationRef.current) {
+          console.log("[NOBEL] Skipping location update - initial book load");
+          isInitialLocationRef.current = false;
+        } else {
+          // Clear previous timeout
+          if (locationUpdateTimeoutRef.current) {
+            clearTimeout(locationUpdateTimeoutRef.current);
+          }
+
+          // Set new timeout to debounce location updates
+          locationUpdateTimeoutRef.current = setTimeout(async () => {
+            try {
+              console.log("Updating Nobel location:", { cfi, progressPercentage });
+              await nobelApiClient.updateLocation(cfi, progressPercentage);
+              console.log("Location updated on Nobel API successfully");
+            } catch (error) {
+              console.error("Failed to update location on Nobel API:", error);
+              // Continue with local save even if Nobel API fails
+            }
+          }, 2000); // Wait 2 seconds before sending update
+        }
+      }
+      */
     };
 
     rendition.on("relocated", handleRelocated);
     return () => {
       rendition.off("relocated", handleRelocated);
+      // Clear any pending location update
+      if (locationUpdateTimeoutRef.current) {
+        clearTimeout(locationUpdateTimeoutRef.current);
+      }
     };
-  }, [STORAGE_KEY_LOC, currentPage]);
+  }, [STORAGE_KEY_LOC, currentPage, isNobelBook, nobelApiClient, isBookReady]);
 
   // Effect for handling text selection and clicks within the reader
   useEffect(() => {
@@ -1046,13 +1235,14 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     if (savedHighlights) {
       try {
         const parsed: Highlight[] = JSON.parse(savedHighlights);
-        parsed.forEach(({ cfi, text, color, createdAt }) => addHighlight({ cfi, text, color, createdAt }));
+        // Use restoreHighlight to avoid triggering API calls for existing highlights
+        parsed.forEach(({ cfi, text, color, type, createdAt }) => restoreHighlight({ cfi, text, color, type, createdAt }));
         setHighlights(parsed);
       } catch (err) {
         console.error("Failed to parse saved highlights", err);
       }
     }
-  }, [STORAGE_KEY_HIGHLIGHTS, addHighlight]);
+  }, [STORAGE_KEY_HIGHLIGHTS, restoreHighlight]);
 
   // Effect for loading saved bookmarks
   useEffect(() => {
@@ -1080,6 +1270,20 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
       setNotes(parsed);
     }
   }, [STORAGE_KEY_NOTES, renditionRef]);
+
+  // Example: Add a function that provides Nobel-specific book metadata
+  const getNobelBookInfo = useCallback(() => {
+    if (!isNobelBook || !nobelData) return null;
+
+    return {
+      hasNotes: nobelData.notes?.length > 0,
+      hasHighlights: nobelData.highlights?.length > 0,
+      hasBookmarks: nobelData.bookmarks?.length > 0,
+      lastLocation: nobelData.location?.cfi || null,
+      copyProtectionEnabled: nobelData.copyProtection?.maxCopyPercentage !== undefined,
+      // Any other Nobel-specific metadata that actually exists
+    };
+  }, [isNobelBook, nobelData]);
 
   return {
     toc,
@@ -1134,5 +1338,6 @@ export function useEpubReader({ url, isCopyProtected = false, copyAllowancePerce
     totalBookChars,
     copiedChars,
     resize,
+    getNobelBookInfo,
   };
 }
