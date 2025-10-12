@@ -65,6 +65,7 @@ Commit messages must follow the format: `type(scope): description`.
 *   **Highlights API:** GET for getting highlights, POST for adding highlights, PUT for updating highlights, and DELETE for deleting highlights.
 *   **Bookmarks API:** GET for getting bookmarks, POST for adding bookmarks, and DELETE for deleting bookmarks.
 *   **Notes API:** GET for getting notes, POST for adding notes, PUT for updating notes, and DELETE for deleting notes.
+*   **Copy Protection API:** GET for getting copy protection info, and PUT for updating copy protection info.
 
 ## User Preferences
 
