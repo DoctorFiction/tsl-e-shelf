@@ -762,8 +762,9 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
       setCurrentChapterTitle(chapter);
 
       if (book.locations.length() > 0) {
-        const progressPercentage = Math.round(book.locations.percentageFromCfi(cfi) * 100);
-        setProgress(progressPercentage);
+        const rawProgress = book.locations.percentageFromCfi(cfi);
+        const progressForUI = Math.round(rawProgress * 100);
+        setProgress(progressForUI);
 
         if (locationUpdateTimeoutRef.current) {
           clearTimeout(locationUpdateTimeoutRef.current);
@@ -771,7 +772,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
         locationUpdateTimeoutRef.current = setTimeout(async () => {
           try {
-            await dataSource.updateLocation(cfi, progressPercentage);
+            await dataSource.updateLocation(cfi, rawProgress);
           } catch (error) {
             console.error("Failed to update location:", error);
           }

@@ -77,7 +77,10 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
 
   async removeHighlight(cfi: string): Promise<void> {
     const highlights = await this.getHighlights();
-    this.set(this.STORAGE_KEY_HIGHLIGHTS, highlights.filter((h) => h.cfi !== cfi));
+    this.set(
+      this.STORAGE_KEY_HIGHLIGHTS,
+      highlights.filter((h) => h.cfi !== cfi),
+    );
   }
 
   async updateHighlightColor(cfi: string, newColor: string): Promise<void> {
@@ -99,7 +102,10 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
 
   async removeBookmark(cfi: string): Promise<void> {
     const bookmarks = await this.getBookmarks();
-    this.set(this.STORAGE_KEY_BOOKMARK, bookmarks.filter((b) => b.cfi !== cfi));
+    this.set(
+      this.STORAGE_KEY_BOOKMARK,
+      bookmarks.filter((b) => b.cfi !== cfi),
+    );
   }
 
   async getNotes(): Promise<Note[]> {
@@ -115,7 +121,10 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
 
   async removeNote(cfi: string): Promise<void> {
     const notes = await this.getNotes();
-    this.set(this.STORAGE_KEY_NOTES, notes.filter((n) => n.cfi !== cfi));
+    this.set(
+      this.STORAGE_KEY_NOTES,
+      notes.filter((n) => n.cfi !== cfi),
+    );
   }
 
   async updateNote(cfi: string, newNoteText: string): Promise<void> {
@@ -128,6 +137,7 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
     return this.get<string>(this.STORAGE_KEY_LOC);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async updateLocation(location: string, progress: number): Promise<void> {
     this.set(this.STORAGE_KEY_LOC, location);
   }
@@ -184,7 +194,7 @@ export class NobelApiDataSource implements EpubReaderDataSource {
               ...h,
               type: "highlight",
               createdAt: h.createdAt || new Date().toISOString(),
-            }) as Highlight
+            }) as Highlight,
         ) || [];
       const merged = await this.mergeData(localHighlights, apiHighlights);
       this.local.set(this.local.STORAGE_KEY_HIGHLIGHTS, merged);
@@ -245,7 +255,7 @@ export class NobelApiDataSource implements EpubReaderDataSource {
               createdAt: b.createdAt || new Date().toISOString(),
               chapter: null,
               page: null,
-            }) as Bookmark
+            }) as Bookmark,
         ) || [];
       const merged = await this.mergeData(localBookmarks, apiBookmarks);
       this.local.set(this.local.STORAGE_KEY_BOOKMARK, merged);
@@ -289,7 +299,7 @@ export class NobelApiDataSource implements EpubReaderDataSource {
             ({
               ...n,
               createdAt: n.createdAt || new Date().toISOString(),
-            }) as Note
+            }) as Note,
         ) || [];
       const merged = await this.mergeData(localNotes, apiNotes);
       this.local.set(this.local.STORAGE_KEY_NOTES, merged);
@@ -341,14 +351,23 @@ export class NobelApiDataSource implements EpubReaderDataSource {
     try {
       const apiData = await this.getNobelBookData();
       const apiLocation = apiData?.location?.cfi;
-      // API location is preferred
-      if (apiLocation) {
-        await this.local.updateLocation(apiLocation, 0); // progress is not available here
+
+      // Validate that the location from the API is a valid-looking CFI string
+      const isValidCfi = typeof apiLocation === "string" && apiLocation.startsWith("epubcfi");
+
+      if (apiLocation && isValidCfi) {
+        // If the API gives a good location, use it and update the local cache
+        await this.local.updateLocation(apiLocation, 0);
         return apiLocation;
+      } else if (!isValidCfi && apiLocation) {
+        // If the API gives a bad location, log it but don't use it
+        console.warn(`[DataSource] Ignoring invalid location from API: ${apiLocation}`);
       }
     } catch (e) {
       console.warn("Nobel API fetch for location failed, using local data.", e);
     }
+
+    // Fallback to the locally stored location
     return localLocation;
   }
 
