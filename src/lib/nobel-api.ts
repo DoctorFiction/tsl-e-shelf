@@ -12,42 +12,7 @@ export interface NobelHighlight {
   text: string;
   color?: string;
   createdAt?: string;
-}
-
-export interface NobelBookmark {
-  id?: string;
-  cfi: string;
-  label?: string;
-  createdAt?: string;
-}
-
-export interface NobelLocation {
-  cfi: string;
-  progress?: number;
-  updatedAt?: string;
-}
-
-export interface NobelCopyProtection {
-  maxCopyPercentage: number;
-  currentCopyPercentage: number;
-  remainingCopyPercentage: number;
-}
-
-// Nobel API type definitions
-export interface NobelNote {
-  id?: string;
-  cfi: string;
-  text: string;
-  note: string;
-  createdAt?: string;
-}
-
-export interface NobelHighlight {
-  id?: string;
-  cfi: string;
-  text: string;
-  color?: string;
-  createdAt?: string;
+  type?: string;
 }
 
 export interface NobelBookmark {
@@ -66,6 +31,7 @@ export interface NobelLocation {
 export interface NobelCopyProtection {
   allowedPercentage: number;
   copiedPercentage: number;
+  copiedCharacters?: number;
   isEnabled: boolean;
 }
 
@@ -339,6 +305,11 @@ export class NobelApiClient {
 
 // Helper function to determine if a book ID is a Nobel book
 export function isNobelBook(bookId: string): boolean {
+  // Check if the bookId is in our mapping
+  if (BOOK_ID_MAPPING[bookId]) {
+    return true;
+  }
+
   // Nobel book IDs can be:
   // 1. Alphanumeric strings like "94FoN1xy0lUZ5Cd" (10+ characters)
   // 2. ISBN format like "9786057895554" (13 digits)

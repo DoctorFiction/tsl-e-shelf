@@ -1,6 +1,6 @@
 "use client";
 import { useEpubReader } from "@/hooks/use-epub-reader";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { useAtom } from "jotai";
 import { readerOverridesAtom } from "@/atoms/reader-preferences";
@@ -10,11 +10,13 @@ import { BookProgressDisplay } from "./book-progress-display";
 import { ImagePreview } from "./image-preview";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MainDrawer } from "./main-drawer";
-
 import { AddEditNoteDialog } from "./add-edit-note-dialog";
+import { LocalStorageDataSource, NobelApiDataSource } from "@/lib/reader-data-source";
+import { isNobelBook as checkIsNobelBook } from "@/lib/nobel-api";
 
 interface EpubReaderProps {
   url: string;
+  bookId: string;
 }
 
 const getMarginClass = (marginValue?: "small" | "full") => {
@@ -27,7 +29,15 @@ const getMarginClass = (marginValue?: "small" | "full") => {
   }
 };
 
-export default function EpubReader({ url }: EpubReaderProps) {
+export default function EpubReader({ url, bookId }: EpubReaderProps) {
+  const dataSource = useMemo(() => {
+    const isNobel = checkIsNobelBook(bookId);
+    if (isNobel) {
+      return new NobelApiDataSource(bookId, url);
+    }
+    return new LocalStorageDataSource(url);
+  }, [bookId, url]);
+
   const {
     viewerRef,
     goNext,
@@ -77,7 +87,7 @@ export default function EpubReader({ url }: EpubReaderProps) {
     getPreviewText,
     copyText,
     resize,
-  } = useEpubReader({ url, isCopyProtected: true });
+  } = useEpubReader({ url, dataSource, isCopyProtected: true });
 
   // TODO: Handle book title, page number, and chapter display on mobile devices
   // TODO: Implement mobile-specific onclick event on the reader: Show the drawer popout button when the user taps the reader; otherwise, hide it.
