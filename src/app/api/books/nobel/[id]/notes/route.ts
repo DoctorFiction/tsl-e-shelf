@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const loginData = {
@@ -31,7 +31,7 @@ export async function GET(
       throw new Error("No token received from login");
     }
 
-    const { id } = params;
+    const { id } = await context.params;
 
     const notesResponse = await fetch(
       `https://api.nobelyayin.com/books/${id}/notes`,
@@ -62,8 +62,8 @@ export async function GET(
 }
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const loginData = {
@@ -92,7 +92,7 @@ export async function POST(
       throw new Error("No token received from login");
     }
 
-    const { id } = params;
+    const { id } = await context.params;
     const { cfi, text, note } = await request.json();
 
     const addNoteResponse = await fetch(
