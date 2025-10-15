@@ -1,3 +1,4 @@
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 export interface NobelNote {
   id?: string;
   cfi: string;
@@ -298,6 +299,40 @@ export class NobelApiClient {
       }
     } catch (error) {
       console.error("Error deleting bookmark:", error);
+      throw error;
+    }
+  }
+
+  // Fetch reader preferences
+  async fetchReaderPreferences(): Promise<IReaderPreferenceConfig | null> {
+    try {
+      const response = await fetch(`/api/user/preferences/reader-styles`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reader preferences: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching reader preferences:", error);
+      return null;
+    }
+  }
+
+  // Update reader preferences
+  async updateReaderPreferences(preferences: IReaderPreferenceConfig): Promise<void> {
+    try {
+      const response = await fetch(`/api/user/preferences/reader-styles`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(preferences),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update reader preferences: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error updating reader preferences:", error);
       throw error;
     }
   }

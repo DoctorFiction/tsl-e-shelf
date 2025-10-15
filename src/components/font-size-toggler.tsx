@@ -3,7 +3,7 @@
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { readerPreferencesAtom } from "@/atoms/reader-preferences";
 
 const FONT_SIZE_MIN = 12;
 const FONT_SIZE_MAX = 38;
@@ -15,29 +15,29 @@ export function FontSizeToggler({
 }: {
   onChange?: (value: number) => void;
 }) {
-  const [overrides, setOverrides] = useAtom(readerOverridesAtom);
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
   const initialValue =
-    typeof overrides.fontSize === "number" ? overrides.fontSize : 20;
+    typeof readerPreferences.fontSize === "number" ? readerPreferences.fontSize : 20;
   const [fontSize, setFontSize] = useState(initialValue);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     setFontSize(
-      typeof overrides.fontSize === "number"
-        ? overrides.fontSize
+      typeof readerPreferences.fontSize === "number"
+        ? readerPreferences.fontSize
         : FONT_SIZE_MIN,
     );
-  }, [overrides.fontSize]);
+  }, [readerPreferences.fontSize]);
 
   useEffect(() => {
     if (!touched) return;
 
     onChange?.(fontSize);
-    setOverrides((prev) => ({
+    setReaderPreferences((prev) => ({
       ...prev,
       fontSize,
     }));
-  }, [fontSize, touched, setOverrides, onChange]);
+  }, [fontSize, touched, setReaderPreferences, onChange]);
 
   const increase = () => {
     setTouched(true);

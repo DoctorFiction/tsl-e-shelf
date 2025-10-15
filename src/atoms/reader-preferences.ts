@@ -1,4 +1,3 @@
-import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { CSSProperties } from "react";
 
@@ -18,16 +17,8 @@ export interface IReaderPreferenceConfig {
   textAlign?: CSSProperties["textAlign"];
   backgroundColor: { light: string; dark: string };
   textColor: { light: string; dark: string };
-}
-
-export interface IReaderOverrides {
-  fontSize?: CSSProperties["fontSize"];
-  fontFamily?: CSSProperties["fontFamily"];
-  lineHeight?: CSSProperties["lineHeight"];
   wordSpacing?: CSSProperties["wordSpacing"];
-  
   columnCount?: CSSProperties["columnCount"];
-  textAlign?: CSSProperties["textAlign"];
   isBold?: boolean;
   characterSpacing?: number;
   margin?: "small" | "full";
@@ -48,6 +39,11 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#000000",
       dark: "#ffffff",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
   Quiet: {
     fontSize: 17,
@@ -63,6 +59,11 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#A5A5Ad",
       dark: "#828288",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
   Paper: {
     fontSize: 17,
@@ -78,6 +79,11 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#1D1A1A",
       dark: "#F0F0EE",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
   Bold: {
     fontSize: 17,
@@ -93,6 +99,11 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#1A1A1C",
       dark: "#EDECf0",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
   Calm: {
     fontSize: 17,
@@ -108,6 +119,11 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#342C24",
       dark: "#F7E9D7",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
   Focus: {
     fontSize: 17,
@@ -123,21 +139,15 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#141303",
       dark: "#FFF8E9",
     },
+    wordSpacing: "1",
+    columnCount: 2,
+    isBold: false,
+    characterSpacing: 1,
+    margin: "full",
   },
 };
 
 export const defaultThemeName: ReaderThemeName = "Original";
-
-export const defaultOverrides: IReaderOverrides = {
-  lineHeight: 1.2,
-  fontSize: 17,
-  characterSpacing: 1,
-  wordSpacing: "1",
-  isBold: false,
-  columnCount: 2,
-  textAlign: "justify",
-  margin: "full",
-};
 
 export const readerThemeNameAtom = atomWithStorage<ReaderThemeName>(
   "reader-theme-name",
@@ -148,10 +158,3 @@ export const readerPreferencesAtom = atomWithStorage<IReaderPreferenceConfig>(
   "reader-preferences",
   THEME_PRESETS[defaultThemeName],
 );
-
-export const readerOverridesAtom = atomWithStorage<IReaderOverrides>(
-  "reader-overrides",
-  defaultOverrides,
-);
-
-export const pendingReaderOverridesAtom = atom<IReaderOverrides>({});

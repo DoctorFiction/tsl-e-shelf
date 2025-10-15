@@ -1,8 +1,8 @@
-import { IReaderOverrides, IReaderPreferenceConfig } from "@/atoms/reader-preferences";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 
 export const getReaderTheme = (
   isDark: boolean, // no longer needed since we use theme config
-  preferences: IReaderPreferenceConfig & IReaderOverrides,
+  preferences: IReaderPreferenceConfig,
 ) => {
   const {
     backgroundColor,
@@ -18,10 +18,12 @@ export const getReaderTheme = (
     columnCount,
   } = preferences;
 
+  const defaultColors = { light: "#ffffff", dark: "#000000" }; // Fallback colors
+
   return {
     body: {
-      background: isDark ? backgroundColor.dark : backgroundColor.light,
-      color: isDark ? textColor?.dark : textColor.light,
+      background: isDark ? (backgroundColor?.dark || defaultColors.dark) : (backgroundColor?.light || defaultColors.light),
+      color: isDark ? (textColor?.dark || defaultColors.dark) : (textColor?.light || defaultColors.light),
       "font-family": fontFamily,
       "font-size": `${Number(fontSize) || 16}px`, // Ensure number conversion
       "line-height": Number(lineHeight) || 1.5, // Ensure number conversion

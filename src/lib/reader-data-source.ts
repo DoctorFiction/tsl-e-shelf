@@ -1,4 +1,5 @@
 import { Highlight, Bookmark, Note } from "@/hooks/use-epub-reader";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 import { NobelApiClient, NobelBookData } from "./nobel-api";
 
 export interface EpubReaderDataSource {
@@ -26,6 +27,9 @@ export interface EpubReaderDataSource {
 
   // This is for Nobel-specific data that doesn't fit the generic model
   getNobelBookData?: () => Promise<NobelBookData | null>;
+
+  getReaderPreferences: () => Promise<IReaderPreferenceConfig | null>;
+  updateReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export class LocalStorageDataSource implements EpubReaderDataSource {
@@ -36,6 +40,7 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
   public readonly STORAGE_KEY_LOC: string;
   public readonly STORAGE_KEY_TOTAL_CHARS: string;
   public readonly STORAGE_KEY_COPIED_CHARS: string;
+  public readonly STORAGE_KEY_PREFERENCES: string;
 
   constructor(url: string) {
     this.url = url;
@@ -45,6 +50,7 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
     this.STORAGE_KEY_LOC = `epub-location-${url}`;
     this.STORAGE_KEY_TOTAL_CHARS = `epub-total-chars-${url}`;
     this.STORAGE_KEY_COPIED_CHARS = `epub-copied-chars-${url}`;
+    this.STORAGE_KEY_PREFERENCES = `epub-reader-preferences-${url}`;
   }
 
   private get<T>(key: string): T | null {
@@ -156,6 +162,14 @@ export class LocalStorageDataSource implements EpubReaderDataSource {
 
   async updateCopiedChars(chars: number): Promise<void> {
     this.set(this.STORAGE_KEY_COPIED_CHARS, chars);
+  }
+
+  async getReaderPreferences(): Promise<IReaderPreferenceConfig | null> {
+    return this.get<IReaderPreferenceConfig>(this.STORAGE_KEY_PREFERENCES);
+  }
+
+  async updateReaderPreferences(preferences: IReaderPreferenceConfig): Promise<void> {
+    this.set(this.STORAGE_KEY_PREFERENCES, preferences);
   }
 }
 
@@ -409,6 +423,29 @@ export class NobelApiDataSource implements EpubReaderDataSource {
       // await this.apiClient.updateCopyProtectionInfo({ copiedCharacters: chars });
     } catch (e) {
       console.error("Failed to update copied chars to Nobel API, saved locally.", e);
+    }
+  }
+
+  async getReaderPreferences(): Promise<IReaderPreferenceConfig | null> {
+    const localPreferences = await this.local.getReaderPreferences();
+    try {
+      const apiPreferences = await this.apiClient.fetchReaderPreferences();
+      if (apiPreferences) {
+        await this.local.updateReaderPreferences(apiPreferences);
+        return apiPreferences;
+      }
+    } catch (e) {
+      console.warn("Nobel API fetch for reader preferences failed, using local data.", e);
+    }
+    return localPreferences;
+  }
+
+  async updateReaderPreferences(preferences: IReaderPreferenceConfig): Promise<void> {
+    await this.local.updateReaderPreferences(preferences);
+    try {
+      await this.apiClient.updateReaderPreferences(preferences);
+    } catch (e) {
+      console.error("Failed to update reader preferences to Nobel API, saved locally.", e);
     }
   }
 }

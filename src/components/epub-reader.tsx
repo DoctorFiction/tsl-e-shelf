@@ -3,7 +3,8 @@ import { useEpubReader } from "@/hooks/use-epub-reader";
 import { useEffect, useMemo, useState } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { useAtom } from "jotai";
-import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { readerPreferencesAtom } from "@/atoms/reader-preferences";
+
 import { BookLoading } from "./book-loading";
 import { Progress } from "./ui/progress";
 import { BookProgressDisplay } from "./book-progress-display";
@@ -120,8 +121,8 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
     };
   }, [goPrev, goNext]);
 
-  const [overrides] = useAtom(readerOverridesAtom);
-  const marginClass = getMarginClass(overrides.margin);
+  const [readerPreferences] = useAtom(readerPreferencesAtom);
+  const marginClass = getMarginClass(readerPreferences.margin);
 
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
   const [controlsVisible, setControlsVisible] = useState(true);

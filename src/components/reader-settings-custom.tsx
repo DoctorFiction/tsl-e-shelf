@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Asterisk, Cog, Type } from "lucide-react";
 import { useAtom } from "jotai";
 import { Slider } from "@/components/ui/slider";
-import { defaultOverrides, IReaderOverrides, pendingReaderOverridesAtom, readerOverridesAtom, readerPreferencesAtom } from "@/atoms/reader-preferences";
+import { IReaderPreferenceConfig, readerPreferencesAtom, THEME_PRESETS, defaultThemeName } from "@/atoms/reader-preferences";
 import { useState, useEffect, CSSProperties, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Button } from "./ui/button";
@@ -83,8 +83,8 @@ interface ReaderSettingsCustomProps {
 }
 
 const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
-  const atomValue = Number(pendingOverrides[field]) || min;
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
+  const atomValue = Number(readerPreferences[field]) || min;
   const [tempValue, setTempValue] = useState<number>(atomValue);
 
   // Sync local state when atom changes externally (e.g., cancel/reset)
@@ -97,7 +97,7 @@ const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: Re
   };
 
   const handleValueCommit = (value: number[]) => {
-    setPendingOverrides((prev) => ({
+    setReaderPreferences((prev) => ({
       ...prev,
       [field]: value[0],
     }));
@@ -115,11 +115,11 @@ const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: Re
 };
 
 export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçenek seçin", icon, disabled }: ReaderStyleSelectProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
-  const currentValue = pendingOverrides[field]?.toString() as string;
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
+  const currentValue = readerPreferences[field]?.toString() as string;
 
   const handleValueChange = (value: string) => {
-    setPendingOverrides((prev) => ({
+    setReaderPreferences((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -149,11 +149,11 @@ export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçen
 };
 
 export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwitchProps) => {
-  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
-  const currentValue = (pendingOverrides[field] as boolean) ?? false;
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
+  const currentValue = (readerPreferences[field] as boolean) ?? false;
 
   const handleCheckedChange = (checked: boolean) => {
-    setPendingOverrides((prev) => ({
+    setReaderPreferences((prev) => ({
       ...prev,
       [field]: checked,
     }));
@@ -210,91 +210,64 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
   const [open, setOpen] = useState(false);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
-  const [prefs] = useAtom(readerPreferencesAtom);
-  const [overrides, setOverrides] = useAtom(readerOverridesAtom);
-  const [pendingOverrides, setPendingOverrides] = useAtom(pendingReaderOverridesAtom);
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
 
-  const isSmallMargin = pendingOverrides.margin === 'small';
+  const isSmallMargin = readerPreferences.margin === 'small';
 
   useEffect(() => {
     if (isSmallMargin) {
-      setPendingOverrides((prev) => ({
+      setReaderPreferences((prev) => ({
         ...prev,
         columnCount: '1',
       }));
     }
-  }, [isSmallMargin, setPendingOverrides]);
-
-  const handleSave = () => {
-    setOverrides(pendingOverrides);
-    setOpen(false);
-  };
-
-  const handleCancel = () => {
-    setPendingOverrides(overrides);
-    setOpen(false);
-  };
+  }, [isSmallMargin, setReaderPreferences]);
 
   const handleReset = () => {
-    setPendingOverrides(defaultOverrides);
-    setOverrides(defaultOverrides);
+    setReaderPreferences(THEME_PRESETS[defaultThemeName]);
     setResetDialogOpen(false);
     setOpen(false);
   };
 
-  useEffect(() => {
-    const initial: IReaderOverrides = {
-      fontFamily: prefs.fontFamily,
-      fontSize: prefs.fontSize,
-      lineHeight: prefs.lineHeight,
-      textAlign: prefs.textAlign,
-    };
-
-    setPendingOverrides((prev) => ({
-      ...initial,
-      ...defaultOverrides,
-      ...prev, // preserve any open changes
-    }));
-  }, [overrides, prefs, setPendingOverrides, open]);
+  
 
   const previewStyle = useMemo<CSSProperties>(() => {
+    const defaultColors = { light: "#ffffff", dark: "#000000" }; // Fallback colors
+    const bgColor = readerPreferences.backgroundColor || defaultColors;
+    const txtColor = readerPreferences.textColor || defaultColors;
+
     return {
-      backgroundColor: isDark ? prefs.backgroundColor.dark : prefs.backgroundColor.light,
-      color: isDark ? prefs.textColor.dark : prefs.textColor.light,
-      fontSize: pendingOverrides.fontSize,
-      fontFamily: pendingOverrides.fontFamily,
-      lineHeight: pendingOverrides.lineHeight,
-      fontWeight: pendingOverrides.isBold ? "bold" : "normal",
-      letterSpacing: `${pendingOverrides.characterSpacing}px`,
-      wordSpacing: `${pendingOverrides.wordSpacing}px`,
-      textAlign: pendingOverrides.textAlign,
-      columnCount: Number(pendingOverrides.columnCount) || 1,
+      backgroundColor: isDark ? bgColor.dark : bgColor.light,
+      color: isDark ? txtColor.dark : txtColor.light,
+      fontSize: readerPreferences.fontSize,
+      fontFamily: readerPreferences.fontFamily,
+      lineHeight: readerPreferences.lineHeight,
+      fontWeight: readerPreferences.isBold ? "bold" : "normal",
+      letterSpacing: `${readerPreferences.characterSpacing}px`,
+      wordSpacing: `${readerPreferences.wordSpacing}px`,
+      textAlign: readerPreferences.textAlign,
+      columnCount: Number(readerPreferences.columnCount) || 1,
       
     };
-  }, [pendingOverrides, prefs.backgroundColor, prefs.textColor, isDark]);
+  }, [readerPreferences, isDark]);
 
   const isCustomized = useMemo(() => {
-    return Object.entries(defaultOverrides).some(([key, val]) => {
-      return overrides[key as keyof typeof overrides] !== val;
+    const defaultPrefs = THEME_PRESETS[defaultThemeName];
+    return Object.entries(defaultPrefs).some(([key, val]) => {
+      // Only compare fields that are part of IReaderPreferenceConfig
+      if (key in readerPreferences) {
+        return readerPreferences[key as keyof IReaderPreferenceConfig] !== val;
+      }
+      return false;
     });
-  }, [overrides]);
+  }, [readerPreferences]);
 
-  const hasChanges = useMemo(() => {
-    const mergedCurrent: IReaderOverrides = {
-      ...prefs,
-      ...overrides,
-    };
-
-    return Object.entries(pendingOverrides).some(([key, val]) => {
-      return mergedCurrent[key as keyof IReaderOverrides] !== val;
-    });
-  }, [pendingOverrides, prefs, overrides]);
+  
 
   return (
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) handleCancel();
         setOpen(isOpen);
       }}
     >
@@ -316,7 +289,7 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
           </DialogTitle>
         </DialogHeader>
         <ReaderPreview getPreviewText={getPreviewText} previewStyle={previewStyle} />
-        <div key={JSON.stringify(pendingOverrides)} className="flex flex-col gap-4">
+        <div key={JSON.stringify(readerPreferences)} className="flex flex-col gap-4">
           <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
           <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
           <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
@@ -349,10 +322,7 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
 
           {/* Cancel + Save Buttons */}
           <div className="flex gap-2">
-            <Button variant="ghost" onClick={handleCancel}>
-              İptal
-            </Button>
-            <Button onClick={handleSave} disabled={!hasChanges}>
+            <Button onClick={() => setOpen(false)}>
               Kaydet
             </Button>
           </div>

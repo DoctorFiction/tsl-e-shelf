@@ -1,6 +1,6 @@
 import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
-import { readerOverridesAtom } from "@/atoms/reader-preferences";
+import { readerPreferencesAtom } from "@/atoms/reader-preferences";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
 import { getReaderTheme } from "@/lib/get-reader-theme";
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
@@ -232,7 +232,8 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
   const isDark = theme === "dark";
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
-  const [overrides] = useAtom(readerOverridesAtom);
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
+  const debouncedReaderPreferences = useDebounce(readerPreferences, 1000);
 
   const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
@@ -586,6 +587,12 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
   }, [debouncedSearchQuery, searchBook]);
 
   useEffect(() => {
+    if (debouncedReaderPreferences) {
+      dataSource.updateReaderPreferences(debouncedReaderPreferences);
+    }
+  }, [dataSource, debouncedReaderPreferences]);
+
+  useEffect(() => {
     if (!renditionRef.current) return;
 
     for (const cfi of previousSearchHighlights.current) {
@@ -732,17 +739,14 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     const rendition = renditionRef.current;
     if (!rendition) return;
 
-    const themeObject = getReaderTheme(isDark, {
-      ...computedStyles,
-      ...overrides,
-    });
+    const themeObject = getReaderTheme(isDark, computedStyles);
 
     if (rendition?.themes) {
       rendition.themes.register("custom-theme", themeObject);
       rendition.themes.default({ override: true });
       rendition.themes.select("custom-theme");
     }
-  }, [isDark, computedStyles, renditionRef, overrides]);
+  }, [isDark, computedStyles, renditionRef]);
 
   useEffect(() => {
     const rendition = renditionRef.current;
@@ -894,6 +898,14 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
       }
     });
   }, [dataSource, renditionRef, setNotes]);
+
+  useEffect(() => {
+    dataSource.getReaderPreferences().then((savedPreferences) => {
+      if (savedPreferences) {
+        setReaderPreferences(savedPreferences);
+      }
+    });
+  }, [dataSource, setReaderPreferences]);
 
   return {
     toc,
