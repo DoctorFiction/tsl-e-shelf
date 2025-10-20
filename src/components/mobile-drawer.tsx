@@ -4,6 +4,7 @@ import { ChevronUp, Settings } from "lucide-react";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 import { MainControlGroup } from "./main-control-group";
 import { SelectionActionsBar } from "./selection-actions-bar";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 
 interface MobileDrawerProps {
   isMobileDrawerOpen: boolean;

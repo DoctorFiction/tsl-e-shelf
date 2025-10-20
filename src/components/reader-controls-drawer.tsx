@@ -4,6 +4,7 @@ import { AddEditNoteDialog } from "./add-edit-note-dialog";
 import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
 import { DesktopDrawer } from "./desktop-drawer";
 import { MobileDrawer } from "./mobile-drawer";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 
 // TODO (2025-07-22): Refactor to make it readable and maintainable, create internal reusable components for repeated sections.
 // TODO: Refactor: Position button on bottom right, change popover content to a list layout (mobile-specific, similar to Apple Books mobile app).

@@ -9,6 +9,7 @@ import { ReaderBookInfo } from "./ui/reader-book-info";
 import { ReaderSettings } from "./reader-settings";
 import { SearchPopover } from "./search-popover";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 
 interface MainControlGroupProps {
   variant: "desktop" | "mobile";

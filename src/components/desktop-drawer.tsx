@@ -5,6 +5,7 @@ import { HighlightOptionsBar } from "./highlight-options-bar";
 import { MainControlGroup } from "./main-control-group";
 import { ModeToggle } from "./mode-toggle";
 import { SelectionActionsBar } from "./selection-actions-bar";
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 
 interface DesktopDrawerProps {
   isPinned: boolean;

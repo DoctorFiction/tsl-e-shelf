@@ -1,7 +1,6 @@
 import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
-import { readerPreferencesAtom } from "@/atoms/reader-preferences";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
 import { getReaderTheme } from "@/lib/get-reader-theme";
 import ePub, { Book, Contents, Location, NavItem, Rendition } from "epubjs";
@@ -234,8 +233,6 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
   const isDark = theme === "dark";
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
-  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
-  const [initialPreferencesLoaded, setInitialPreferencesLoaded] = useState(false);
 
   const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
@@ -900,13 +897,8 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
   }, [dataSource, renditionRef, setNotes]);
 
   useEffect(() => {
-    dataSource.getReaderPreferences().then((savedPreferences) => {
-      if (savedPreferences) {
-        setReaderPreferences(savedPreferences);
-      }
-      setInitialPreferencesLoaded(true);
-    });
-  }, [dataSource, setReaderPreferences]);
+    
+  }, [dataSource]);
 
   return {
     toc,

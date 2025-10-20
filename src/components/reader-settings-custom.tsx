@@ -247,7 +247,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
     });
   }, [readerPreferences]);
 
-  const handleLocalChange = (field: keyof IReaderPreferenceConfig, value: any) => {
+  const handleLocalChange = (field: keyof IReaderPreferenceConfig, value: string | number | boolean) => {
     const processedValue = (field === "fontSize" || field === "lineHeight" || field === "characterSpacing" || field === "wordSpacing")
       ? Number(value)
       : value;
@@ -346,7 +346,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 options={fontOptions}
                 placeholder="Seçenek seçin"
                 icon={<Type className="h-4 w-4" />}
-                value={localPreferences.fontFamily}
+                value={localPreferences.fontFamily ?? "system"}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSlider
@@ -356,7 +356,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 max={2.5}
                 step={0.05}
                 formatValue={(val) => val.toFixed(2)}
-                value={localPreferences.lineHeight}
+                value={localPreferences.lineHeight ?? 1.2}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSlider
@@ -366,7 +366,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 max={5}
                 step={0.5}
                 formatValue={(val) => `${val.toFixed(1)}px`}
-                value={localPreferences.characterSpacing}
+                value={localPreferences.characterSpacing ?? 1}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSlider
@@ -376,7 +376,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 max={10}
                 step={0.5}
                 formatValue={(val) => `${val.toFixed(1)}px`}
-                value={localPreferences.wordSpacing}
+                value={localPreferences.wordSpacing ?? 1}
                 onChange={handleLocalChange}
               />
 
@@ -387,7 +387,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 placeholder="Sütun seçin"
                 icon={<Type className="h-4 w-4" />}
                 disabled={isSmallMargin}
-                value={localPreferences.columnCount}
+                value={(localPreferences.columnCount ?? "1").toString()}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSelect
@@ -396,7 +396,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 options={marginOptions}
                 placeholder="Kenar boşluğu seçin"
                 icon={<Type className="h-4 w-4" />}
-                value={localPreferences.margin}
+                value={localPreferences.margin ?? "full"}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSelect
@@ -405,14 +405,14 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
                 options={textAlignOptions}
                 placeholder="Hizalama seçin"
                 icon={<Type className="h-4 w-4" />}
-                value={localPreferences.textAlign}
+                value={localPreferences.textAlign ?? "justify"}
                 onChange={handleLocalChange}
               />
               <ReaderStyleSwitch
                 label="Kalın Metin"
                 field="isBold"
                 description="Daha iyi okunabilirlik için metni kalınlaştırın"
-                value={localPreferences.isBold}
+                value={localPreferences.isBold ?? false}
                 onChange={handleLocalChange}
               />
             </div>
