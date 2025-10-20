@@ -212,13 +212,13 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
 
   const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
 
-  const isSmallMargin = readerPreferences.margin === 'small';
+  const isSmallMargin = readerPreferences.margin === "small";
 
   useEffect(() => {
     if (isSmallMargin) {
       setReaderPreferences((prev) => ({
         ...prev,
-        columnCount: '1',
+        columnCount: "1",
       }));
     }
   }, [isSmallMargin, setReaderPreferences]);
@@ -228,8 +228,6 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
     setResetDialogOpen(false);
     setOpen(false);
   };
-
-  
 
   const previewStyle = useMemo<CSSProperties>(() => {
     const defaultColors = { light: "#ffffff", dark: "#000000" }; // Fallback colors
@@ -247,7 +245,6 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
       wordSpacing: `${readerPreferences.wordSpacing}px`,
       textAlign: readerPreferences.textAlign,
       columnCount: Number(readerPreferences.columnCount) || 1,
-      
     };
   }, [readerPreferences, isDark]);
 
@@ -261,8 +258,6 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
       return false;
     });
   }, [readerPreferences]);
-
-  
 
   return (
     <Dialog
@@ -280,27 +275,33 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
           {isCustomized ? <Asterisk className="flex-none" /> : ""}
         </div>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>
             <div className="flex flex-row gap-2">
               <p>Daha fazla özelleştirme</p>
             </div>
           </DialogTitle>
         </DialogHeader>
-        <ReaderPreview getPreviewText={getPreviewText} previewStyle={previewStyle} />
-        <div key={JSON.stringify(readerPreferences)} className="flex flex-col gap-4">
-          <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
-          <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
-          <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
-          
-          <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} disabled={isSmallMargin} />
-          <ReaderStyleSelect label="Kenar Boşluğu" field="margin" options={marginOptions} placeholder="Kenar boşluğu seçin" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
-          <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
+
+        <div className="flex-1 overflow-y-auto pr-2">
+          <div className="flex flex-col gap-4">
+            <ReaderPreview getPreviewText={getPreviewText} previewStyle={previewStyle} />
+            <div key={JSON.stringify(readerPreferences)} className="flex flex-col gap-4">
+              <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
+              <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
+              <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+              <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+
+              <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} disabled={isSmallMargin} />
+              <ReaderStyleSelect label="Kenar Boşluğu" field="margin" options={marginOptions} placeholder="Kenar boşluğu seçin" icon={<Type className="h-4 w-4" />} />
+              <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
+              <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
+            </div>
+          </div>
         </div>
-        <div className="flex justify-between items-center pt-4">
+
+        <div className="flex justify-between items-center pt-4 border-t flex-shrink-0">
           {/* Reset Button on the left if customized */}
           <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
             <AlertDialogTrigger asChild>
@@ -322,9 +323,7 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
 
           {/* Cancel + Save Buttons */}
           <div className="flex gap-2">
-            <Button onClick={() => setOpen(false)}>
-              Kaydet
-            </Button>
+            <Button onClick={() => setOpen(false)}>Kaydet</Button>
           </div>
         </div>
       </DialogContent>

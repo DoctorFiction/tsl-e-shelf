@@ -33,7 +33,7 @@ export const ReaderSettings = ({ getPreviewText }: ReaderSettingsProps) => {
           <ALargeSmall />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[340px] p-4">
+      <PopoverContent className="w-[340px] p-4 max-h-[90vh] overflow-y-auto">
         <div className="flex flex-col gap-1">
           {/* Font Size + Mode */}
           <div className="flex-1">
