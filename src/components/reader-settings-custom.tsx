@@ -272,6 +272,7 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
     const defaultPrefs = THEME_PRESETS[defaultThemeName];
     setReaderPreferences(defaultPrefs);
     setLocalPreferences(defaultPrefs);
+    saveReaderPreferences(defaultPrefs);
     setResetDialogOpen(false);
     setOpen(false);
   };
