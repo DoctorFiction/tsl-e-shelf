@@ -1,3 +1,4 @@
+import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
 import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { readerPreferencesAtom } from "@/atoms/reader-preferences";
@@ -176,6 +177,7 @@ interface IUseEpubReaderReturn {
   copyText: (text: string) => Promise<void>;
   totalBookChars: number;
   copiedChars: number;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAllowancePercentage = 10 }: IUseEpubReader): IUseEpubReaderReturn {
@@ -233,7 +235,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
   const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
-  const debouncedReaderPreferences = useDebounce(readerPreferences, 1000);
+  const [initialPreferencesLoaded, setInitialPreferencesLoaded] = useState(false);
 
   const [totalBookChars, setTotalBookChars] = useAtom(totalBookCharsAtom);
   const [copiedChars, setCopiedChars] = useAtom(copiedCharsAtom);
@@ -586,11 +588,9 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     }
   }, [debouncedSearchQuery, searchBook]);
 
-  useEffect(() => {
-    if (debouncedReaderPreferences) {
-      dataSource.updateReaderPreferences(debouncedReaderPreferences);
-    }
-  }, [dataSource, debouncedReaderPreferences]);
+  const saveReaderPreferences = useCallback(async (preferences: IReaderPreferenceConfig) => {
+    await dataSource.updateReaderPreferences(preferences);
+  }, [dataSource]);
 
   useEffect(() => {
     if (!renditionRef.current) return;
@@ -904,6 +904,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
       if (savedPreferences) {
         setReaderPreferences(savedPreferences);
       }
+      setInitialPreferencesLoaded(true);
     });
   }, [dataSource, setReaderPreferences]);
 
@@ -960,5 +961,6 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     totalBookChars,
     copiedChars,
     resize,
+    saveReaderPreferences,
   };
 }

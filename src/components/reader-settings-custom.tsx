@@ -80,27 +80,34 @@ interface ReaderStyleSwitchProps {
 
 interface ReaderSettingsCustomProps {
   getPreviewText: (charCount?: number) => Promise<string | null>;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
-const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: ReaderStyleSliderProps) => {
-  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
-  const atomValue = Number(readerPreferences[field]) || min;
-  const [tempValue, setTempValue] = useState<number>(atomValue);
+const ReaderStyleSlider = ({
+  label,
+  field,
+  min,
+  max,
+  step = 1,
+  formatValue,
+  value,
+  onChange,
+}: ReaderStyleSliderProps & {
+  value: number;
+  onChange: (field: SliderField, value: number) => void;
+}) => {
+  const [tempValue, setTempValue] = useState<number>(value);
 
-  // Sync local state when atom changes externally (e.g., cancel/reset)
   useEffect(() => {
-    setTempValue(atomValue);
-  }, [atomValue]);
+    setTempValue(value);
+  }, [value]);
 
   const handleValueChange = (value: number[]) => {
     setTempValue(value[0]);
   };
 
   const handleValueCommit = (value: number[]) => {
-    setReaderPreferences((prev) => ({
-      ...prev,
-      [field]: value[0],
-    }));
+    onChange(field, value[0]);
   };
 
   return (
@@ -109,26 +116,39 @@ const ReaderStyleSlider = ({ label, field, min, max, step = 1, formatValue }: Re
         <span>{label}</span>
         <span>{formatValue ? formatValue(tempValue) : tempValue}</span>
       </div>
-      <Slider min={min} max={max} step={step} value={[tempValue]} onValueChange={handleValueChange} onValueCommit={handleValueCommit} />
+      <Slider
+        min={min}
+        max={max}
+        step={step}
+        value={[tempValue]}
+        onValueChange={handleValueChange}
+        onValueCommit={handleValueCommit}
+      />
     </div>
   );
 };
 
-export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçenek seçin", icon, disabled }: ReaderStyleSelectProps) => {
-  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
-  const currentValue = readerPreferences[field]?.toString() as string;
-
+const ReaderStyleSelect = ({
+  label,
+  field,
+  options,
+  placeholder = "Seçenek seçin",
+  icon,
+  disabled,
+  value,
+  onChange,
+}: ReaderStyleSelectProps & {
+  value: string;
+  onChange: (field: SelectField, value: string) => void;
+}) => {
   const handleValueChange = (value: string) => {
-    setReaderPreferences((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    onChange(field, value);
   };
 
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
-      <Select value={currentValue} onValueChange={handleValueChange} disabled={disabled}>
+      <Select value={value} onValueChange={handleValueChange} disabled={disabled}>
         <SelectTrigger className="w-full">
           {icon && <span className="mr-2">{icon}</span>}
           <SelectValue placeholder={placeholder} />
@@ -148,15 +168,18 @@ export const ReaderStyleSelect = ({ label, field, options, placeholder = "Seçen
   );
 };
 
-export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwitchProps) => {
-  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
-  const currentValue = (readerPreferences[field] as boolean) ?? false;
-
+const ReaderStyleSwitch = ({
+  label,
+  field,
+  description,
+  value,
+  onChange,
+}: ReaderStyleSwitchProps & {
+  value: boolean;
+  onChange: (field: SwitchField, value: boolean) => void;
+}) => {
   const handleCheckedChange = (checked: boolean) => {
-    setReaderPreferences((prev) => ({
-      ...prev,
-      [field]: checked,
-    }));
+    onChange(field, checked);
   };
 
   return (
@@ -165,12 +188,12 @@ export const ReaderStyleSwitch = ({ label, field, description }: ReaderStyleSwit
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
         {description && <p className="text-xs text-muted-foreground/70">{description}</p>}
       </div>
-      <Switch checked={currentValue} onCheckedChange={handleCheckedChange} />
+      <Switch checked={value} onCheckedChange={handleCheckedChange} />
     </div>
   );
 };
 
-export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomProps) => {
+export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: ReaderSettingsCustomProps) => {
   const fontOptions = [
     { value: "system", label: "Sistem Varsayılanı" },
     { value: "Georgia, 'Times New Roman', serif", label: "Georgia" },
@@ -211,53 +234,82 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
+  const [localPreferences, setLocalPreferences] = useState(readerPreferences);
 
-  const isSmallMargin = readerPreferences.margin === "small";
+  useEffect(() => {
+    console.log("readerPreferences changed", readerPreferences);
+    setLocalPreferences({
+      ...readerPreferences,
+      fontSize: Number(readerPreferences.fontSize),
+      lineHeight: Number(readerPreferences.lineHeight),
+      characterSpacing: Number(readerPreferences.characterSpacing),
+      wordSpacing: Number(readerPreferences.wordSpacing),
+    });
+  }, [readerPreferences]);
+
+  const handleLocalChange = (field: keyof IReaderPreferenceConfig, value: any) => {
+    const processedValue = (field === "fontSize" || field === "lineHeight" || field === "characterSpacing" || field === "wordSpacing")
+      ? Number(value)
+      : value;
+    setLocalPreferences((prev) => ({
+      ...prev,
+      [field]: processedValue,
+    }));
+  };
+
+  const isSmallMargin = localPreferences.margin === "small";
 
   useEffect(() => {
     if (isSmallMargin) {
-      setReaderPreferences((prev) => ({
+      setLocalPreferences((prev) => ({
         ...prev,
         columnCount: "1",
       }));
     }
-  }, [isSmallMargin, setReaderPreferences]);
+  }, [isSmallMargin]);
 
   const handleReset = () => {
-    setReaderPreferences(THEME_PRESETS[defaultThemeName]);
+    const defaultPrefs = THEME_PRESETS[defaultThemeName];
+    setReaderPreferences(defaultPrefs);
+    setLocalPreferences(defaultPrefs);
     setResetDialogOpen(false);
+    setOpen(false);
+  };
+
+  const handleSave = () => {
+    setReaderPreferences(localPreferences);
+    saveReaderPreferences(localPreferences);
     setOpen(false);
   };
 
   const previewStyle = useMemo<CSSProperties>(() => {
     const defaultColors = { light: "#ffffff", dark: "#000000" }; // Fallback colors
-    const bgColor = readerPreferences.backgroundColor || defaultColors;
-    const txtColor = readerPreferences.textColor || defaultColors;
+    const bgColor = localPreferences.backgroundColor || defaultColors;
+    const txtColor = localPreferences.textColor || defaultColors;
 
     return {
       backgroundColor: isDark ? bgColor.dark : bgColor.light,
       color: isDark ? txtColor.dark : txtColor.light,
-      fontSize: readerPreferences.fontSize,
-      fontFamily: readerPreferences.fontFamily,
-      lineHeight: readerPreferences.lineHeight,
-      fontWeight: readerPreferences.isBold ? "bold" : "normal",
-      letterSpacing: `${readerPreferences.characterSpacing}px`,
-      wordSpacing: `${readerPreferences.wordSpacing}px`,
-      textAlign: readerPreferences.textAlign,
-      columnCount: Number(readerPreferences.columnCount) || 1,
+      fontSize: localPreferences.fontSize,
+      fontFamily: localPreferences.fontFamily,
+      lineHeight: localPreferences.lineHeight,
+      fontWeight: localPreferences.isBold ? "bold" : "normal",
+      letterSpacing: `${localPreferences.characterSpacing}px`,
+      wordSpacing: `${localPreferences.wordSpacing}px`,
+      textAlign: localPreferences.textAlign,
+      columnCount: Number(localPreferences.columnCount) || 1,
     };
-  }, [readerPreferences, isDark]);
+  }, [localPreferences, isDark]);
 
   const isCustomized = useMemo(() => {
     const defaultPrefs = THEME_PRESETS[defaultThemeName];
     return Object.entries(defaultPrefs).some(([key, val]) => {
-      // Only compare fields that are part of IReaderPreferenceConfig
-      if (key in readerPreferences) {
-        return readerPreferences[key as keyof IReaderPreferenceConfig] !== val;
+      if (key in localPreferences) {
+        return localPreferences[key as keyof IReaderPreferenceConfig] !== val;
       }
       return false;
     });
-  }, [readerPreferences]);
+  }, [localPreferences]);
 
   return (
     <Dialog
@@ -287,16 +339,82 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
         <div className="flex-1 overflow-y-auto pr-2">
           <div className="flex flex-col gap-4">
             <ReaderPreview getPreviewText={getPreviewText} previewStyle={previewStyle} />
-            <div key={JSON.stringify(readerPreferences)} className="flex flex-col gap-4">
-              <ReaderStyleSelect label="Yazı Tipi Ailesi" field="fontFamily" options={fontOptions} placeholder="Seçenek seçin" icon={<Type className="h-4 w-4" />} />
-              <ReaderStyleSlider label="Satır Aralığı" field="lineHeight" min={0.75} max={2.5} step={0.05} formatValue={(val) => val.toFixed(2)} />
-              <ReaderStyleSlider label="Karakter Aralığı" field="characterSpacing" min={-3} max={5} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
-              <ReaderStyleSlider label="Kelime Aralığı" field="wordSpacing" min={-5} max={10} step={0.5} formatValue={(val) => `${val.toFixed(1)}px`} />
+            <div className="flex flex-col gap-4">
+              <ReaderStyleSelect
+                label="Yazı Tipi Ailesi"
+                field="fontFamily"
+                options={fontOptions}
+                placeholder="Seçenek seçin"
+                icon={<Type className="h-4 w-4" />}
+                value={localPreferences.fontFamily}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSlider
+                label="Satır Aralığı"
+                field="lineHeight"
+                min={0.75}
+                max={2.5}
+                step={0.05}
+                formatValue={(val) => val.toFixed(2)}
+                value={localPreferences.lineHeight}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSlider
+                label="Karakter Aralığı"
+                field="characterSpacing"
+                min={-3}
+                max={5}
+                step={0.5}
+                formatValue={(val) => `${val.toFixed(1)}px`}
+                value={localPreferences.characterSpacing}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSlider
+                label="Kelime Aralığı"
+                field="wordSpacing"
+                min={-5}
+                max={10}
+                step={0.5}
+                formatValue={(val) => `${val.toFixed(1)}px`}
+                value={localPreferences.wordSpacing}
+                onChange={handleLocalChange}
+              />
 
-              <ReaderStyleSelect label="Sütunlar" field="columnCount" options={columnOptions} placeholder="Sütun seçin" icon={<Type className="h-4 w-4" />} disabled={isSmallMargin} />
-              <ReaderStyleSelect label="Kenar Boşluğu" field="margin" options={marginOptions} placeholder="Kenar boşluğu seçin" icon={<Type className="h-4 w-4" />} />
-              <ReaderStyleSelect label="Metin Hizalama" field="textAlign" options={textAlignOptions} placeholder="Hizalama seçin" icon={<Type className="h-4 w-4" />} />
-              <ReaderStyleSwitch label="Kalın Metin" field="isBold" description="Daha iyi okunabilirlik için metni kalınlaştırın" />
+              <ReaderStyleSelect
+                label="Sütunlar"
+                field="columnCount"
+                options={columnOptions}
+                placeholder="Sütun seçin"
+                icon={<Type className="h-4 w-4" />}
+                disabled={isSmallMargin}
+                value={localPreferences.columnCount}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSelect
+                label="Kenar Boşluğu"
+                field="margin"
+                options={marginOptions}
+                placeholder="Kenar boşluğu seçin"
+                icon={<Type className="h-4 w-4" />}
+                value={localPreferences.margin}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSelect
+                label="Metin Hizalama"
+                field="textAlign"
+                options={textAlignOptions}
+                placeholder="Hizalama seçin"
+                icon={<Type className="h-4 w-4" />}
+                value={localPreferences.textAlign}
+                onChange={handleLocalChange}
+              />
+              <ReaderStyleSwitch
+                label="Kalın Metin"
+                field="isBold"
+                description="Daha iyi okunabilirlik için metni kalınlaştırın"
+                value={localPreferences.isBold}
+                onChange={handleLocalChange}
+              />
             </div>
           </div>
         </div>
@@ -323,7 +441,10 @@ export const ReaderSettingsCustom = ({ getPreviewText }: ReaderSettingsCustomPro
 
           {/* Cancel + Save Buttons */}
           <div className="flex gap-2">
-            <Button onClick={() => setOpen(false)}>Kaydet</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              İptal
+            </Button>
+            <Button onClick={handleSave}>Kaydet</Button>
           </div>
         </div>
       </DialogContent>

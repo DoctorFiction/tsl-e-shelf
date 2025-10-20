@@ -42,6 +42,7 @@ interface MainControlGroupProps {
   bookTitle?: string | null;
   totalPages?: number;
   progress?: number;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export function MainControlGroup({
@@ -76,6 +77,7 @@ export function MainControlGroup({
   bookTitle,
   totalPages,
   progress,
+  saveReaderPreferences,
 }: MainControlGroupProps) {
   if (variant === "mobile") {
     return (
@@ -118,7 +120,7 @@ export function MainControlGroup({
           <Typography className="text-xs">Resimler</Typography>
         </div>
         <div className="flex flex-col items-center gap-2">
-          <ReaderSettings getPreviewText={getPreviewText} />
+          <ReaderSettings getPreviewText={getPreviewText} saveReaderPreferences={saveReaderPreferences} />
           <Typography className="text-xs">Ayarlar</Typography>
         </div>
         <div className="flex flex-col items-center gap-2">
@@ -172,7 +174,7 @@ export function MainControlGroup({
         {isPinned && <Typography>Resimler</Typography>}
       </div>
       <div className="flex flex-row gap-2 items-center">
-        <ReaderSettings getPreviewText={getPreviewText} />
+        <ReaderSettings getPreviewText={getPreviewText} saveReaderPreferences={saveReaderPreferences} />
         {isPinned && <Typography>Ayarlar</Typography>}
       </div>
       <div className="flex flex-row gap-2 items-center">

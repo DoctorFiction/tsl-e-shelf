@@ -47,6 +47,7 @@ interface DesktopDrawerProps {
   bookTitle?: string | null;
   totalPages?: number;
   progress?: number;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export function DesktopDrawer(props: DesktopDrawerProps) {
@@ -63,6 +64,7 @@ export function DesktopDrawer(props: DesktopDrawerProps) {
     addHighlight,
     setIsNoteDialogOpen,
     setIsCopyConfirmationDialogOpen,
+    saveReaderPreferences,
   } = props;
 
   return (
@@ -102,7 +104,7 @@ export function DesktopDrawer(props: DesktopDrawerProps) {
           setIsCopyConfirmationDialogOpen={setIsCopyConfirmationDialogOpen}
         />
       ) : (
-        <MainControlGroup variant="desktop" {...props} />
+        <MainControlGroup variant="desktop" {...props} saveReaderPreferences={saveReaderPreferences} />
       )}
 
       <div className="mt-auto flex flex-col items-center gap-3 mb-4">

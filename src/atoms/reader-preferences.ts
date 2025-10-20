@@ -10,18 +10,19 @@ export type ReaderThemeName =
   | "Focus";
 
 export interface IReaderPreferenceConfig {
-  fontSize: CSSProperties["fontSize"];
+  fontSize: number;
   fontFamily: CSSProperties["fontFamily"];
-  lineHeight: CSSProperties["lineHeight"];
+  lineHeight: number;
   theme: "light" | "dark" | "auto";
   textAlign?: CSSProperties["textAlign"];
   backgroundColor: { light: string; dark: string };
   textColor: { light: string; dark: string };
-  wordSpacing?: CSSProperties["wordSpacing"];
+  wordSpacing?: number;
   columnCount?: CSSProperties["columnCount"];
   isBold?: boolean;
   characterSpacing?: number;
   margin?: "small" | "full";
+  padding?: string;
 }
 
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
@@ -39,11 +40,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#000000",
       dark: "#ffffff",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
   Quiet: {
     fontSize: 17,
@@ -59,11 +61,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#A5A5Ad",
       dark: "#828288",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
   Paper: {
     fontSize: 17,
@@ -79,11 +82,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#1D1A1A",
       dark: "#F0F0EE",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
   Bold: {
     fontSize: 17,
@@ -99,11 +103,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#1A1A1C",
       dark: "#EDECf0",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
   Calm: {
     fontSize: 17,
@@ -119,11 +124,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#342C24",
       dark: "#F7E9D7",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
   Focus: {
     fontSize: 17,
@@ -139,11 +145,12 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
       light: "#141303",
       dark: "#FFF8E9",
     },
-    wordSpacing: "1",
+    wordSpacing: 1,
     columnCount: 2,
     isBold: false,
     characterSpacing: 1,
     margin: "full",
+    padding: "2rem",
   },
 };
 

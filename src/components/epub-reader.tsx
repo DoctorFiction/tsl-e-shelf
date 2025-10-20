@@ -88,6 +88,7 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
     getPreviewText,
     copyText,
     resize,
+    saveReaderPreferences,
   } = useEpubReader({ url, dataSource, isCopyProtected: true });
 
   // TODO: Handle book title, page number, and chapter display on mobile devices
@@ -242,6 +243,7 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
           isSearching={isSearching}
           getPreviewText={getPreviewText}
           copyText={copyText}
+          saveReaderPreferences={saveReaderPreferences}
         />
         <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         {editingNote && (

@@ -48,6 +48,7 @@ interface ReaderControlsDrawerProps {
   isSearching: boolean;
   getPreviewText: (charCount?: number) => Promise<string | null>;
   copyText: (text: string) => Promise<void>;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export function ReaderControlsDrawer(props: ReaderControlsDrawerProps) {
@@ -103,6 +104,7 @@ export function ReaderControlsDrawer(props: ReaderControlsDrawerProps) {
         setIsPinned={setIsPinned}
         setIsNoteDialogOpen={setIsNoteDialogOpen}
         setIsCopyConfirmationDialogOpen={setIsCopyConfirmationDialogOpen}
+        saveReaderPreferences={props.saveReaderPreferences}
       />
       <MobileDrawer
         {...props}
@@ -110,6 +112,7 @@ export function ReaderControlsDrawer(props: ReaderControlsDrawerProps) {
         setIsMobileDrawerOpen={setIsMobileDrawerOpen}
         setIsNoteDialogOpen={setIsNoteDialogOpen}
         setIsCopyConfirmationDialogOpen={setIsCopyConfirmationDialogOpen}
+        saveReaderPreferences={props.saveReaderPreferences}
       />
 
       {isNoteDialogOpen && <AddEditNoteDialog open={isNoteDialogOpen} onSave={handleSaveNote} onClose={handleCloseNoteDialog} />}

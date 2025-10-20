@@ -45,6 +45,7 @@ interface MobileDrawerProps {
   bookTitle?: string | null;
   totalPages?: number;
   progress?: number;
+  saveReaderPreferences: (preferences: IReaderPreferenceConfig) => Promise<void>;
 }
 
 export function MobileDrawer(props: MobileDrawerProps) {
@@ -60,6 +61,7 @@ export function MobileDrawer(props: MobileDrawerProps) {
     addHighlight,
     setIsNoteDialogOpen,
     setIsCopyConfirmationDialogOpen,
+    saveReaderPreferences,
   } = props;
 
   return (
@@ -96,7 +98,7 @@ export function MobileDrawer(props: MobileDrawerProps) {
               setIsMobileDrawerOpen={setIsMobileDrawerOpen}
             />
           ) : (
-            <MainControlGroup variant="mobile" {...props} />
+            <MainControlGroup variant="mobile" {...props} saveReaderPreferences={saveReaderPreferences} />
           )}
 
           <Button
