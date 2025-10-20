@@ -1,4 +1,5 @@
 import EpubReader from "@/components/epub-reader";
+import { DevtoolProtection } from "@/components/devtool-protection";
 
 function extractBookId(idOrUrl: string): string {
   try {
@@ -31,6 +32,9 @@ export default async function ReaderPage({ params }: { params: Promise<{ id: str
 
   const bookUrl = isRemoteUrl ? `/api/book?url=${encodeURIComponent(decodedIdOrUrl)}` : `/books/${decodedIdOrUrl}`;
 
-  return <EpubReader url={bookUrl} bookId={bookId} />;
+  return (
+    <DevtoolProtection>
+      <EpubReader url={bookUrl} bookId={bookId} />
+    </DevtoolProtection>
+  );
 }
-
