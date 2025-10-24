@@ -248,9 +248,14 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
   }, [readerPreferences]);
 
   const handleLocalChange = (field: keyof IReaderPreferenceConfig, value: string | number | boolean) => {
-    const processedValue = (field === "fontSize" || field === "lineHeight" || field === "characterSpacing" || field === "wordSpacing")
-      ? Number(value)
-      : value;
+    const processedValue =
+      field === "fontSize" ||
+      field === "lineHeight" ||
+      field === "characterSpacing" ||
+      field === "wordSpacing" ||
+      field === "columnCount"
+        ? Number(value)
+        : value;
     setLocalPreferences((prev) => ({
       ...prev,
       [field]: processedValue,
@@ -306,7 +311,11 @@ export const ReaderSettingsCustom = ({ getPreviewText, saveReaderPreferences }: 
     const defaultPrefs = THEME_PRESETS[defaultThemeName];
     return Object.entries(defaultPrefs).some(([key, val]) => {
       if (key in localPreferences) {
-        return localPreferences[key as keyof IReaderPreferenceConfig] !== val;
+        const localVal = localPreferences[key as keyof IReaderPreferenceConfig];
+        if (key === "backgroundColor" || key === "textColor") {
+          return JSON.stringify(localVal) !== JSON.stringify(val);
+        }
+        return localVal !== val;
       }
       return false;
     });
