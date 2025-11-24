@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string; highlightId: string } },
+  { params }: { params: Promise<{ id: string; highlightId: string }> },
 ) {
   try {
     const loginData = {
@@ -31,7 +31,7 @@ export async function PUT(
       throw new Error("No token received from login");
     }
 
-    const { id, highlightId } = params;
+    const { id, highlightId } = await params;
     const { color } = await request.json();
 
     const updateResponse = await fetch(
@@ -66,7 +66,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string; highlightId: string } },
+  { params }: { params: Promise<{ id: string; highlightId: string }> },
 ) {
   try {
     const loginData = {
@@ -95,7 +95,7 @@ export async function DELETE(
       throw new Error("No token received from login");
     }
 
-    const { id, highlightId } = params;
+    const { id, highlightId } = await params;
 
     const deleteResponse = await fetch(
       `https://api.nobelyayin.com/books/${id}/highlights/${highlightId}`,
