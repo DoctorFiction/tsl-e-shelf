@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } },
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const loginData = {
       email: "api@test.com",
@@ -24,27 +21,23 @@ export async function POST(
 
     const loginResult = await loginResponse.json();
 
-    const token =
-      loginResult.token || loginResult.access_token || loginResult.accessToken;
+    const token = loginResult.token || loginResult.access_token || loginResult.accessToken;
 
     if (!token) {
       throw new Error("No token received from login");
     }
 
-    const { id } = params;
+    const { id } = await params;
     const { cfi, text, type, color } = await request.json();
 
-    const addHighlightResponse = await fetch(
-      `https://api.nobelyayin.com/books/${id}/highlights`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ cfi, text, type, color }),
+    const addHighlightResponse = await fetch(`https://api.nobelyayin.com/books/${id}/highlights`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({ cfi, text, type, color }),
+    });
 
     if (!addHighlightResponse.ok) {
       throw new Error(`Failed to add highlight: ${addHighlightResponse.status}`);
@@ -59,7 +52,7 @@ export async function POST(
         message: "Failed to add highlight to Nobel API",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
