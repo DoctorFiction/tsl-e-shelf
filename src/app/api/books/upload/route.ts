@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     try {
       await mkdir(booksDir, { recursive: true });
     } catch (error) {
-      // Directory might already exist, ignore error
+      console.error("Error uploading book:", error);
     }
 
     // Generate a unique filename
@@ -39,11 +39,11 @@ export async function POST(request: NextRequest) {
     // Return the book ID (encoded filename)
     const bookId = encodeURIComponent(filename);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       id: bookId,
       filename: filename,
-      message: "Kitap başarıyla yüklendi" 
+      message: "Kitap başarıyla yüklendi",
     });
   } catch (error) {
     console.error("Error uploading book:", error);
