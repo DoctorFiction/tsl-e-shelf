@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string; bookmarkId: string } },
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; bookmarkId: string }> }) {
   try {
     const loginData = {
       email: "api@test.com",
@@ -24,25 +21,21 @@ export async function DELETE(
 
     const loginResult = await loginResponse.json();
 
-    const token =
-      loginResult.token || loginResult.access_token || loginResult.accessToken;
+    const token = loginResult.token || loginResult.access_token || loginResult.accessToken;
 
     if (!token) {
       throw new Error("No token received from login");
     }
 
-    const { id, bookmarkId } = params;
+    const { id, bookmarkId } = await params;
 
-    const deleteResponse = await fetch(
-      `https://api.nobelyayin.com/books/${id}/bookmarks/${bookmarkId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    const deleteResponse = await fetch(`https://api.nobelyayin.com/books/${id}/bookmarks/${bookmarkId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+    });
 
     if (!deleteResponse.ok) {
       throw new Error(`Failed to delete bookmark: ${deleteResponse.status}`);
@@ -56,7 +49,7 @@ export async function DELETE(
         message: "Failed to delete bookmark from Nobel API",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
