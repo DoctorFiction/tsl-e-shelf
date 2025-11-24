@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string; noteId: string }> },
-) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string; noteId: string }> }) {
   try {
     const loginData = {
       email: "api@test.com",
@@ -24,8 +21,7 @@ export async function PUT(
 
     const loginResult = await loginResponse.json();
 
-    const token =
-      loginResult.token || loginResult.access_token || loginResult.accessToken;
+    const token = loginResult.token || loginResult.access_token || loginResult.accessToken;
 
     if (!token) {
       throw new Error("No token received from login");
@@ -34,17 +30,14 @@ export async function PUT(
     const { id, noteId } = await params;
     const { note } = await request.json();
 
-    const updateResponse = await fetch(
-      `https://api.nobelyayin.com/books/${id}/notes/${noteId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ note }),
+    const updateResponse = await fetch(`https://api.nobelyayin.com/books/${id}/notes/${noteId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({ note }),
+    });
 
     if (!updateResponse.ok) {
       throw new Error(`Failed to update note: ${updateResponse.status}`);
@@ -59,15 +52,12 @@ export async function PUT(
         message: "Failed to update note in Nobel API",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string; noteId: string }> },
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string; noteId: string }> }) {
   try {
     const loginData = {
       email: "api@test.com",
@@ -88,8 +78,7 @@ export async function DELETE(
 
     const loginResult = await loginResponse.json();
 
-    const token =
-      loginResult.token || loginResult.access_token || loginResult.accessToken;
+    const token = loginResult.token || loginResult.access_token || loginResult.accessToken;
 
     if (!token) {
       throw new Error("No token received from login");
@@ -97,16 +86,13 @@ export async function DELETE(
 
     const { id, noteId } = await params;
 
-    const deleteResponse = await fetch(
-      `https://api.nobelyayin.com/books/${id}/notes/${noteId}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+    const deleteResponse = await fetch(`https://api.nobelyayin.com/books/${id}/notes/${noteId}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+    });
 
     if (!deleteResponse.ok) {
       throw new Error(`Failed to delete note: ${deleteResponse.status}`);
@@ -120,7 +106,7 @@ export async function DELETE(
         message: "Failed to delete note from Nobel API",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
