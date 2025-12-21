@@ -23,6 +23,7 @@ export interface IReaderPreferenceConfig {
   characterSpacing?: number;
   margin?: "small" | "full";
   padding?: string;
+  zoom?: number;
 }
 
 export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
@@ -46,6 +47,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
   Quiet: {
     fontSize: 17,
@@ -67,6 +69,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
   Paper: {
     fontSize: 17,
@@ -88,6 +91,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
   Bold: {
     fontSize: 17,
@@ -109,6 +113,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
   Calm: {
     fontSize: 17,
@@ -130,6 +135,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
   Focus: {
     fontSize: 17,
@@ -151,6 +157,7 @@ export const THEME_PRESETS: Record<ReaderThemeName, IReaderPreferenceConfig> = {
     characterSpacing: 1,
     margin: "full",
     padding: "2rem",
+    zoom: 1,
   },
 };
 

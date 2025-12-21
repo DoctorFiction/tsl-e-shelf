@@ -10,6 +10,7 @@ import { ReaderSettings } from "./reader-settings";
 import { SearchPopover } from "./search-popover";
 import { TableOfContentsPopover } from "./table-of-contents-popover";
 import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
+import { ZoomControl } from "./zoom-control";
 
 interface MainControlGroupProps {
   variant: "desktop" | "mobile";
@@ -125,6 +126,10 @@ export function MainControlGroup({
           <Typography className="text-xs">Ayarlar</Typography>
         </div>
         <div className="flex flex-col items-center gap-2">
+          <ZoomControl />
+          <Typography className="text-xs">Yakınlaştır</Typography>
+        </div>
+        <div className="flex flex-col items-center gap-2">
           <ReaderBookInfo bookCover={bookCover} bookTitle={bookTitle} totalPages={totalPages} progress={progress} highlights={highlights} bookmarks={bookmarks} notes={notes} />
           <Typography className="text-xs">Kitap Bilgisi</Typography>
         </div>
@@ -177,6 +182,10 @@ export function MainControlGroup({
       <div className="flex flex-row gap-2 items-center">
         <ReaderSettings getPreviewText={getPreviewText} saveReaderPreferences={saveReaderPreferences} />
         {isPinned && <Typography>Ayarlar</Typography>}
+      </div>
+      <div className="flex flex-row gap-2 items-center">
+        <ZoomControl />
+        {isPinned && <Typography>Yakınlaştır</Typography>}
       </div>
       <div className="flex flex-row gap-2 items-center">
         <ReaderBookInfo bookCover={bookCover} bookTitle={bookTitle} totalPages={totalPages} progress={progress} highlights={highlights} bookmarks={bookmarks} notes={notes} />

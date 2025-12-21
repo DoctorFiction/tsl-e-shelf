@@ -84,6 +84,11 @@ Commit messages must follow the format: `type(scope): description`.
 *   **TODO (2025-07-22):** Fix delete note when editing.
 *   **TODO (2025-07-22):** Refactor `src/components/reader-controls-drawer.tsx` to make it readable and maintainable, create internal reusable components for repeated sections.
 *   **TODO (2025-10-15):** Add a 'Dev Tools' button in `src/components/header.tsx`, visible only in development mode.
+*   **TODO (2025-12-19):** Scroll horizontally and vertically on page when zoomed.
+*   **TODO (2025-12-19):** Improve zoom control buttons layout (as it does not fit the sidebar currently, implement a sidebar friendly zoom control).
+*   **TODO (2025-12-19):** Single/two page setting.
+*   **FIX (2025-12-19):** Some fonts do not properly render on this book.
+*   **FIX (2025-12-19):** When zooming in/out it seems to zoom from left top, and the page content on the right side of the page becomes invisible quickly. Can we zoom from the center, somehow?
 
 
 ### Phase 2: API and Database Integration

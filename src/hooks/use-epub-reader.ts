@@ -1,4 +1,7 @@
-import { IReaderPreferenceConfig } from "@/atoms/reader-preferences";
+import {
+  IReaderPreferenceConfig,
+  readerPreferencesAtom,
+} from "@/atoms/reader-preferences";
 import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
@@ -231,6 +234,11 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const [readerPreferences, setReaderPreferences] = useAtom(
+    readerPreferencesAtom,
+  );
+  const { zoom } = readerPreferences;
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
 
@@ -585,9 +593,26 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     }
   }, [debouncedSearchQuery, searchBook]);
 
-  const saveReaderPreferences = useCallback(async (preferences: IReaderPreferenceConfig) => {
-    await dataSource.updateReaderPreferences(preferences);
-  }, [dataSource]);
+  const saveReaderPreferences = useCallback(
+    async (preferences: IReaderPreferenceConfig) => {
+      await dataSource.updateReaderPreferences(preferences);
+      setReaderPreferences(preferences);
+    },
+    [dataSource, setReaderPreferences],
+  );
+
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
+
+    if (zoom) {
+      rendition.themes.override("zoom", zoom);
+    }
+
+    setTimeout(() => {
+      resize();
+    }, 10);
+  }, [zoom, resize]);
 
   useEffect(() => {
     if (!renditionRef.current) return;
