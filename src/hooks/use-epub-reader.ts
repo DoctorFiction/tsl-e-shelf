@@ -600,8 +600,10 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     const rendition = renditionRef.current;
     const viewer = viewerRef.current;
 
-    if (rendition?.manager?.container && viewer) {
-      const containerToScale = rendition.manager.container;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const manager = (rendition as any)?.manager;
+    if (manager?.container && viewer && zoom !== undefined) {
+      const containerToScale = manager.container;
 
       if (zoom > 1) {
         viewer.style.overflow = "auto";
@@ -638,7 +640,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
         let scrollTop: number;
 
         const startDrag = (e: MouseEvent) => {
-          if (readerPreferences.zoom > 1) {
+          if ((readerPreferences.zoom ?? 1) > 1) {
             isDragging = true;
             startX = e.pageX;
             startY = e.pageY;
@@ -674,7 +676,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
         doc.addEventListener("mouseleave", endDrag);
         doc.addEventListener("mousemove", drag);
 
-        if (readerPreferences.zoom > 1) {
+        if ((readerPreferences.zoom ?? 1) > 1) {
           iframe.style.cursor = "grab";
           doc.body.style.cursor = "grab";
         } else {
