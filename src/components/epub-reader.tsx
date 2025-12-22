@@ -1,6 +1,6 @@
 "use client";
 import { useEpubReader } from "@/hooks/use-epub-reader";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { ReaderControlsDrawer } from "./reader-controls-drawer";
 import { useAtom } from "jotai";
 import { readerPreferencesAtom } from "@/atoms/reader-preferences";
@@ -14,6 +14,24 @@ import { MainDrawer } from "./main-drawer";
 import { AddEditNoteDialog } from "./add-edit-note-dialog";
 import { LocalStorageDataSource, NobelApiDataSource } from "@/lib/reader-data-source";
 import { isNobelBook as checkIsNobelBook } from "@/lib/nobel-api";
+import { MobileBottomBar } from "./mobile-bottom-bar";
+import { MobileSelectionBar } from "./mobile-selection-bar";
+import { MobileDrawer } from "./mobile-drawer";
+import { CopyConfirmationDialog } from "./copy-confirmation-dialog";
+
+// Utility hook for detecting mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+  
+  return isMobile;
+}
 
 interface EpubReaderProps {
   url: string;
@@ -125,10 +143,21 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
   const [readerPreferences] = useAtom(readerPreferencesAtom);
   const marginClass = getMarginClass(readerPreferences.margin);
 
+  const isMobile = useIsMobile();
   const isBookmarked = !!bookmarks.find((bm) => bm.cfi === location);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [readerControlsDrawerPinned, setReaderControlsDrawerPinned] = useState(false);
   const [mainDrawerPinned, setMainDrawerPinned] = useState(false);
+  
+  // Mobile-specific states
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const [isCopyConfirmationDialogOpen, setIsCopyConfirmationDialogOpen] = useState(false);
+  
+  // Clear selection when closing mobile selection bar
+  const handleCloseSelection = useCallback(() => {
+    setSelection(null);
+  }, [setSelection]);
 
   useEffect(() => {
     if (resize) {
@@ -166,15 +195,47 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
 
   return (
     <div className="w-full h-screen overflow-hidden flex">
-      <MainDrawer onDrawerStateChange={setMainDrawerPinned} toc={toc} goToHref={goToHref} tocLoading={isLoading} />
-      <div className={`relative w-full flex-1 ${mainDrawerPinned ? "pl-64" : "pl-20"}`}>
+      {/* Desktop Main Drawer - Hidden on Mobile */}
+      <div className="hidden md:block">
+        <MainDrawer onDrawerStateChange={setMainDrawerPinned} toc={toc} goToHref={goToHref} tocLoading={isLoading} />
+      </div>
+      
+      <div className={`relative w-full flex-1 ${mainDrawerPinned ? "md:pl-64" : "md:pl-20"}`}>
         {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
         <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
+        
         <div className="relative w-full h-full">
-          <div ref={viewerRef} className={`h-full zoom-scroll-container ${marginClass}`} onContextMenu={(e) => e.preventDefault()}>
-            {!isLoading && <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />}
+          {/* Reader container */}
+          <div 
+            ref={viewerRef} 
+            className={`h-full zoom-scroll-container ${marginClass} ${isMobile ? 'pb-16' : ''}`} 
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            {/* Desktop progress display */}
+            {!isLoading && !isMobile && (
+              <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />
+            )}
           </div>
+          
+          {/* Mobile tap zones for page navigation - transparent overlays on edges */}
+          {isMobile && !selection && !isMobileDrawerOpen && (
+            <>
+              {/* Left tap zone - previous page */}
+              <button
+                onClick={goPrev}
+                className="fixed left-0 top-0 w-12 h-[calc(100%-4rem)] z-30 bg-transparent active:bg-black/5 transition-colors"
+                aria-label="Önceki sayfa"
+              />
+              {/* Right tap zone - next page */}
+              <button
+                onClick={goNext}
+                className="fixed right-0 top-0 w-12 h-[calc(100%-4rem)] z-30 bg-transparent active:bg-black/5 transition-colors"
+                aria-label="Sonraki sayfa"
+              />
+            </>
+          )}
 
+          {/* Desktop navigation buttons */}
           <div
             className={`fixed ${mainDrawerPinned ? "left-68" : "left-24"} top-1/2 transform -translate-y-1/2 z-50 text-center transition-opacity duration-300 hidden md:block ${
               controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -203,48 +264,167 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
             </button>
           </div>
         </div>
-        <ReaderControlsDrawer
-          selection={selection}
-          addHighlight={addHighlight}
-          clickedHighlight={clickedHighlight}
-          removeHighlight={removeHighlight}
-          setClickedHighlight={setClickedHighlight}
-          setSelection={setSelection}
-          addNote={addNote}
-          highlights={highlights}
-          bookmarks={bookmarks}
-          notes={notes}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          searchResults={searchResults}
-          goToCfi={goToCfi}
-          removeBookmark={removeBookmark}
-          removeAllBookmarks={removeAllBookmarks}
-          removeNote={removeNote}
-          removeAllNotes={removeAllNotes}
-          editNote={editNote}
-          removeAllHighlights={removeAllHighlights}
-          isBookmarked={isBookmarked}
-          addBookmark={addBookmark}
-          location={location}
-          toc={toc}
-          goToHref={goToHref}
-          currentSearchResultIndex={currentSearchResultIndex}
-          goToSearchResult={goToSearchResult}
-          onDrawerStateChange={setReaderControlsDrawerPinned}
-          bookTitle={bookTitle}
-          bookAuthor={bookAuthor}
-          bookCover={bookCover}
-          totalPages={totalPages}
-          progress={progress}
-          bookImages={bookImages}
-          updateHighlightColor={updateHighlightColor}
-          searchBook={searchBook}
-          isSearching={isSearching}
-          getPreviewText={getPreviewText}
-          copyText={copyText}
-          saveReaderPreferences={saveReaderPreferences}
-        />
+        
+        {/* Desktop Reader Controls Drawer */}
+        <div className="hidden md:block">
+          <ReaderControlsDrawer
+            selection={selection}
+            addHighlight={addHighlight}
+            clickedHighlight={clickedHighlight}
+            removeHighlight={removeHighlight}
+            setClickedHighlight={setClickedHighlight}
+            setSelection={setSelection}
+            addNote={addNote}
+            highlights={highlights}
+            bookmarks={bookmarks}
+            notes={notes}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchResults={searchResults}
+            goToCfi={goToCfi}
+            removeBookmark={removeBookmark}
+            removeAllBookmarks={removeAllBookmarks}
+            removeNote={removeNote}
+            removeAllNotes={removeAllNotes}
+            editNote={editNote}
+            removeAllHighlights={removeAllHighlights}
+            isBookmarked={isBookmarked}
+            addBookmark={addBookmark}
+            location={location}
+            toc={toc}
+            goToHref={goToHref}
+            currentSearchResultIndex={currentSearchResultIndex}
+            goToSearchResult={goToSearchResult}
+            onDrawerStateChange={setReaderControlsDrawerPinned}
+            bookTitle={bookTitle}
+            bookAuthor={bookAuthor}
+            bookCover={bookCover}
+            totalPages={totalPages}
+            progress={progress}
+            bookImages={bookImages}
+            updateHighlightColor={updateHighlightColor}
+            searchBook={searchBook}
+            isSearching={isSearching}
+            getPreviewText={getPreviewText}
+            copyText={copyText}
+            saveReaderPreferences={saveReaderPreferences}
+          />
+        </div>
+        
+        {/* Mobile Components */}
+        {isMobile && (
+          <>
+            {/* Mobile Bottom Navigation Bar */}
+            <MobileBottomBar
+              goPrev={goPrev}
+              goNext={goNext}
+              onMenuClick={() => setIsMobileDrawerOpen(true)}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              currentChapterTitle={currentChapterTitle}
+              isBookmarked={isBookmarked}
+              addBookmark={addBookmark}
+              removeBookmark={removeBookmark}
+              location={location}
+            />
+            
+            {/* Mobile Selection Bar - Shows when text is selected */}
+            {selection && !isMobileDrawerOpen && (
+              <MobileSelectionBar
+                selection={selection}
+                addHighlight={addHighlight}
+                setIsNoteDialogOpen={setIsNoteDialogOpen}
+                setIsCopyConfirmationDialogOpen={setIsCopyConfirmationDialogOpen}
+                onClose={handleCloseSelection}
+              />
+            )}
+            
+            {/* Mobile Drawer */}
+            <MobileDrawer
+              isMobileDrawerOpen={isMobileDrawerOpen}
+              setIsMobileDrawerOpen={setIsMobileDrawerOpen}
+              selection={selection}
+              setSelection={setSelection}
+              clickedHighlight={clickedHighlight}
+              setClickedHighlight={setClickedHighlight}
+              removeHighlight={removeHighlight}
+              updateHighlightColor={updateHighlightColor}
+              addHighlight={addHighlight}
+              setIsNoteDialogOpen={setIsNoteDialogOpen}
+              setIsCopyConfirmationDialogOpen={setIsCopyConfirmationDialogOpen}
+              toc={toc}
+              goToHref={goToHref}
+              isBookmarked={isBookmarked}
+              addBookmark={addBookmark}
+              removeBookmark={removeBookmark}
+              location={location}
+              bookmarks={bookmarks}
+              goToCfi={goToCfi}
+              removeAllBookmarks={removeAllBookmarks}
+              highlights={highlights}
+              removeAllHighlights={removeAllHighlights}
+              notes={notes}
+              removeNote={removeNote}
+              removeAllNotes={removeAllNotes}
+              editNote={editNote}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              searchResults={searchResults}
+              currentSearchResultIndex={currentSearchResultIndex}
+              goToSearchResult={goToSearchResult}
+              searchBook={searchBook}
+              isSearching={isSearching}
+              bookImages={bookImages}
+              getPreviewText={getPreviewText}
+              bookCover={bookCover}
+              bookTitle={bookTitle}
+              totalPages={totalPages}
+              progress={progress}
+              saveReaderPreferences={saveReaderPreferences}
+            />
+            
+            {/* Note Dialog for Mobile */}
+            {isNoteDialogOpen && selection && (
+              <AddEditNoteDialog
+                open={isNoteDialogOpen}
+                note={{ cfi: selection.cfi, text: selection.text, note: "", createdAt: new Date().toISOString() }}
+                onSave={(noteText) => {
+                  addNote({ cfi: selection.cfi, text: selection.text, note: noteText });
+                  setIsNoteDialogOpen(false);
+                  setSelection(null);
+                }}
+                onDelete={() => {
+                  setIsNoteDialogOpen(false);
+                }}
+                onClose={() => {
+                  setIsNoteDialogOpen(false);
+                }}
+              />
+            )}
+            
+            {/* Copy Confirmation Dialog for Mobile */}
+            {isCopyConfirmationDialogOpen && selection && (
+              <CopyConfirmationDialog
+                isOpen={isCopyConfirmationDialogOpen}
+                selectedText={selection.text}
+                onCancel={() => {
+                  setIsCopyConfirmationDialogOpen(false);
+                  setSelection(null);
+                }}
+                onConfirm={async () => {
+                  try {
+                    await copyText(selection.text);
+                  } catch {
+                    // Handle error silently or show toast
+                  }
+                  setIsCopyConfirmationDialogOpen(false);
+                  setSelection(null);
+                }}
+              />
+            )}
+          </>
+        )}
+        
         <ImagePreview imagePreview={imagePreview} setImagePreviewAction={setImagePreview} />
         {editingNote && (
           <AddEditNoteDialog

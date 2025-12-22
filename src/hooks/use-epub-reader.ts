@@ -704,30 +704,41 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
           }
         };
 
-        // Touch: two-finger pan for scrolling, single finger for selection
-        let isTouchPanning = false;
-        let lastTouchX: number;
-        let lastTouchY: number;
+        // Mobile touch handling:
+        // - Two fingers: scroll/pan the page
+        // - One finger: text selection (native browser behavior)
+        // - Auto-scroll when dragging selection to screen edges
+        
+        let isTwoFingerScrolling = false;
+        let lastTouchX: number = 0;
+        let lastTouchY: number = 0;
+        let autoScrollInterval: ReturnType<typeof setInterval> | null = null;
+        
+        // Detect if user is on a mobile device
+        const isMobileDevice = () => {
+          return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        };
 
-        const startTouchPan = (e: TouchEvent) => {
-          if ((readerPreferences.zoom ?? 1) > 1 && e.touches.length === 2) {
-            // Two fingers = panning
-            isTouchPanning = true;
+        const startTouchHandler = (e: TouchEvent) => {
+          // Two fingers = scrolling mode
+          if (e.touches.length === 2) {
+            isTwoFingerScrolling = true;
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             lastTouchX = (touch1.pageX + touch2.pageX) / 2;
             lastTouchY = (touch1.pageY + touch2.pageY) / 2;
             scrollLeft = scrollContainer.scrollLeft;
             scrollTop = scrollContainer.scrollTop;
+            e.preventDefault();
+          } else if (e.touches.length === 1) {
+            // Single finger - allow native text selection
+            isTwoFingerScrolling = false;
           }
         };
 
-        const endTouchPan = () => {
-          isTouchPanning = false;
-        };
-
-        const touchPan = (e: TouchEvent) => {
-          if (isTouchPanning && e.touches.length === 2) {
+        const moveTouchHandler = (e: TouchEvent) => {
+          if (isTwoFingerScrolling && e.touches.length === 2) {
+            // Two finger scrolling
             const touch1 = e.touches[0];
             const touch2 = e.touches[1];
             const currentX = (touch1.pageX + touch2.pageX) / 2;
@@ -736,7 +747,44 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
             const walkY = currentY - lastTouchY;
             scrollContainer.scrollLeft = scrollLeft - walkX;
             scrollContainer.scrollTop = scrollTop - walkY;
+            lastTouchX = currentX;
+            lastTouchY = currentY;
+            scrollLeft = scrollContainer.scrollLeft;
+            scrollTop = scrollContainer.scrollTop;
             e.preventDefault();
+          } else if (e.touches.length === 1 && isMobileDevice()) {
+            // Single finger - check for edge auto-scroll during text selection
+            const touch = e.touches[0];
+            const viewportHeight = window.innerHeight;
+            const edgeThreshold = 50; // pixels from edge to trigger scroll
+            const scrollSpeed = 5;
+            
+            // Clear any existing auto-scroll
+            if (autoScrollInterval) {
+              clearInterval(autoScrollInterval);
+              autoScrollInterval = null;
+            }
+            
+            // Check if touch is near the top or bottom edge
+            if (touch.clientY < edgeThreshold) {
+              // Near top - scroll up
+              autoScrollInterval = setInterval(() => {
+                scrollContainer.scrollTop -= scrollSpeed;
+              }, 16);
+            } else if (touch.clientY > viewportHeight - edgeThreshold - 60) { // 60px for bottom bar
+              // Near bottom - scroll down
+              autoScrollInterval = setInterval(() => {
+                scrollContainer.scrollTop += scrollSpeed;
+              }, 16);
+            }
+          }
+        };
+
+        const endTouchHandler = () => {
+          isTwoFingerScrolling = false;
+          if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
           }
         };
 
@@ -746,11 +794,13 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
         doc.addEventListener("mousemove", rightClickDrag);
         doc.addEventListener("contextmenu", preventContextMenu);
 
-        // Add touch event listeners for mobile (two-finger pan)
-        doc.addEventListener("touchstart", startTouchPan, { passive: true });
-        doc.addEventListener("touchend", endTouchPan);
-        doc.addEventListener("touchcancel", endTouchPan);
-        doc.addEventListener("touchmove", touchPan, { passive: false });
+        // Add touch event listeners for mobile
+        // - Two finger scroll (passive: false to allow preventDefault)
+        // - Single finger for text selection with edge auto-scroll
+        doc.addEventListener("touchstart", startTouchHandler, { passive: false });
+        doc.addEventListener("touchend", endTouchHandler);
+        doc.addEventListener("touchcancel", endTouchHandler);
+        doc.addEventListener("touchmove", moveTouchHandler, { passive: false });
 
         // Default cursor based on zoom
         if ((readerPreferences.zoom ?? 1) > 1) {
@@ -801,6 +851,9 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
     setError(null);
     setIsLoading(true);
+    
+    // Reset zoom to default when opening a new book
+    setReaderPreferences((prev) => ({ ...prev, zoom: 1 }));
 
     try {
       const book = ePub(url);

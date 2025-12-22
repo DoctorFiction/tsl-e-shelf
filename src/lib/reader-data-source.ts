@@ -230,17 +230,25 @@ export class NobelApiDataSource implements EpubReaderDataSource {
   }
 
   async removeHighlight(cfi: string): Promise<void> {
-    await this.local.removeHighlight(cfi);
+    // First, find the highlight before deleting from local storage
+    let highlightToDelete: Highlight | undefined;
     try {
-      // Note: Nobel API might need an ID to delete. This assumes CFI is enough or we need to find the ID.
-      // Assuming we need to find the highlight to get its ID.
       const highlights = await this.getHighlights();
-      const highlightToDelete = highlights.find((h) => h.cfi === cfi);
-      if (highlightToDelete?.id) {
-        await this.apiClient.deleteHighlight(highlightToDelete.id);
-      }
+      highlightToDelete = highlights.find((h) => h.cfi === cfi);
     } catch (e) {
-      console.error("Failed to remove highlight from Nobel API, removed locally.", e);
+      console.error("Failed to get highlights before deletion:", e);
+    }
+    
+    // Remove from local storage
+    await this.local.removeHighlight(cfi);
+    
+    // Try to remove from Nobel API if we have the highlight ID
+    if (highlightToDelete?.id) {
+      try {
+        await this.apiClient.deleteHighlight(highlightToDelete.id);
+      } catch (e) {
+        console.error("Failed to remove highlight from Nobel API, removed locally.", e);
+      }
     }
   }
 
@@ -291,15 +299,25 @@ export class NobelApiDataSource implements EpubReaderDataSource {
   }
 
   async removeBookmark(cfi: string): Promise<void> {
-    await this.local.removeBookmark(cfi);
+    // First, find the bookmark before deleting from local storage
+    let bookmarkToDelete: Bookmark | undefined;
     try {
       const bookmarks = await this.getBookmarks();
-      const bookmarkToDelete = bookmarks.find((b) => b.cfi === cfi);
-      if (bookmarkToDelete?.id) {
-        await this.apiClient.deleteBookmark(bookmarkToDelete.id);
-      }
+      bookmarkToDelete = bookmarks.find((b) => b.cfi === cfi);
     } catch (e) {
-      console.error("Failed to remove bookmark from Nobel API, removed locally.", e);
+      console.error("Failed to get bookmarks before deletion:", e);
+    }
+    
+    // Remove from local storage
+    await this.local.removeBookmark(cfi);
+    
+    // Try to remove from Nobel API if we have the bookmark ID
+    if (bookmarkToDelete?.id) {
+      try {
+        await this.apiClient.deleteBookmark(bookmarkToDelete.id);
+      } catch (e) {
+        console.error("Failed to remove bookmark from Nobel API, removed locally.", e);
+      }
     }
   }
 
@@ -335,15 +353,25 @@ export class NobelApiDataSource implements EpubReaderDataSource {
   }
 
   async removeNote(cfi: string): Promise<void> {
-    await this.local.removeNote(cfi);
+    // First, find the note before deleting from local storage
+    let noteToDelete: Note | undefined;
     try {
       const notes = await this.getNotes();
-      const noteToDelete = notes.find((n) => n.cfi === cfi);
-      if (noteToDelete?.id) {
-        await this.apiClient.deleteNote(noteToDelete.id);
-      }
+      noteToDelete = notes.find((n) => n.cfi === cfi);
     } catch (e) {
-      console.error("Failed to remove note from Nobel API, removed locally.", e);
+      console.error("Failed to get notes before deletion:", e);
+    }
+    
+    // Remove from local storage
+    await this.local.removeNote(cfi);
+    
+    // Try to remove from Nobel API if we have the note ID
+    if (noteToDelete?.id) {
+      try {
+        await this.apiClient.deleteNote(noteToDelete.id);
+      } catch (e) {
+        console.error("Failed to remove note from Nobel API, removed locally.", e);
+      }
     }
   }
 
