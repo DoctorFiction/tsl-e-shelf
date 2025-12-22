@@ -1,7 +1,4 @@
-import {
-  IReaderPreferenceConfig,
-  readerPreferencesAtom,
-} from "@/atoms/reader-preferences";
+import { IReaderPreferenceConfig, readerPreferencesAtom } from "@/atoms/reader-preferences";
 import { copiedCharsAtom, totalBookCharsAtom, copyAllowancePercentageAtom } from "@/atoms/copy-protection";
 import { computedReaderStylesAtom } from "@/atoms/computed-reader-styles";
 import { getChapterFromCfi, getPageFromCfi } from "@/lib/epub-utils";
@@ -235,9 +232,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const [readerPreferences, setReaderPreferences] = useAtom(
-    readerPreferencesAtom,
-  );
+  const [readerPreferences, setReaderPreferences] = useAtom(readerPreferencesAtom);
   const { zoom } = readerPreferences;
 
   const [computedStyles] = useAtom(computedReaderStylesAtom);
@@ -598,7 +593,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
       await dataSource.updateReaderPreferences(preferences);
       setReaderPreferences(preferences);
     },
-    [dataSource, setReaderPreferences],
+    [dataSource, setReaderPreferences]
   );
 
   useEffect(() => {
@@ -630,7 +625,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     const rendition = renditionRef.current;
     if (!rendition) return;
 
-    const onRendered = (_: any, view: any) => {
+    const onRendered = (_: unknown, view: { iframe: HTMLIFrameElement }) => {
       const iframe = view.iframe;
       const doc = iframe.contentDocument;
       const scrollContainer = viewerRef.current;
@@ -1005,9 +1000,7 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
     });
   }, [dataSource, renditionRef, setNotes]);
 
-  useEffect(() => {
-    
-  }, [dataSource]);
+  useEffect(() => {}, [dataSource]);
 
   return {
     toc,
