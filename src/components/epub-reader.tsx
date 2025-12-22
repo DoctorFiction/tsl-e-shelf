@@ -171,7 +171,7 @@ export default function EpubReader({ url, bookId }: EpubReaderProps) {
         {isLoading ? <BookLoading bookTitle={bookTitle} bookCover={bookCover} /> : <></>}
         <Progress value={progress} className="fixed top-0 left-0 right-0 z-20 h-1 rounded-none" />
         <div className="relative w-full h-full">
-          <div ref={viewerRef} className={`h-full ${marginClass}`} onContextMenu={(e) => e.preventDefault()}>
+          <div ref={viewerRef} className={`h-full zoom-scroll-container ${marginClass}`} onContextMenu={(e) => e.preventDefault()}>
             {!isLoading && <BookProgressDisplay bookTitle={bookTitle} currentPage={currentPage} currentChapterTitle={currentChapterTitle} />}
           </div>
 

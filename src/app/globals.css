@@ -118,3 +118,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom scrollbar styles for zoom scroll container */
+.zoom-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+}
+
+.zoom-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.zoom-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.zoom-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+  border: transparent;
+}
+
+.zoom-scroll-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.7);
+}

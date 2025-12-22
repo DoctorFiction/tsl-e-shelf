@@ -607,12 +607,34 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
       if (zoom > 1) {
         viewer.style.overflow = "auto";
+        viewer.style.overscrollBehavior = "contain";
+        // Use touch-action to allow panning on touch devices
+        viewer.style.touchAction = "pan-x pan-y";
+        // WebKit smooth scrolling
+        (viewer.style as unknown as { webkitOverflowScrolling: string }).webkitOverflowScrolling = "touch";
+
+        // First reset transform to get original dimensions
+        containerToScale.style.transform = "scale(1)";
+        const originalWidth = containerToScale.offsetWidth;
+        const originalHeight = containerToScale.offsetHeight;
+
+        // Apply scale transform
         containerToScale.style.transform = `scale(${zoom})`;
-        containerToScale.style.transformOrigin = "center center";
+        // Use top left origin for proper scroll behavior
+        containerToScale.style.transformOrigin = "top left";
+
+        // Set explicit dimensions to create scrollable area
+        // The container needs to occupy the scaled space for scrollbars to work
+        containerToScale.style.marginRight = `${originalWidth * (zoom - 1)}px`;
+        containerToScale.style.marginBottom = `${originalHeight * (zoom - 1)}px`;
       } else {
         viewer.style.overflow = "hidden";
+        viewer.style.overscrollBehavior = "auto";
+        viewer.style.touchAction = "auto";
         containerToScale.style.transform = "scale(1)";
-        containerToScale.style.transformOrigin = "0 0";
+        containerToScale.style.transformOrigin = "top left";
+        containerToScale.style.marginRight = "";
+        containerToScale.style.marginBottom = "";
       }
     }
 
@@ -639,8 +661,12 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
         let scrollLeft: number;
         let scrollTop: number;
 
-        const startDrag = (e: MouseEvent) => {
+        // Right-click drag for panning (scrolling)
+        const startRightClickDrag = (e: MouseEvent) => {
+          // Only handle right-click (button 2)
+          if (e.button !== 2) return;
           if ((readerPreferences.zoom ?? 1) > 1) {
+            e.preventDefault();
             isDragging = true;
             startX = e.pageX;
             startY = e.pageY;
@@ -651,15 +677,15 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
           }
         };
 
-        const endDrag = () => {
+        const endRightClickDrag = () => {
           if (isDragging) {
             isDragging = false;
-            iframe.style.cursor = "grab";
-            doc.body.style.cursor = "grab";
+            iframe.style.cursor = "default";
+            doc.body.style.cursor = "default";
           }
         };
 
-        const drag = (e: MouseEvent) => {
+        const rightClickDrag = (e: MouseEvent) => {
           if (isDragging) {
             e.preventDefault();
             const x = e.pageX;
@@ -671,14 +697,66 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
           }
         };
 
-        doc.addEventListener("mousedown", startDrag);
-        doc.addEventListener("mouseup", endDrag);
-        doc.addEventListener("mouseleave", endDrag);
-        doc.addEventListener("mousemove", drag);
+        // Prevent context menu on right-click when zoomed
+        const preventContextMenu = (e: MouseEvent) => {
+          if ((readerPreferences.zoom ?? 1) > 1) {
+            e.preventDefault();
+          }
+        };
 
+        // Touch: two-finger pan for scrolling, single finger for selection
+        let isTouchPanning = false;
+        let lastTouchX: number;
+        let lastTouchY: number;
+
+        const startTouchPan = (e: TouchEvent) => {
+          if ((readerPreferences.zoom ?? 1) > 1 && e.touches.length === 2) {
+            // Two fingers = panning
+            isTouchPanning = true;
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            lastTouchX = (touch1.pageX + touch2.pageX) / 2;
+            lastTouchY = (touch1.pageY + touch2.pageY) / 2;
+            scrollLeft = scrollContainer.scrollLeft;
+            scrollTop = scrollContainer.scrollTop;
+          }
+        };
+
+        const endTouchPan = () => {
+          isTouchPanning = false;
+        };
+
+        const touchPan = (e: TouchEvent) => {
+          if (isTouchPanning && e.touches.length === 2) {
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const currentX = (touch1.pageX + touch2.pageX) / 2;
+            const currentY = (touch1.pageY + touch2.pageY) / 2;
+            const walkX = currentX - lastTouchX;
+            const walkY = currentY - lastTouchY;
+            scrollContainer.scrollLeft = scrollLeft - walkX;
+            scrollContainer.scrollTop = scrollTop - walkY;
+            e.preventDefault();
+          }
+        };
+
+        doc.addEventListener("mousedown", startRightClickDrag);
+        doc.addEventListener("mouseup", endRightClickDrag);
+        doc.addEventListener("mouseleave", endRightClickDrag);
+        doc.addEventListener("mousemove", rightClickDrag);
+        doc.addEventListener("contextmenu", preventContextMenu);
+
+        // Add touch event listeners for mobile (two-finger pan)
+        doc.addEventListener("touchstart", startTouchPan, { passive: true });
+        doc.addEventListener("touchend", endTouchPan);
+        doc.addEventListener("touchcancel", endTouchPan);
+        doc.addEventListener("touchmove", touchPan, { passive: false });
+
+        // Default cursor based on zoom
         if ((readerPreferences.zoom ?? 1) > 1) {
-          iframe.style.cursor = "grab";
-          doc.body.style.cursor = "grab";
+          // Normal cursor for text selection
+          iframe.style.cursor = "default";
+          doc.body.style.cursor = "default";
         } else {
           iframe.style.cursor = "default";
           doc.body.style.cursor = "default";
