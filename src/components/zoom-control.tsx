@@ -18,18 +18,7 @@ export function ZoomControl() {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleZoomOut}
-        disabled={zoom <= 0.5}
-      >
-        <MinusIcon className="h-4 w-4" />
-      </Button>
-      <span className="text-sm font-medium tabular-nums">
-        {Math.round(zoom * 100)}%
-      </span>
+    <div className="flex flex-col items-center justify-center gap-2">
       <Button
         variant="ghost"
         size="icon"
@@ -37,6 +26,17 @@ export function ZoomControl() {
         disabled={zoom >= 2}
       >
         <PlusIcon className="h-4 w-4" />
+      </Button>
+      <span className="text-sm font-medium tabular-nums">
+        {Math.round(zoom * 100)}%
+      </span>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleZoomOut}
+        disabled={zoom <= 0.5}
+      >
+        <MinusIcon className="h-4 w-4" />
       </Button>
     </div>
   );

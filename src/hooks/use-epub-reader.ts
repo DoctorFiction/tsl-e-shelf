@@ -603,16 +603,100 @@ export function useEpubReader({ url, dataSource, isCopyProtected = false, copyAl
 
   useEffect(() => {
     const rendition = renditionRef.current;
-    if (!rendition) return;
+    const viewer = viewerRef.current;
 
-    if (zoom) {
-      rendition.themes.override("zoom", zoom);
+    if (rendition?.manager?.container && viewer) {
+      const containerToScale = rendition.manager.container;
+
+      if (zoom > 1) {
+        viewer.style.overflow = "auto";
+        containerToScale.style.transform = `scale(${zoom})`;
+        containerToScale.style.transformOrigin = "center center";
+      } else {
+        viewer.style.overflow = "hidden";
+        containerToScale.style.transform = "scale(1)";
+        containerToScale.style.transformOrigin = "0 0";
+      }
     }
 
+    // It might be necessary to resize after zoom changes to re-calculate layout
     setTimeout(() => {
       resize();
     }, 10);
   }, [zoom, resize]);
+
+  // This effect handles the drag-to-pan functionality
+  useEffect(() => {
+    const rendition = renditionRef.current;
+    if (!rendition) return;
+
+    const onRendered = (_: any, view: any) => {
+      const iframe = view.iframe;
+      const doc = iframe.contentDocument;
+      const scrollContainer = viewerRef.current;
+
+      if (doc && scrollContainer) {
+        let isDragging = false;
+        let startX: number;
+        let startY: number;
+        let scrollLeft: number;
+        let scrollTop: number;
+
+        const startDrag = (e: MouseEvent) => {
+          if (readerPreferences.zoom > 1) {
+            isDragging = true;
+            startX = e.pageX;
+            startY = e.pageY;
+            scrollLeft = scrollContainer.scrollLeft;
+            scrollTop = scrollContainer.scrollTop;
+            iframe.style.cursor = "grabbing";
+            doc.body.style.cursor = "grabbing";
+          }
+        };
+
+        const endDrag = () => {
+          if (isDragging) {
+            isDragging = false;
+            iframe.style.cursor = "grab";
+            doc.body.style.cursor = "grab";
+          }
+        };
+
+        const drag = (e: MouseEvent) => {
+          if (isDragging) {
+            e.preventDefault();
+            const x = e.pageX;
+            const y = e.pageY;
+            const walkX = x - startX;
+            const walkY = y - startY;
+            scrollContainer.scrollLeft = scrollLeft - walkX;
+            scrollContainer.scrollTop = scrollTop - walkY;
+          }
+        };
+
+        doc.addEventListener("mousedown", startDrag);
+        doc.addEventListener("mouseup", endDrag);
+        doc.addEventListener("mouseleave", endDrag);
+        doc.addEventListener("mousemove", drag);
+
+        if (readerPreferences.zoom > 1) {
+          iframe.style.cursor = "grab";
+          doc.body.style.cursor = "grab";
+        } else {
+          iframe.style.cursor = "default";
+          doc.body.style.cursor = "default";
+        }
+      }
+    };
+
+    rendition.on("rendered", onRendered);
+
+    return () => {
+      if (renditionRef.current) {
+        renditionRef.current.off("rendered", onRendered);
+      }
+    };
+  }, [readerPreferences.zoom]);
 
   useEffect(() => {
     if (!renditionRef.current) return;

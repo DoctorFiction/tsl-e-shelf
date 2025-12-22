@@ -88,7 +88,6 @@ Commit messages must follow the format: `type(scope): description`.
 *   **TODO (2025-12-19):** Improve zoom control buttons layout (as it does not fit the sidebar currently, implement a sidebar friendly zoom control).
 *   **TODO (2025-12-19):** Single/two page setting.
 *   **FIX (2025-12-19):** Some fonts do not properly render on this book.
-*   **FIX (2025-12-19):** When zooming in/out it seems to zoom from left top, and the page content on the right side of the page becomes invisible quickly. Can we zoom from the center, somehow?
 
 
 ### Phase 2: API and Database Integration
