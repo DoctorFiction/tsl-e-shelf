@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { BookImage, Bookmark, EnhancedNavItem, Highlight, Note, SearchResult } from "@/hooks/use-epub-reader";
-import { ChevronUp, Settings } from "lucide-react";
 import { HighlightOptionsBar } from "./highlight-options-bar";
 import { MainControlGroup } from "./main-control-group";
 import { SelectionActionsBar } from "./selection-actions-bar";
@@ -67,14 +66,6 @@ export function MobileDrawer(props: MobileDrawerProps) {
 
   return (
     <>
-      <Button
-        onClick={() => setIsMobileDrawerOpen(!isMobileDrawerOpen)}
-        className="fixed top-4 right-4 z-50 md:hidden bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 rounded-full p-3 shadow-lg hover:shadow-xl transition-all duration-200"
-        size="sm"
-      >
-        {isMobileDrawerOpen ? <ChevronUp className="w-5 h-5" /> : <Settings className="w-5 h-5" />}
-      </Button>
-
       <div
         className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 rounded-t-2xl shadow-xl transition-transform duration-300 z-50 md:hidden ${
           isMobileDrawerOpen ? "translate-y-0" : "translate-y-full"
